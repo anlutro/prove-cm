@@ -68,6 +68,11 @@ class HostRunner():
 
 		self.output.start_connect()
 		self.ssh_client.connect(self.options['host'], **kwargs)
+		if self.options.get('sudo'):
+			stdin, stdout, stderr = self.ssh_client.exec_command('sudo -s')
+			if stdout.channel.closed:
+				stdin.write(self.options.get('sudo_password') + '\n')
+				stdin.flush()
 		self.output.finish_connect()
 
 		for states in state_files.values():
