@@ -1,11 +1,8 @@
 import os
 import os.path
-import prove.client
 import sys
 
-
-class ProveError(BaseException):
-	pass
+import prove.client
 
 
 def main():

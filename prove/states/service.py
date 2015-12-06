@@ -1,8 +1,8 @@
 from prove.states import State
 
 
-class running(State):
-	def run(service=None):
+class Running(State):
+	def run(self, service=None):
 		result = self._run_command('systemctl status {}'.format(service))
 		if result.was_successful:
 			return True, 'Service {} is already running'.format(service)
@@ -13,8 +13,8 @@ class running(State):
 		return False, result.stderr or 'Service {} could not be started'.format(service)
 
 
-class enabled(State):
-	def run(service=None):
+class Enabled(State):
+	def run(self, service=None):
 		result = self._run_command('systemctl is-enabled {}'.format(service))
 		if result.was_successful:
 			return True, 'Service {} is already enabled'.format(service)

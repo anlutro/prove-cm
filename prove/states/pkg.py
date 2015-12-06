@@ -1,7 +1,7 @@
 from prove.states import State
 
 
-class upgrade(State):
+class Upgrade(State):
 	def run(self):
 		result = self._run_command('apt-get upgrade')
 		if result.was_successful:
@@ -9,7 +9,7 @@ class upgrade(State):
 		return False, result.stderr
 
 
-class installed(State):
+class Installed(State):
 	def run(self, package=None):
 		result = self._run_command('apt-get install -y -q {}'.format(package))
 		if result.was_successful:

@@ -36,7 +36,7 @@ class State():
 	def _run_command(self, command, bufsize=-1, timeout=None, get_pty=False):
 		chan = self._client.get_transport().open_session(timeout=timeout)
 		if get_pty:
-		    chan.get_pty()
+			chan.get_pty()
 		chan.settimeout(timeout)
 		chan.exec_command(command)
 		return CommandResult(chan, bufsize)

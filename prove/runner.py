@@ -1,9 +1,10 @@
 import collections
-import prove
-import prove.environment
-import prove.utils
-import paramiko
 import importlib
+
+import paramiko
+import prove.environment
+import prove.errors
+import prove.utils
 
 
 def normalize_state_data(state_file_data):
@@ -29,18 +30,18 @@ def get_state_cls(state_fn):
 	try:
 		state_module = importlib.import_module('prove.states.' + state_mod)
 	except ImportError:
-		raise ProveError('No state module named {}'.format(state_mod))
-
-	try:
-		state_cls = getattr(state_module, state_fn)
-	except AttributeError:
-		raise ProveError('State module {} has no function {}'.format(state_mod, state_fn))
-
-	if hasattr(state_module, '__hidden__') and state_fn in state_module.__hidden__:
-		raise ProveError('State module {} function {} is not public'.format(state_mod, state_fn))
+		raise prove.errors.ProveError('No state module named {}'.format(state_mod))
 
 	if state_fn.startswith('_'):
-		raise ProveError('State module function {}.{} is private'.format(state_mod, state_fn))
+		raise prove.errors.ProveError('State module function {}.{} is private'.format(state_mod, state_fn))
+
+	try:
+		state_cls = getattr(state_module, prove.utils.snake_to_camel_case(state_fn))
+	except AttributeError:
+		raise prove.errors.ProveError('State module {} has no function {}'.format(state_mod, state_fn))
+
+	if hasattr(state_module, '__hidden__') and state_fn in state_module.__hidden__:
+		raise prove.errors.ProveError('State module {} function {} is not public'.format(state_mod, state_fn))
 
 	return state_cls
 
@@ -82,8 +83,8 @@ class HostRunner():
 			state_cls = get_state_cls(state_fn)
 			state_obj = state_cls(self.ssh_client)
 			result, comment = state_obj.run(**state_args)
-		except prove.ProveError as e:
-			self.output.state_error(e)
+		except prove.errors.ProveError as exc:
+			self.output.state_error(exc)
 			self.num_failed_states += 1
 			return
 

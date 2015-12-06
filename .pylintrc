@@ -1,0 +1,9 @@
+[REPORTS]
+reports = no
+output-format = colorized
+
+[MESSAGES CONTROL]
+disable = bad-continuation, missing-docstring
+
+[FORMAT]
+indent-string = \t

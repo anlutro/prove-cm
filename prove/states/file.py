@@ -1,6 +1,6 @@
-from prove.states import State
 import tempfile
 
+from prove.states import State
 
 __hidden__ = ['FileState']
 
@@ -22,7 +22,7 @@ class FileState(State):
 		return self._run_command('chmod -c {} {}'.format(mode, path))
 
 
-class absent(State):
+class Absent(State):
 	def run(self, path=None):
 		result = self._run_command('rm -v {}'.format(path))
 		if result.was_successful:
@@ -30,7 +30,7 @@ class absent(State):
 		return False, result.stderr
 
 
-class present(FileState):
+class Present(FileState):
 	def run(self, path=None, user=None, group=None, mode=None):
 		changes = []
 
@@ -55,23 +55,23 @@ class present(FileState):
 		return True, changes
 
 
-class managed(FileState):
+class Managed(FileState):
 	def run(self, path=None, contents=None, source=None, user=None, group=None, mode=None):
 		changes = []
 
 		if contents:
 			if contents[-1] != '\n':
 				contents += '\n'
-			fp = tempfile.NamedTemporaryFile()
-			fp.write(contents.encode('utf-8'))
-			fp.seek(0)
+			file = tempfile.NamedTemporaryFile()
+			file.write(contents.encode('utf-8'))
+			file.seek(0)
 		elif source:
-			fp = open(source, 'r')
+			file = open(source, 'r')
 
 		sftp = self._client.open_sftp()
-		sftp.putfo(fp, path)
+		sftp.putfo(file, path)
 		sftp.close()
-		fp.close()
+		file.close()
 
 		if user is not None or group is not None:
 			result = self._ensure_ownership(path, user, group)

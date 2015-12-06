@@ -1,5 +1,6 @@
 import importlib
 import os.path
+
 import prove.runner
 import yaml
 
@@ -7,8 +8,8 @@ import yaml
 class Client():
 	@classmethod
 	def from_config_file(cls, config_path, args):
-		with open(config_path) as f:
-			config = yaml.load(f)
+		with open(config_path) as file:
+			config = yaml.load(file)
 
 		if 'options' not in config:
 			config['options'] = {}

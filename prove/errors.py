@@ -1,0 +1,2 @@
+class ProveError(BaseException):
+	pass
