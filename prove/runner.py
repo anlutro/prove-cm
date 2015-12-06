@@ -1,9 +1,6 @@
 import collections
-import os
-import os.path
-import yaml
 import prove
-import mako.template
+import prove.environment
 import paramiko
 import importlib
 
@@ -73,24 +70,27 @@ class HostRunner():
 
 		for states in state_files.values():
 			for state_id, state_fn, state_args in normalize_state_data(states):
-				self.output.start_state(state_id, state_fn)
-
-				try:
-					state_cls = get_state_cls(state_fn)
-					state_obj = state_cls(self.ssh_client)
-					result, comment = state_obj.run(**state_args)
-				except prove.ProveError as e:
-					self.output.state_error(e)
-					self.num_failed_states += 1
-					continue
-
-				self.output.finish_state(result, comment)
-				if result:
-					self.num_succeeded_states += 1
-				else:
-					self.num_failed_states += 1
+				self.run_state(state_id, state_fn, state_args)
 
 		self.output.finish_run(self.num_succeeded_states, self.num_failed_states)
+
+	def run_state(self, state_id, state_fn, state_args):
+		self.output.start_state(state_id, state_fn)
+
+		try:
+			state_cls = get_state_cls(state_fn)
+			state_obj = state_cls(self.ssh_client)
+			result, comment = state_obj.run(**state_args)
+		except prove.ProveError as e:
+			self.output.state_error(e)
+			self.num_failed_states += 1
+			return
+
+		self.output.finish_state(result, comment)
+		if result:
+			self.num_succeeded_states += 1
+		else:
+			self.num_failed_states += 1
 
 
 class Runner():

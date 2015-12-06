@@ -29,7 +29,7 @@ def test_get_state_cls():
 
 def test_HostRunner_run():
 	env = mock.Mock()
-	env.get_state_data = mock.Mock(return_value={})
+	env.get_states = mock.Mock(return_value={})
 	ssh_client = mock.Mock()
 	options = {'host': 'localhost'}
 	output = mock.Mock()
@@ -40,7 +40,7 @@ def test_HostRunner_run():
 
 def test_HostRunner_run_with_states():
 	env = mock.Mock()
-	env.get_state_data = mock.Mock(return_value={})
+	env.get_states = mock.Mock(return_value={})
 	ssh_client = mock.Mock()
 	options = {'host': 'localhost'}
 	output = mock.Mock()

@@ -27,7 +27,6 @@ def _test_scan(scan_type, cls):
 	_assert_scanned(scanned, scan_type, cls)
 	return scanned['test_'+scan_type]
 
-
 def test_scan_roles():
 	_test_scan('role', prove.environment.Role)
 

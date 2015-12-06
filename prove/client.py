@@ -1,9 +1,7 @@
 import importlib
-import os
 import os.path
-import yaml
 import prove.runner
-import prove.environment
+import yaml
 
 
 class Client():
@@ -37,17 +35,3 @@ class Client():
 			self.config.get('globals', {}),
 		)
 		runner.run(self.config.get('targets', []))
-
-	def read_roles_from_files(self):
-		roles_dir = os.path.join(self.config['options']['root_path'], 'roles')
-		role_files = [f for f in os.listdir(roles_dir) if os.path.isfile(os.path.join(roles_dir, f))]
-		roles = {}
-		for role_file in role_files:
-			full_path = os.path.join(roles_dir, role_file)
-			if role_file.endswith('.yml') or role_file.endswith('.yaml'):
-				with open(full_path) as f:
-					roles[role_file.split('.')[0]] = yaml.load(f)
-			if role_file.endswith('.json'):
-				with open(full_path) as f:
-					roles[role_file.split('.')[0]] = json.load(f)
-		return roles
