@@ -64,11 +64,13 @@ class HostRunner():
 		if self.options.get('password'):
 			kwargs['password'] = self.options['password']
 
+		self.output.rendering_states(self.options['host'])
 		state_files = self.env.get_states()
 
-		self.output.start_connect(self.options['host'])
+		self.output.start_connect()
 		self.ssh_client.connect(self.options['host'], **kwargs)
 		self.output.finish_connect()
+
 		for states in state_files.values():
 			for state_id, state_fn, state_args in normalize_state_data(states):
 				self.output.start_state(state_id, state_fn)
@@ -89,22 +91,6 @@ class HostRunner():
 					self.num_failed_states += 1
 
 		self.output.finish_run(self.num_succeeded_states, self.num_failed_states)
-
-
-	def get_states(self, state_file):
-		if state_file.endswith('.yml.mako') or state_file.endswith('.yaml.mako'):
-			with open(state_file, 'r') as f:
-				yaml_str = mako.template.Template(f.read()).render(**self.variables)
-			state_data = yaml.load(yaml_str, prove.utils.CustomYAMLLoader)
-			return get_states_yaml(state_data)
-
-		elif state_file.endswith('.yml') or state_file.endswith('.yaml'):
-			with open(state_file, 'r') as f:
-				state_data = yaml.load(f, prove.utils.CustomYAMLLoader)
-			return get_states_yaml(state_data)
-
-		else:
-			raise ValueError('Unknown state extension: "{}"'.format(state_file))
 
 
 class Runner():

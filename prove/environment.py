@@ -52,8 +52,6 @@ class FileLoader:
 
 
 def _scan(root_path, directory, cls):
-	'''Scan a directory for files and instantiate them as either Role, Variable
-	or State objects.'''
 	root_path = os.path.join(root_path, directory)
 	files = prove.utils.list_files(root_path)
 	ret = {}

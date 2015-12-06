@@ -1,8 +1,14 @@
 import sys
 
 
-def start_connect(host):
-	sys.stdout.write('Connecting to {}... '.format(host))
+def rendering_states(host):
+	sys.stdout.write('[{}] Rendering states... '.format(host))
+	sys.stdout.flush()
+
+
+def start_connect():
+	sys.stdout.write('Connecting... ')
+	sys.stdout.flush()
 
 
 def finish_connect():
@@ -11,12 +17,12 @@ def finish_connect():
 
 def start_state(state_id, state_fn):
 	sys.stdout.write('├─ Running {} ({})... '.format(state_id, state_fn))
+	sys.stdout.flush()
 
 
 def state_error(exception):
 	print('\033[31m' + 'Error!' + '\033[0m')
 	print('│  └─ ' + str(exception))
-	
 
 
 def finish_state(result, comment):
