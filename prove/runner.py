@@ -1,3 +1,4 @@
+import collections
 import os
 import os.path
 import yaml
@@ -7,22 +8,16 @@ import paramiko
 import importlib
 
 
-def normalize_state_data(state_data):
-	if not isinstance(state_data, list):
-		state_data_list = []
-		for state_fn, state_args in state_data.items():
-			state_dict = collections.OrderedDict({'fn': state_fn})
-			state_dict.update(state_args)
-			state_data_list.append(state_dict)
-		state_data = state_data_list
-
-	return state_data
-
-
-def get_states_yaml(state_yaml):
+def normalize_state_data(state_file_data):
 	states = []
-	for state_id, state_data in state_yaml.items():
-		state_data = normalize_state_data(state_data)
+	for state_id, state_data in state_file_data.items():
+		if not isinstance(state_data, list):
+			state_data_list = []
+			for state_fn, state_args in state_data.items():
+				state_dict = collections.OrderedDict({'fn': state_fn})
+				state_dict.update(state_args)
+				state_data_list.append(state_dict)
+			state_data = state_data_list
 		for state_call in state_data:
 			state_fn = state_call.pop('fn')
 			state_args = state_call
@@ -53,11 +48,12 @@ def get_state_cls(state_fn):
 
 
 class HostRunner():
-	def __init__(self, ssh_client, options, output_module, variables):
+	def __init__(self, env, ssh_client, options, output_module):
+		self.env = env
 		self.ssh_client = ssh_client
 		self.options = options
 		self.output = output_module
-		self.variables = variables
+
 		self.num_succeeded_states = 0
 		self.num_failed_states = 0
 
@@ -68,45 +64,32 @@ class HostRunner():
 		if self.options.get('password'):
 			kwargs['password'] = self.options['password']
 
+		state_files = self.env.get_states()
+
 		self.output.start_connect(self.options['host'])
 		self.ssh_client.connect(self.options['host'], **kwargs)
 		self.output.finish_connect()
+		for states in state_files.values():
+			for state_id, state_fn, state_args in normalize_state_data(states):
+				self.output.start_state(state_id, state_fn)
 
-		for state_file_name in self.options.get('states', []):
-			self.variables['state_file'] = state_file_name
-			self.run_states(state_file_name)
+				try:
+					state_cls = get_state_cls(state_fn)
+					state_obj = state_cls(self.ssh_client)
+					result, comment = state_obj.run(**state_args)
+				except prove.ProveError as e:
+					self.output.state_error(e)
+					self.num_failed_states += 1
+					continue
+
+				self.output.finish_state(result, comment)
+				if result:
+					self.num_succeeded_states += 1
+				else:
+					self.num_failed_states += 1
 
 		self.output.finish_run(self.num_succeeded_states, self.num_failed_states)
 
-	def run_states(self, state_file_name):
-		state_file = os.path.join(self.options['root_path'], 'states', state_file_name)
-
-		for ext in ('yml.mako', 'yaml.mako', 'yml', 'yaml', 'py'):
-			state_file_check = '{}.{}'.format(state_file, ext)
-			if os.path.isfile(state_file_check):
-				state_file = state_file_check
-				break
-		else:
-			return
-
-		states = self.get_states(state_file)
-		for state_id, state_fn, state_args in states:
-			self.output.start_state(state_id, state_fn)
-
-			try:
-				state_cls = get_state_cls(state_fn)
-				state_obj = state_cls(self.ssh_client)
-				result, comment = state_obj.run(**state_args)
-			except prove.ProveError as e:
-				self.output.state_error(e)
-				self.num_failed_states += 1
-				continue
-
-			self.output.finish_state(result, comment)
-			if result:
-				self.num_succeeded_states += 1
-			else:
-				self.num_failed_states += 1
 
 	def get_states(self, state_file):
 		if state_file.endswith('.yml.mako') or state_file.endswith('.yaml.mako'):
@@ -126,9 +109,13 @@ class HostRunner():
 
 class Runner():
 	def __init__(self, options, output_module, global_variables=None):
+		self.env = prove.environment.Environment.from_path(
+			options['root_path'],
+			options.get('loaders', ['yaml_mako', 'yaml', 'json']),
+			global_variables,
+		)
 		self.options = options
 		self.output = output_module
-		self.global_variables = global_variables or {}
 
 	def run(self, targets):
 		ssh_client = paramiko.SSHClient()
@@ -138,14 +125,11 @@ class Runner():
 			new_host_options = self.options.copy()
 			new_host_options.update(host_options)
 			host_options.update(new_host_options)
-			del new_host_options
 
-			variables = self.global_variables.copy()
-			variables.update(prove.get_variables(
-				os.path.join(self.options['root_path'], 'variables'),
-				host_options.get('variables', [])
-			))
-
-			host_runner = HostRunner(ssh_client, host_options, self.output, variables)
+			host_env = self.env.make_host_env(
+				host_options.get('roles', []),
+				host_options.get('variables', []),
+				host_options.get('states', []),
+			)
+			host_runner = HostRunner(host_env, ssh_client, host_options, self.output)
 			host_runner.run()
-

@@ -1,15 +1,17 @@
 import collections
+import os
+import os.path
 import yaml
 
 
 def list_files(path):
-    result_files = set()
+	result_files = set()
 
-    for root, dirs, files in os.walk(path):
-        for f in files:
-            result_files.add(os.path.join(root, f))
+	for root, dirs, files in os.walk(path):
+		for f in files:
+			result_files.add(os.path.join(root, f))
 
-    return result_files
+	return result_files
 
 
 class CustomYAMLLoader(yaml.Loader):

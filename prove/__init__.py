@@ -3,7 +3,6 @@ import collections
 import importlib
 import os
 import os.path
-import mako.template
 import paramiko
 import prove.utils
 import prove.client
@@ -45,7 +44,7 @@ def main():
 	else:
 		config_path = os.path.join(os.getcwd(), 'prove.yml')
 
-	prove.client.Client(config_path, args).run()
+	prove.client.Client.from_config_file(config_path, args).run()
 
 
 if __name__ == '__main__':
