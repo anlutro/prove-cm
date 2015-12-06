@@ -95,8 +95,8 @@ class Environment:
 
 		for component in _scan_components(os.path.join(root_path, 'components')):
 			roles.update(component.roles)
-			states.update(component.states)
 			variables.update(component.variables)
+			states.update(component.states)
 
 		roles.update(_scan(root_path, 'roles', Role))
 		variables.update(_scan(root_path, 'variables', Variable))
@@ -142,7 +142,7 @@ class HostEnvironment:
 			tmp_variables = self.global_variables.copy()
 			for variable in self.variables.values():
 				loaded = self.loader.load_variable(variable, tmp_variables)
-				tmp_variables.update(loaded)
+				tmp_variables = prove.utils.deep_dict_merge(tmp_variables, loaded)
 			self._compiled_variables = tmp_variables
 		return self._compiled_variables
 

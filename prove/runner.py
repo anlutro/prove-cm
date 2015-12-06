@@ -1,6 +1,7 @@
 import collections
 import prove
 import prove.environment
+import prove.utils
 import paramiko
 import importlib
 
@@ -108,9 +109,7 @@ class Runner():
 		ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
 		for host_options in targets:
-			new_host_options = self.options.copy()
-			new_host_options.update(host_options)
-			host_options.update(new_host_options)
+			host_options = prove.utils.deep_dict_merge(self.options, host_options)
 
 			host_env = self.env.make_host_env(
 				host_options.get('roles', []),
