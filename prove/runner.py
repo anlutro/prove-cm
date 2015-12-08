@@ -58,10 +58,15 @@ class HostRunner():
 
 	def run(self):
 		kwargs = {}
+		if self.options.get('port'):
+			kwargs['port'] = self.options['port']
 		if self.options.get('username'):
 			kwargs['username'] = self.options['username']
 		if self.options.get('password'):
 			kwargs['password'] = self.options['password']
+		if self.options.get('ssh_key'):
+			kwargs['key_filename'] = self.options('ssh_key')
+			kwargs['look_for_keys'] = True
 
 		self.output.rendering_states(self.options['host'])
 		state_files = self.env.get_states()
