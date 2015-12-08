@@ -7,43 +7,32 @@ import prove.errors
 import prove.utils
 
 
-def normalize_state_data(state_file_data):
-	states = []
-	for state_id, state_data in state_file_data.items():
-		if not isinstance(state_data, list):
-			state_data_list = []
-			for state_fn, state_args in state_data.items():
-				state_dict = collections.OrderedDict({'fn': state_fn})
-				state_dict.update(state_args)
-				state_data_list.append(state_dict)
-			state_data = state_data_list
-		for state_call in state_data:
-			state_fn = state_call.pop('fn')
-			state_args = state_call
-			states.append((state_id, state_fn, state_args))
-	return states
+class Runner():
+	def __init__(self, options, output_module, global_variables=None, env=None):
+		if not env:
+			env = prove.environment.Environment.from_path(
+				options['root_path'],
+				options.get('loaders', ['yaml_mako', 'yaml', 'json']),
+				global_variables,
+			)
+		self.env = env
+		self.options = options
+		self.output = output_module
 
+	def run(self, targets):
+		ssh_client = paramiko.SSHClient()
+		ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-def get_state_cls(state_fn):
-	state_mod, state_fn = state_fn.rsplit('.', 1)
+		for host_options in targets:
+			host_options = prove.utils.deep_dict_merge(self.options, host_options)
 
-	try:
-		state_module = importlib.import_module('prove.states.' + state_mod)
-	except ImportError:
-		raise prove.errors.ProveError('No state module named {}'.format(state_mod))
-
-	if state_fn.startswith('_'):
-		raise prove.errors.ProveError('State module function {}.{} is private'.format(state_mod, state_fn))
-
-	try:
-		state_cls = getattr(state_module, prove.utils.snake_to_camel_case(state_fn))
-	except AttributeError:
-		raise prove.errors.ProveError('State module {} has no function {}'.format(state_mod, state_fn))
-
-	if hasattr(state_module, '__hidden__') and state_fn in state_module.__hidden__:
-		raise prove.errors.ProveError('State module {} function {} is not public'.format(state_mod, state_fn))
-
-	return state_cls
+			host_env = self.env.make_host_env(
+				host_options.get('roles', []),
+				host_options.get('variables', []),
+				host_options.get('states', []),
+			)
+			host_runner = HostRunner(host_env, ssh_client, host_options, self.output)
+			host_runner.run()
 
 
 class HostRunner():
@@ -105,29 +94,40 @@ class HostRunner():
 			self.num_failed_states += 1
 
 
-class Runner():
-	def __init__(self, options, output_module, global_variables=None, env=None):
-		if not env:
-			env = prove.environment.Environment.from_path(
-				options['root_path'],
-				options.get('loaders', ['yaml_mako', 'yaml', 'json']),
-				global_variables,
-			)
-		self.env = env
-		self.options = options
-		self.output = output_module
+def normalize_state_data(state_file_data):
+	states = []
+	for state_id, state_data in state_file_data.items():
+		if not isinstance(state_data, list):
+			state_data_list = []
+			for state_fn, state_args in state_data.items():
+				state_dict = collections.OrderedDict({'fn': state_fn})
+				state_dict.update(state_args)
+				state_data_list.append(state_dict)
+			state_data = state_data_list
+		for state_call in state_data:
+			state_fn = state_call.pop('fn')
+			state_args = state_call
+			states.append((state_id, state_fn, state_args))
+	return states
 
-	def run(self, targets):
-		ssh_client = paramiko.SSHClient()
-		ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-		for host_options in targets:
-			host_options = prove.utils.deep_dict_merge(self.options, host_options)
+def get_state_cls(state_fn):
+	state_mod, state_fn = state_fn.rsplit('.', 1)
 
-			host_env = self.env.make_host_env(
-				host_options.get('roles', []),
-				host_options.get('variables', []),
-				host_options.get('states', []),
-			)
-			host_runner = HostRunner(host_env, ssh_client, host_options, self.output)
-			host_runner.run()
+	try:
+		state_module = importlib.import_module('prove.states.' + state_mod)
+	except ImportError:
+		raise prove.errors.ProveError('No state module named {}'.format(state_mod))
+
+	if state_fn.startswith('_'):
+		raise prove.errors.ProveError('State module function {}.{} is private'.format(state_mod, state_fn))
+
+	try:
+		state_cls = getattr(state_module, prove.utils.snake_to_camel_case(state_fn))
+	except AttributeError:
+		raise prove.errors.ProveError('State module {} has no function {}'.format(state_mod, state_fn))
+
+	if hasattr(state_module, '__hidden__') and state_fn in state_module.__hidden__:
+		raise prove.errors.ProveError('State module {} function {} is not public'.format(state_mod, state_fn))
+
+	return state_cls

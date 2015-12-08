@@ -7,89 +7,6 @@ import os.path
 import prove.utils
 
 
-class Role:
-	def __init__(self, name, path):
-		self.name = name
-		self.path = path
-
-
-class Variable:
-	def __init__(self, name, path):
-		self.name = name
-		self.path = path
-
-
-class State:
-	def __init__(self, name, path):
-		self.name = name
-		self.path = path
-
-
-class Component:
-	def __init__(self, name, roles, variables, states):
-		self.name = name
-		self.roles = roles
-		self.variables = variables
-		self.states = states
-
-
-class FileLoader:
-	def __init__(self, root_path, loaders):
-		self.root_path = root_path
-		self.loaders = [importlib.import_module('prove.loader.' + loader) for loader in loaders]
-
-	def load_role(self, role):
-		return self._load(role.path, {})
-
-	def load_variable(self, variable, variables):
-		return self._load(variable.path, variables)
-
-	def load_state(self, state, variables):
-		return self._load(state.path, variables)
-
-	def _load(self, path, variables):
-		for loader in self.loaders:
-			if loader.supports(path):
-				return loader.load(path, variables)
-		raise Exception('Cannot find loader for file: ' + path)
-
-
-def _scan(root_path, directory, cls, name_prefix=None):
-	root_path = os.path.join(root_path, directory)
-	if os.path.isdir(root_path):
-		files = prove.utils.list_files(root_path)
-	else:
-		files = glob.glob(root_path + '.*')
-
-	ret = {}
-	for path in files:
-		name = path.replace(root_path, '').lstrip('/').split('.')[0]
-		if name_prefix:
-			if name:
-				name = name_prefix + '.' + name
-			else:
-				name = name_prefix
-		ret[name] = cls(name, path)
-	return ret
-
-
-def _scan_components(components_dir):
-	components = []
-	if os.path.isdir(components_dir):
-		component_dirs = [d for d in os.listdir(components_dir)
-			if os.path.isdir(os.path.join(components_dir, d))]
-		for component_dir in component_dirs:
-			component_name = component_dir
-			component_dir = os.path.join(components_dir, component_name)
-			components.append(Component(
-				component_dir,
-				_scan(component_dir, 'roles', Role, component_name),
-				_scan(component_dir, 'variables', Variable, component_name),
-				_scan(component_dir, 'states', State, component_name),
-			))
-	return components
-
-
 class Environment:
 	def __init__(self, loader, roles, variables, states, global_variables=None):
 		self.loader = loader
@@ -139,6 +56,27 @@ class Environment:
 		return new_variables, new_states
 
 
+class FileLoader:
+	def __init__(self, root_path, loaders):
+		self.root_path = root_path
+		self.loaders = [importlib.import_module('prove.loader.' + loader) for loader in loaders]
+
+	def load_role(self, role):
+		return self._load(role.path, {})
+
+	def load_variable(self, variable, variables):
+		return self._load(variable.path, variables)
+
+	def load_state(self, state, variables):
+		return self._load(state.path, variables)
+
+	def _load(self, path, variables):
+		for loader in self.loaders:
+			if loader.supports(path):
+				return loader.load(path, variables)
+		raise Exception('Cannot find loader for file: ' + path)
+
+
 class HostEnvironment:
 	def __init__(self, loader, variables, states, global_variables=None):
 		self.loader = loader
@@ -164,3 +102,65 @@ class HostEnvironment:
 			variables['state_file'] = state.name
 			states[state.name] = self.loader.load_state(state, variables)
 		return states
+
+
+def _scan(root_path, directory, cls, name_prefix=None):
+	root_path = os.path.join(root_path, directory)
+	if os.path.isdir(root_path):
+		files = prove.utils.list_files(root_path)
+	else:
+		files = glob.glob(root_path + '.*')
+
+	ret = {}
+	for path in files:
+		name = path.replace(root_path, '').lstrip('/').split('.')[0]
+		if name_prefix:
+			if name:
+				name = name_prefix + '.' + name
+			else:
+				name = name_prefix
+		ret[name] = cls(name, path)
+	return ret
+
+
+def _scan_components(components_dir):
+	components = []
+	if os.path.isdir(components_dir):
+		component_dirs = [d for d in os.listdir(components_dir)
+			if os.path.isdir(os.path.join(components_dir, d))]
+		for component_dir in component_dirs:
+			component_name = component_dir
+			component_dir = os.path.join(components_dir, component_name)
+			components.append(Component(
+				component_dir,
+				_scan(component_dir, 'roles', Role, component_name),
+				_scan(component_dir, 'variables', Variable, component_name),
+				_scan(component_dir, 'states', State, component_name),
+			))
+	return components
+
+
+class Role:
+	def __init__(self, name, path):
+		self.name = name
+		self.path = path
+
+
+class Variable:
+	def __init__(self, name, path):
+		self.name = name
+		self.path = path
+
+
+class State:
+	def __init__(self, name, path):
+		self.name = name
+		self.path = path
+
+
+class Component:
+	def __init__(self, name, roles, variables, states):
+		self.name = name
+		self.roles = roles
+		self.variables = variables
+		self.states = states
