@@ -1,6 +1,7 @@
 import prove.runner
 import prove.states.file
 import prove.output.null
+import prove.environment
 from unittest import mock
 
 
@@ -24,7 +25,7 @@ def test_normalize_state_data():
 
 def test_get_state_cls():
 	state_fn = prove.runner.get_state_cls('file.managed')
-	assert prove.states.file.managed is state_fn
+	assert prove.states.file.Managed is state_fn
 
 
 def test_HostRunner_run():

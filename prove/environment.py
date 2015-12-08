@@ -1,7 +1,9 @@
 import collections
+import glob
 import importlib
 import os
 import os.path
+
 import prove.utils
 
 
@@ -52,12 +54,21 @@ class FileLoader:
 		raise Exception('Cannot find loader for file: ' + path)
 
 
-def _scan(root_path, directory, cls):
+def _scan(root_path, directory, cls, name_prefix=None):
 	root_path = os.path.join(root_path, directory)
-	files = prove.utils.list_files(root_path)
+	if os.path.isdir(root_path):
+		files = prove.utils.list_files(root_path)
+	else:
+		files = glob.glob(root_path + '.*')
+
 	ret = {}
 	for path in files:
 		name = path.replace(root_path, '').lstrip('/').split('.')[0]
+		if name_prefix:
+			if name:
+				name = name_prefix + '.' + name
+			else:
+				name = name_prefix
 		ret[name] = cls(name, path)
 	return ret
 
@@ -72,9 +83,9 @@ def _scan_components(components_dir):
 			component_dir = os.path.join(components_dir, component_name)
 			components.append(Component(
 				component_dir,
-				_scan(component_dir, 'roles', Role),
-				_scan(component_dir, 'variables', Variable),
-				_scan(component_dir, 'states', State),
+				_scan(component_dir, 'roles', Role, component_name),
+				_scan(component_dir, 'variables', Variable, component_name),
+				_scan(component_dir, 'states', State, component_name),
 			))
 	return components
 

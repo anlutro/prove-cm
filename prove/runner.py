@@ -101,12 +101,14 @@ class HostRunner():
 
 
 class Runner():
-	def __init__(self, options, output_module, global_variables=None):
-		self.env = prove.environment.Environment.from_path(
-			options['root_path'],
-			options.get('loaders', ['yaml_mako', 'yaml', 'json']),
-			global_variables,
-		)
+	def __init__(self, options, output_module, global_variables=None, env=None):
+		if not env:
+			env = prove.environment.Environment.from_path(
+				options['root_path'],
+				options.get('loaders', ['yaml_mako', 'yaml', 'json']),
+				global_variables,
+			)
+		self.env = env
 		self.options = options
 		self.output = output_module
 

@@ -1,5 +1,6 @@
 import os.path
 import prove.environment
+from unittest import mock
 
 TEST_ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
 
