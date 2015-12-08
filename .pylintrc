@@ -3,7 +3,7 @@ reports = no
 output-format = colorized
 
 [MESSAGES CONTROL]
-disable = bad-continuation, missing-docstring
+disable = bad-continuation, missing-docstring, too-few-public-methods
 
 [FORMAT]
 indent-string = \t
