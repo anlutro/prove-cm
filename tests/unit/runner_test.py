@@ -79,3 +79,16 @@ def test_sort_states():
 	])
 	assert states[0][0] == 'b'
 	assert states[1][0] == 'a'
+
+	states = prove.runner.sort_states([
+		('e', None, {'priority': 'last'}),
+		('d', None, {}),
+		('c', None, {'priority': 2}),
+		('b', None, {'priority': 1}),
+		('a', None, {'priority': 'first'}),
+	])
+	assert states[0][0] == 'a'
+	assert states[1][0] == 'b'
+	assert states[2][0] == 'c'
+	assert states[3][0] == 'd'
+	assert states[4][0] == 'e'
