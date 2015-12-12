@@ -53,21 +53,21 @@ def test_HostRunner_run_with_states():
 
 def test_sort_states():
 	states = prove.runner.sort_states([
-		('a', None, {'priority': 2}),
-		('b', None, {'priority': 1}),
+		('a', None, {'_priority': 2}),
+		('b', None, {'_priority': 1}),
 	])
 	assert states[0][0] == 'b'
 	assert states[1][0] == 'a'
 
 	states = prove.runner.sort_states([
 		('a', None, {}),
-		('b', None, {'priority': 1}),
+		('b', None, {'_priority': 1}),
 	])
 	assert states[0][0] == 'b'
 	assert states[1][0] == 'a'
 
 	states = prove.runner.sort_states([
-		('a', None, {'priority': 'last'}),
+		('a', None, {'_priority': 'last'}),
 		('b', None, {}),
 	])
 	assert states[0][0] == 'b'
@@ -75,17 +75,17 @@ def test_sort_states():
 
 	states = prove.runner.sort_states([
 		('a', None, {}),
-		('b', None, {'priority': 'first'}),
+		('b', None, {'_priority': 'first'}),
 	])
 	assert states[0][0] == 'b'
 	assert states[1][0] == 'a'
 
 	states = prove.runner.sort_states([
-		('e', None, {'priority': 'last'}),
+		('e', None, {'_priority': 'last'}),
 		('d', None, {}),
-		('c', None, {'priority': 2}),
-		('b', None, {'priority': 1}),
-		('a', None, {'priority': 'first'}),
+		('c', None, {'_priority': 2}),
+		('b', None, {'_priority': 1}),
+		('a', None, {'_priority': 'first'}),
 	])
 	assert states[0][0] == 'a'
 	assert states[1][0] == 'b'
