@@ -69,9 +69,9 @@ class HostRunner():
 				stdin.flush()
 		self.output.finish_connect()
 
-		for states in state_files.values():
-			for state_id, state_fn, state_args in normalize_state_data(states):
-				self.run_state(state_id, state_fn, state_args)
+		states = [normalize_state_data(state_file) for state_file in state_files.values()]
+		for state_id, state_fn, state_args in process_states(states):
+			self.run_state(state_id, state_fn, state_args)
 
 		self.output.finish_run(self.num_succeeded_states, self.num_failed_states)
 
@@ -108,6 +108,52 @@ def normalize_state_data(state_file_data):
 			state_fn = state_call.pop('fn')
 			state_args = state_call
 			states.append((state_id, state_fn, state_args))
+	return states
+
+
+def sort_states(states):
+	min_priority = 0
+	max_priority = 0
+
+	# find the minimum and maximum priority numbers
+	for state_id, state_fn, state_args in states:
+		if 'priority' in state_args and isinstance(state_args['priority'], int):
+			if  state_args['priority'] > max_priority:
+				max_priority = state_args['priority'] + 1
+			if state_args['priority'] < min_priority:
+				min_priority = state_args['priority'] - 1
+
+	# states with no priority should come after max_priority, but before "last"
+	default_state_priority = max_priority
+	# remove any risk of overlapping between un-priorityed and "last" states
+	max_priority += len(states)
+
+	for state_id, state_fn, state_args in states:
+		state_priority = default_state_priority
+		if 'priority' in state_args:
+			if state_args['priority'] == 'first':
+				min_priority -= 1
+				state_priority = min_priority
+			elif state_args['priority'] == 'last':
+				max_priority += 1
+				state_priority = max_priority
+			else:
+				state_priority = state_args['priority']
+		else:
+			state_priority = default_state_priority
+			default_state_priority += 1
+
+		state_args['priority'] = state_priority * 100
+
+	def get_state_priority(state):
+		state_id, state_fn, state_args = state
+		return state_args.pop('priority')
+
+	return sorted(states, key=get_state_priority)
+
+
+def process_states(states):
+	states = sort_states(states)
 	return states
 
 

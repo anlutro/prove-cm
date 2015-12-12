@@ -49,3 +49,33 @@ def test_HostRunner_run_with_states():
 	runner = prove.runner.HostRunner(env, ssh_client, options, output)
 	runner.run()
 	assert 1 == ssh_client.connect.call_count
+
+
+def test_sort_states():
+	states = prove.runner.sort_states([
+		('a', None, {'priority': 2}),
+		('b', None, {'priority': 1}),
+	])
+	assert states[0][0] == 'b'
+	assert states[1][0] == 'a'
+
+	states = prove.runner.sort_states([
+		('a', None, {}),
+		('b', None, {'priority': 1}),
+	])
+	assert states[0][0] == 'b'
+	assert states[1][0] == 'a'
+
+	states = prove.runner.sort_states([
+		('a', None, {'priority': 'last'}),
+		('b', None, {}),
+	])
+	assert states[0][0] == 'b'
+	assert states[1][0] == 'a'
+
+	states = prove.runner.sort_states([
+		('a', None, {}),
+		('b', None, {'priority': 'first'}),
+	])
+	assert states[0][0] == 'b'
+	assert states[1][0] == 'a'
