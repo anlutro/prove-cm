@@ -119,9 +119,9 @@ def sort_states(states):
 	for state_id, state_fn, state_args in states:
 		if 'priority' in state_args and isinstance(state_args['priority'], int):
 			if  state_args['priority'] > max_priority:
-				max_priority = state_args['priority'] + 1
+				max_priority = int(state_args['priority']) + 1
 			if state_args['priority'] < min_priority:
-				min_priority = state_args['priority'] - 1
+				min_priority = int(state_args['priority']) - 1
 
 	# states with no priority should come after max_priority, but before "last"
 	default_state_priority = max_priority
@@ -138,7 +138,7 @@ def sort_states(states):
 				max_priority += 1
 				state_priority = max_priority
 			else:
-				state_priority = state_args['priority']
+				state_priority = int(state_args['priority'])
 		else:
 			state_priority = default_state_priority
 			default_state_priority += 1
