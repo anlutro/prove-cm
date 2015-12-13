@@ -81,6 +81,7 @@ class HostRunner():
 		self.output.start_state(state_id, state_fn)
 
 		try:
+			state_args = {k:v for k,v in state_args.items() if not k.startswith('_')}
 			state_cls = get_state_cls(state_fn)
 			state_obj = state_cls(self.ssh_client)
 			result, comment = state_obj.run(**state_args)
