@@ -8,7 +8,7 @@ def sort_states(states):
 	# number to "first" and "last" states
 	for state_id, state_fn, state_args in states:
 		if '_priority' in state_args and isinstance(state_args['_priority'], int):
-			if  state_args['_priority'] > max_priority:
+			if state_args['_priority'] > max_priority:
 				max_priority = int(state_args['_priority']) + 1
 			if state_args['_priority'] < min_priority:
 				min_priority = int(state_args['_priority']) - 1
