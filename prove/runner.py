@@ -70,9 +70,10 @@ class HostRunner():
 				stdin.flush()
 		self.output.finish_connect()
 
-		states = [normalize_state_data(state_file) for state_file in state_files.values()]
-		for state_id, state_fn, state_args in process_states(states):
-			self.run_state(state_id, state_fn, state_args)
+		state_files = [normalize_state_data(state_file) for state_file in state_files.values()]
+		for states in state_files:
+			for state_id, state_fn, state_args in process_states(states):
+				self.run_state(state_id, state_fn, state_args)
 
 		self.output.finish_run(self.num_succeeded_states, self.num_failed_states)
 
