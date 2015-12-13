@@ -4,6 +4,7 @@ import importlib
 import paramiko
 import prove.environment
 import prove.errors
+import prove.sort
 import prove.utils
 
 
@@ -111,49 +112,8 @@ def normalize_state_data(state_file_data):
 	return states
 
 
-def sort_states(states):
-	min_priority = 0
-	max_priority = 0
-
-	# find the minimum and maximum priority numbers
-	for state_id, state_fn, state_args in states:
-		if '_priority' in state_args and isinstance(state_args['_priority'], int):
-			if  state_args['_priority'] > max_priority:
-				max_priority = int(state_args['_priority']) + 1
-			if state_args['_priority'] < min_priority:
-				min_priority = int(state_args['_priority']) - 1
-
-	# states with no priority should come after max_priority, but before "last"
-	default_state_priority = max_priority
-	# remove any risk of overlapping between un-priorityed and "last" states
-	max_priority += len(states)
-
-	for state_id, state_fn, state_args in states:
-		state_priority = default_state_priority
-		if '_priority' in state_args:
-			if state_args['_priority'] == 'first':
-				min_priority -= 1
-				state_priority = min_priority
-			elif state_args['_priority'] == 'last':
-				max_priority += 1
-				state_priority = max_priority
-			else:
-				state_priority = int(state_args['_priority'])
-		else:
-			state_priority = default_state_priority
-			default_state_priority += 1
-
-		state_args['_priority'] = state_priority * 100
-
-	def get_state_priority(state):
-		state_id, state_fn, state_args = state
-		return state_args.pop('_priority')
-
-	return sorted(states, key=get_state_priority)
-
-
 def process_states(states):
-	states = sort_states(states)
+	states = prove.sort.sort_states(states)
 	return states
 
 
