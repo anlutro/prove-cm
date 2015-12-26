@@ -45,7 +45,9 @@ def finish_state(result, comment):
 	comment = [c for c in comment if c]
 	if comment:
 		comment_out = '│  └─ ' + comment[0]
-		comment_out += '\n'.join(['│     ' + line for line in comment[1:] if line])
+		if len(comment) > 1:
+			comment_lines = ['│     ' + line for line in comment[1:] if line]
+			comment_out += '\n' + '\n'.join(comment_lines)
 		comment = comment_out.rstrip()
 
 	if result:

@@ -92,7 +92,7 @@ class HostRunner():
 
 		try:
 			state_args = {k:v for k,v in state_args.items() if not k.startswith('_')}
-			state_cls = get_state_cls(state_fn)
+			state_cls = self.get_state_cls(state_fn)
 			state_obj = state_cls(self.ssh_client)
 			result, comment = state_obj._run(**state_args)
 		except prove.errors.ProveError as exc:
@@ -105,6 +105,27 @@ class HostRunner():
 			self.num_succeeded_states += 1
 		else:
 			self.num_failed_states += 1
+
+	def get_state_cls(self, state_fn):
+		state_mod, state_fn = state_fn.rsplit('.', 1)
+
+		try:
+			state_module = importlib.import_module('prove.states.' + state_mod)
+		except ImportError:
+			raise prove.errors.ProveError('No state module named {}'.format(state_mod))
+
+		if hasattr(state_module, 'lazy_load'):
+			state_module = state_module.lazy_load(self.ssh_client)
+
+		try:
+			state_cls = getattr(state_module, prove.utils.snake_to_camel_case(state_fn))
+		except AttributeError:
+			raise prove.errors.ProveError('State module {} has no function {}'.format(state_mod, state_fn))
+
+		if not issubclass(state_cls, prove.state.State):
+			raise prove.errors.ProveError('State function {}.{} is not a state'.format(state_mod, state_fn))
+
+		return state_cls
 
 
 def normalize_state_data(state_file_data):
@@ -127,22 +148,3 @@ def normalize_state_data(state_file_data):
 def process_states(states):
 	states = prove.sort.sort_states(states)
 	return states
-
-
-def get_state_cls(state_fn):
-	state_mod, state_fn = state_fn.rsplit('.', 1)
-
-	try:
-		state_module = importlib.import_module('prove.states.' + state_mod)
-	except ImportError:
-		raise prove.errors.ProveError('No state module named {}'.format(state_mod))
-
-	try:
-		state_cls = getattr(state_module, prove.utils.snake_to_camel_case(state_fn))
-	except AttributeError:
-		raise prove.errors.ProveError('State module {} has no function {}'.format(state_mod, state_fn))
-
-	if not issubclass(state_cls, prove.state.State):
-		raise prove.errors.ProveError('State function {}.{} is not a state'.format(state_mod, state_fn))
-
-	return state_cls
