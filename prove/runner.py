@@ -2,9 +2,11 @@ import collections
 import importlib
 
 import paramiko
+import paramiko.ssh_exception
 import prove.environment
 import prove.errors
 import prove.sort
+import prove.state
 import prove.utils
 
 
@@ -62,7 +64,15 @@ class HostRunner():
 		state_files = self.env.get_states()
 
 		self.output.start_connect()
-		self.ssh_client.connect(self.options['host'], **kwargs)
+		try:
+			self.ssh_client.connect(self.options['host'], **kwargs)
+		except paramiko.ssh_exception.PasswordRequiredException as exception:
+			self.output.connect_error('Specified SSH key requires password. '
+				'Either specify a passwordless key, specify the ssh_key_pass '
+				'in prove.yml, or use your SSH agent to "remember" the '
+				'password for you.')
+			return
+
 		if self.options.get('sudo'):
 			stdin, stdout, stderr = self.ssh_client.exec_command('sudo -s')
 			if stdout.channel.closed:
@@ -127,15 +137,12 @@ def get_state_cls(state_fn):
 	except ImportError:
 		raise prove.errors.ProveError('No state module named {}'.format(state_mod))
 
-	if state_fn.startswith('_'):
-		raise prove.errors.ProveError('State module function {}.{} is private'.format(state_mod, state_fn))
-
 	try:
 		state_cls = getattr(state_module, prove.utils.snake_to_camel_case(state_fn))
 	except AttributeError:
 		raise prove.errors.ProveError('State module {} has no function {}'.format(state_mod, state_fn))
 
-	if hasattr(state_module, '__hidden__') and state_fn in state_module.__hidden__:
-		raise prove.errors.ProveError('State module {} function {} is not public'.format(state_mod, state_fn))
+	if not issubclass(state_cls, prove.state.State):
+		raise prove.errors.ProveError('State function {}.{} is not a state'.format(state_mod, state_fn))
 
 	return state_cls

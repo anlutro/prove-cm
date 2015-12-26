@@ -1,4 +1,4 @@
-from prove.states import State
+from prove.state import State
 
 
 class Upgrade(State):

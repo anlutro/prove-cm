@@ -1,11 +1,11 @@
 import tempfile
 
-from prove.states import State
-
-__hidden__ = ['FileState']
+from prove.state import State
 
 
-class FileState(State):
+class _FileState(State):
+	'Abstract file state with helper methods.'
+
 	def _ensure_ownership(self, path, user=None, group=None):
 		if user is None and group is None:
 			return
@@ -30,7 +30,7 @@ class Absent(State):
 		return False, result.stderr
 
 
-class Present(FileState):
+class Present(_FileState):
 	def run(self, path=None, user=None, group=None, mode=None):
 		changes = []
 
@@ -55,7 +55,7 @@ class Present(FileState):
 		return True, changes
 
 
-class Managed(FileState):
+class Managed(_FileState):
 	def run(self, path=None, contents=None, source=None, user=None, group=None, mode=None):
 		changes = []
 

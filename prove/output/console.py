@@ -1,4 +1,5 @@
 import sys
+import textwrap
 
 
 def rendering_states(host):
@@ -9,6 +10,11 @@ def rendering_states(host):
 def start_connect():
 	sys.stdout.write('Connecting... ')
 	sys.stdout.flush()
+
+
+def connect_error(msg):
+	msg = '[\033[31mERROR\033[0m] Encountered an error when trying to connect: ' + msg
+	sys.stdout.write('\n' + textwrap.fill(msg, 80) + '\n')
 
 
 def finish_connect():
