@@ -40,3 +40,29 @@ class State():
 		chan.settimeout(timeout)
 		chan.exec_command(command)
 		return CommandResult(chan, bufsize)
+
+	def _run(self, *args, **kwargs):
+		def check_requirements(arg_key, desired_result=True):
+			if not arg_key in kwargs:
+				return None, None
+			requirements = kwargs.pop(arg_key)
+			if isinstance(requirements, str):
+				requirements = [requirements]
+			for cmd in requirements:
+				result = self._run_command(cmd)
+				if result.was_successful == desired_result:
+					message = result.stdout or result.stderr or \
+						'{} command returned {}: {}'.format(
+							arg_key, result.was_successful, cmd)
+					return True, message
+			return None, None
+
+		result, message = check_requirements('unless', desired_result=True)
+		if result is not None:
+			return result, message
+
+		result, message = check_requirements('onlyif', desired_result=False)
+		if result is not None:
+			return result, message
+
+		return self.run(*args, **kwargs)

@@ -94,7 +94,7 @@ class HostRunner():
 			state_args = {k:v for k,v in state_args.items() if not k.startswith('_')}
 			state_cls = get_state_cls(state_fn)
 			state_obj = state_cls(self.ssh_client)
-			result, comment = state_obj.run(**state_args)
+			result, comment = state_obj._run(**state_args)
 		except prove.errors.ProveError as exc:
 			self.output.state_error(exc)
 			self.num_failed_states += 1
