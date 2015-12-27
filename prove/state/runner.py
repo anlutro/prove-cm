@@ -9,6 +9,8 @@ import prove.sort
 import prove.state
 import prove.utils
 
+import logging
+log = logging.getLogger(__name__)
 
 class Runner():
 	def __init__(self, options, output_module, global_variables=None, env=None):
@@ -96,6 +98,7 @@ class HostRunner():
 			state_obj = state_cls(self.ssh_client)
 			result, comment = state_obj._run(**state_args)
 		except prove.errors.ProveError as exc:
+			log.debug('', exc_info=True)
 			self.output.state_error(exc)
 			self.num_failed_states += 1
 			return
@@ -111,8 +114,9 @@ class HostRunner():
 
 		try:
 			state_module = importlib.import_module('prove.states.' + state_mod)
-		except ImportError:
-			raise prove.errors.ProveError('No state module named {}'.format(state_mod))
+		except ImportError as exception:
+			msg = 'No state module named {}'.format(state_mod)
+			raise prove.errors.ProveError(msg) from exception
 
 		if hasattr(state_module, 'lazy_load'):
 			state_module = state_module.lazy_load(self.ssh_client)

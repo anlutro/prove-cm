@@ -1,4 +1,4 @@
-from prove.state import _run_command
+from prove.state.command import _run_command
 
 def lazy_load(client):
 	result = _run_command(client, 'lsb_release -a')
