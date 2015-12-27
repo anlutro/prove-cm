@@ -73,7 +73,7 @@ class State():
 
 	def _run(self, *args, **kwargs):
 		def check_requirements(arg_key, desired_result=True):
-			if not arg_key in kwargs:
+			if arg_key not in kwargs:
 				return None, None
 			requirements = kwargs.pop(arg_key)
 			if isinstance(requirements, str):
@@ -95,4 +95,4 @@ class State():
 		if result is not None:
 			return result, message
 
-		return self.run(*args, **kwargs)
+		return self.run(*args, **kwargs) # pylint: disable=no-member

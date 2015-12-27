@@ -109,7 +109,7 @@ def _scan(root_path, directory, cls, name_prefix=None):
 	if os.path.isdir(root_path):
 		files = prove.utils.list_files(root_path)
 	else:
-		files = glob.glob(root_path + '.*')
+		files = set(glob.glob(root_path + '.*'))
 
 	ret = {}
 	for path in files:

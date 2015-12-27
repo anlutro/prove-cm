@@ -1,3 +1,4 @@
+import logging
 import collections
 import importlib
 
@@ -5,12 +6,11 @@ import paramiko
 import paramiko.ssh_exception
 import prove.environment
 import prove.errors
-import prove.sort
 import prove.state
 import prove.utils
 
-import logging
 log = logging.getLogger(__name__)
+
 
 class Runner():
 	def __init__(self, options, output_module, global_variables=None, env=None):
@@ -68,7 +68,7 @@ class HostRunner():
 		self.output.start_connect()
 		try:
 			self.ssh_client.connect(self.options['host'], **kwargs)
-		except paramiko.ssh_exception.PasswordRequiredException as exception:
+		except paramiko.ssh_exception.PasswordRequiredException:
 			self.output.connect_error('Specified SSH key requires password. '
 				'Either specify a passwordless key, specify the ssh_key_pass '
 				'in prove.yml, or use your SSH agent to "remember" the '
@@ -93,7 +93,7 @@ class HostRunner():
 		self.output.start_state(state_id, state_fn)
 
 		try:
-			state_args = {k:v for k,v in state_args.items() if not k.startswith('_')}
+			state_args = {k:v for k, v in state_args.items() if not k.startswith('_')}
 			state_cls = self.get_state_cls(state_fn)
 			state_obj = state_cls(self.ssh_client)
 			result, comment = state_obj._run(**state_args)
@@ -150,5 +150,5 @@ def normalize_state_data(state_file_data):
 
 
 def process_states(states):
-	states = prove.sort.sort_states(states)
+	states = prove.state.sort_states(states)
 	return states
