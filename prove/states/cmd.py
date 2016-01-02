@@ -1,11 +1,17 @@
-from prove.state import State
+from prove.state import StateResult
 
 
-class Run(State):
-	def run(self, command=None, format_vars=None):
-		if format_vars is not None:
-			command = command.format(**format_vars)
-		result = self._run_command(command)
-		if result.was_successful:
-			return True, result.stdout
-		return False, result.stderr
+def run(connection, args):
+	result = connection.run_command(args.get('command'))
+
+	comments = []
+	if result.stderr:
+		comments.append('STDERR:\n' + result.stderr)
+	if result.stdout:
+		comments.append('STDOUT:\n' + result.stdout)
+
+	return StateResult(
+		success=result.was_successful,
+		changes=None,
+		comment='\n'.join(comments)
+	)

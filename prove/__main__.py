@@ -1,2 +1,0 @@
-import prove
-prove.main()

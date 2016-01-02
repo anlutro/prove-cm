@@ -1,166 +1,115 @@
 import collections
-import glob
-import importlib
-import os
-import os.path
 
-import prove.utils
-
-
-class Environment:
-	def __init__(self, loader, roles, variables, states, global_variables=None):
-		self.loader = loader
-		self.roles = roles
-		self.variables = variables
-		self.states = states
-		self.global_variables = global_variables or {}
-
-	@classmethod
-	def from_path(cls, root_path, loaders, global_variables=None):
-		states = {}
-		roles = {}
-		variables = {}
-
-		for component in _scan_components(os.path.join(root_path, 'components')):
-			roles.update(component.roles)
-			variables.update(component.variables)
-			states.update(component.states)
-
-		roles.update(_scan(root_path, 'roles', Role))
-		variables.update(_scan(root_path, 'variables', Variable))
-		states.update(_scan(root_path, 'states', State))
-
-		loader = FileLoader(root_path, loaders)
-
-		return cls(loader, roles, variables, states, global_variables)
-
-	def make_host_env(self, roles, variables, states):
-		if roles:
-			variables, states = self.merge_roles(roles, variables, states)
-
-		variable_dict = self.global_variables.copy()
-		variable_dict.update({v: self.variables[v] for v in variables})
-		state_dict = {state: self.states[state] for state in states}
-
-		return HostEnvironment(self.loader, variable_dict, state_dict, self.global_variables)
-
-	def merge_roles(self, roles, variables, states):
-		new_variables = {}
-		new_states = {}
-		for role in roles:
-			role = self.loader.load_role(self.roles[role])
-			new_variables.update({variable: self.variables[variable] for variable in role.get('variables', [])})
-			new_states.update({state: self.states[state] for state in role.get('states', [])})
-		new_variables.update(variables)
-		new_states.update(states)
-		return new_variables, new_states
-
-
-class FileLoader:
-	def __init__(self, root_path, loaders):
-		self.root_path = root_path
-		self.loaders = [importlib.import_module('prove.loader.' + loader) for loader in loaders]
-
-	def load_role(self, role):
-		return self._load(role.path, {})
-
-	def load_variable(self, variable, variables):
-		return self._load(variable.path, variables)
-
-	def load_state(self, state, variables):
-		return self._load(state.path, variables)
-
-	def _load(self, path, variables):
-		for loader in self.loaders:
-			if loader.supports(path):
-				return loader.load(path, variables)
-		raise Exception('Cannot find loader for file: ' + path)
-
-
-class HostEnvironment:
-	def __init__(self, loader, variables, states, global_variables=None):
-		self.loader = loader
-		self.states = states
-		self.variables = variables
-		self.global_variables = global_variables or {}
-		self._compiled_variables = None
-
-	@property
-	def compiled_variables(self):
-		if self._compiled_variables is None:
-			tmp_variables = self.global_variables.copy()
-			for variable in self.variables.values():
-				loaded = self.loader.load_variable(variable, tmp_variables)
-				tmp_variables = prove.utils.deep_dict_merge(tmp_variables, loaded)
-			self._compiled_variables = tmp_variables
-		return self._compiled_variables
-
-	def get_states(self):
-		states = collections.OrderedDict()
-		variables = self.compiled_variables
-		for state in self.states.values():
-			variables['state_file'] = state.name
-			states[state.name] = self.loader.load_state(state, variables)
-		return states
-
-
-def _scan(root_path, directory, cls, name_prefix=None):
-	root_path = os.path.join(root_path, directory)
-	if os.path.isdir(root_path):
-		files = prove.utils.list_files(root_path)
-	else:
-		files = set(glob.glob(root_path + '.*'))
-
-	ret = {}
-	for path in files:
-		name = path.replace(root_path, '').lstrip('/').split('.')[0]
-		if name_prefix:
-			if name:
-				name = name_prefix + '.' + name
-			else:
-				name = name_prefix
-		ret[name] = cls(name, path)
-	return ret
-
-
-def _scan_components(components_dir):
-	components = []
-	if os.path.isdir(components_dir):
-		component_dirs = [d for d in os.listdir(components_dir)
-			if os.path.isdir(os.path.join(components_dir, d))]
-		for component_dir in component_dirs:
-			component_name = component_dir
-			component_dir = os.path.join(components_dir, component_name)
-			components.append(Component(
-				component_dir,
-				_scan(component_dir, 'roles', Role, component_name),
-				_scan(component_dir, 'variables', Variable, component_name),
-				_scan(component_dir, 'states', State, component_name),
-			))
-	return components
+import prove.config
 
 
 class Role:
-	def __init__(self, name, path):
+	def __init__(self, name, states, variables, variable_files):
 		self.name = name
-		self.path = path
-
-
-class Variable:
-	def __init__(self, name, path):
-		self.name = name
-		self.path = path
-
-
-class State:
-	def __init__(self, name, path):
-		self.name = name
-		self.path = path
-
-
-class Component:
-	def __init__(self, name, roles, variables, states):
-		self.name = name
-		self.roles = roles
-		self.variables = variables
+		assert isinstance(states, list)
 		self.states = states
+		assert isinstance(variables, dict)
+		self.variables = variables
+		assert isinstance(variable_files, list)
+		self.variable_files = variable_files
+
+	@classmethod
+	def from_dict(cls, name, data):
+		return cls(
+			name,
+			states=data.get('states', []),
+			variables=data.get('variables', {}),
+			variable_files=data.get('variable_files', []),
+		)
+
+
+class VariableFile:
+	def __init__(self, name, variables):
+		self.name = name
+		self.variables = variables
+
+
+class HostEnvironment:
+	def __init__(self, options, states, variables):
+		assert isinstance(options, prove.config.Options)
+		self.options = options
+		assert isinstance(states, list)
+		self.states = states
+		assert isinstance(variables, dict)
+		self.variables = variables
+
+
+class Environment:
+	def __init__(self, options, roles, variables, variable_files,
+			state_files):
+		assert isinstance(options, prove.config.Options)
+		self.options = options
+		assert isinstance(roles, dict)
+		self.roles = roles
+		assert isinstance(variables, dict)
+		self.variables = variables
+		assert isinstance(variable_files, dict)
+		self.variable_files = variable_files
+		assert isinstance(state_files, dict)
+		self.state_files = state_files
+
+	@classmethod
+	def from_options_and_config(cls, options, config):
+		roles = collections.OrderedDict({
+			name: Role.from_dict(name, data)
+			for name, data in config.get('roles', {}).items()
+		})
+
+		variables = config.get('variables', {})
+
+		from prove.loaders import json, yaml, yaml_mako
+		loaders = [json, yaml, yaml_mako]
+
+		locator = prove.locator.Locator(
+			options['root_dir'],
+			loaders
+		)
+
+		roles.update(locator.locate_roles())
+		variable_files = locator.locate_variables()
+		state_files = locator.locate_states()
+
+		return cls(options=options, roles=roles, variables=variables,
+			variable_files=variable_files, state_files=state_files)
+
+	def make_host_env(self, host_config):
+		assert isinstance(host_config, prove.config.HostConfig)
+		host_variables = self.variables.copy()
+		host_options = self.options.make_copy(host_config.options)
+
+		for role in host_config.roles:
+			role = self.roles[role]
+			for variable_file in role.variable_files:
+				host_variables.update(self.variable_files[variable_file].variables)
+			host_variables.update(role.variables)
+		for variable_file in host_config.variable_files:
+			host_variables.update(self.variable_files[variable_file].variables)
+		host_variables.update(host_config.variables)
+
+		loaded_states = collections.OrderedDict()
+		def load_states(states):
+			for state_name in states:
+				if state_name in loaded_states:
+					continue
+				if state_name not in self.state_files:
+					raise prove.state.StateMissingException(state_name)
+				state = self.state_files[state_name].load(host_variables)
+				load_states(state.includes)
+				loaded_states[state_name] = state
+		for role in host_config.roles:
+			load_states(self.roles[role].states)
+		load_states(host_config.states)
+
+		for state_name, state in loaded_states.items():
+			for required_state_name in state.requires:
+				if required_state_name not in loaded_states:
+					raise prove.state.StateNotLoadedException(required_state_name, state_name)
+
+		host_states = prove.state.sort_states(loaded_states)
+
+		return HostEnvironment(host_options, host_states, host_variables)

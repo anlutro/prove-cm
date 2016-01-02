@@ -1,12 +1,5 @@
-import argparse
-import importlib
 import logging
-import os
-import os.path
 import sys
-
-import prove.state.runner
-import yaml
 
 
 def setup_logging(config):
@@ -36,35 +29,3 @@ def setup_logging(config):
 
 	# add the logging handler for all loggers
 	root.addHandler(handler)
-
-
-def main():
-	parser = argparse.ArgumentParser(description='Prove - a configuration manager')
-	parser.add_argument('command', choices=['states'], help='Which command to run')
-	parser.add_argument('-c', '--config', help='Path to config file')
-	args = parser.parse_args()
-
-	with open(args.config) as file:
-		config = yaml.load(file)
-
-	if 'options' not in config:
-		config['options'] = {}
-	if 'root_path' not in config['options']:
-		config['options']['root_path'] = os.path.dirname(args.config)
-
-	setup_logging(config['options'])
-
-	output_module = config.get('output_module', 'console')
-	output_module = importlib.import_module('prove.output.' + output_module)
-
-	if args.command == 'states':
-		runner = prove.state.runner.Runner(
-			config.get('options', {}),
-			output_module,
-			config.get('globals', {}),
-		)
-		runner.run(config.get('targets', []))
-
-
-if __name__ == '__main__':
-	main()

@@ -21,6 +21,6 @@ setup(
         'pyyaml',
     ],
     entry_points={
-        'console_scripts': ['prove=prove:main']
+        'console_scripts': ['prove=prove.client.console:main']
     },
 )

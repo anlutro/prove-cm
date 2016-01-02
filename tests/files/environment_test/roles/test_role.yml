@@ -1,4 +1,0 @@
-variables:
-  - test_variable
-states:
-  - test_state
