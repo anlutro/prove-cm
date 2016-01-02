@@ -44,13 +44,22 @@ class Executor:
 	@contextmanager
 	def connect(self, host):
 		log.info('Connecting to host: %s', host.host)
+		self.app.output.connect_start(host)
 		connection = self.get_connection(host)
-		connection.connect()
+
+		try:
+			connection.connect()
+			self.app.output.connect_success(host)
+		except:
+			self.app.output.connect_failure(host)
+			raise
+
 		try:
 			yield connection
 		finally:
 			log.info('Diconnecting host: %s', host.host)
 			connection.disconnect()
+			self.app.output.disconnected(host)
 
 	def get_connection(self, host):
 		env = self.app.get_host_env(host)

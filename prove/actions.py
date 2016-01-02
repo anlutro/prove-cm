@@ -30,7 +30,7 @@ class StatesAction(Action):
 	def run_states(self, app, host, connection):
 		for state in connection.env.states:
 			for invocation in state.invocations:
-				print('=> {}:{}'.format(state.name, invocation.fn))
+				app.output.state_invocation_start(state, invocation)
 				state_mod, state_fn = invocation.fn.split('.')
 				state_mod = importlib.import_module('prove.states.' + state_mod)
 				state_fn = getattr(state_mod, state_fn)
@@ -38,10 +38,7 @@ class StatesAction(Action):
 				if not isinstance(result, prove.state.StateResult):
 					raise ValueError('State function {}.{} did not return a StateResult object'.format(
 						state_mod.__name__, state_fn.__name__))
-				print('Result: ', 'success' if result.success else 'failure')
-				print('Changes:', result.changes)
-				if result.comment:
-					print(result.comment)
+				app.output.state_invocation_finish(state, invocation, result)
 
 
 class CmdAction(Action):
@@ -49,13 +46,7 @@ class CmdAction(Action):
 		for host in app.hosts:
 			with app.executor_connect(host) as connection:
 				result = connection.run_command(self.args)
-				print('Exit code:', result.exit_code)
-				if result.stderr:
-					print('STDERR:')
-					print(result.stderr)
-				if result.stdout:
-					print('STDOUT:')
-					print(result.stdout)
+				app.output.cmd_result(result)
 
 
 class PingAction(Action):
