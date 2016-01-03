@@ -14,6 +14,7 @@ class Connection:
 		self.host = host
 		assert isinstance(env, prove.environment.HostEnvironment)
 		self.env = env
+		self.options = env.options
 		self.info = ConnectionInfo(self)
 
 	def _cmd_as_list(self, command):

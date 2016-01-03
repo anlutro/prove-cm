@@ -1,15 +1,18 @@
 class StateException(Exception):
 	pass
 
+
 class StateMissingException(StateException):
 	msg = 'State "{}" could not be found. Does the state file exist?'
 	def __init__(self, state_name):
 		super().__init__(self.msg.format(state_name))
 
+
 class StateNotLoadedException(StateException):
 	msg = 'State "{}" (required by "{}") was not found'
 	def __init__(self, required_state, requiree_state):
 		super().__init__(self.msg.format(required_state_name, requiree_state))
+
 
 class StateWrongDataException(StateException):
 	msg = 'State "{}" contains bad data - should be a dict'

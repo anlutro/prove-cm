@@ -37,19 +37,22 @@ class Connection(prove.executor.Connection):
 		super().__init__(*args)
 
 	def connect(self):
-		options = self.host.options
 		kwargs = {}
-		if options.get('port'):
-			kwargs['port'] = options['port']
-		if options.get('username'):
-			kwargs['username'] = options['username']
-		if options.get('password'):
-			kwargs['password'] = options['password']
-		if options.get('ssh_key'):
-			kwargs['key_filename'] = options('ssh_key')
+		if self.options.get('port'):
+			kwargs['port'] = self.options['port']
+		if self.options.get('username'):
+			kwargs['username'] = self.options['username']
+		if self.options.get('password'):
+			kwargs['password'] = self.options['password']
+		if self.options.get('ssh_key'):
+			kwargs['key_filename'] = self.options('ssh_key')
 			kwargs['look_for_keys'] = True
 
 		self.ssh_client.connect(self.host.host, **kwargs)
+
+		if self.options.get('sudo'):
+			log.debug('Switching to root')
+			self.run_command('sudo -su')
 
 	def disconnect(self):
 		self.ssh_client.close()
