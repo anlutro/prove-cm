@@ -55,8 +55,9 @@ class Connection(prove.executor.Connection):
 		self.ssh_client.close()
 
 	def run_command(self, command, timeout=None, get_pty=False):
-		if isinstance(command, list):
-			command = ' '.join(command)
+		command = self._cmd_as_string(command)
+		log.debug('Running command: `%s`', command)
+
 		chan = self.ssh_client.get_transport().open_session()
 		if get_pty:
 			chan.get_pty()

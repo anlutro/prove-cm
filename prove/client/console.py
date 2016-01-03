@@ -1,8 +1,8 @@
 import argparse
+import importlib
 import os
 import os.path
 
-import prove.actions
 import prove.client
 import prove.util
 
@@ -58,8 +58,10 @@ class ConsoleClient(prove.client.Client):
 		return config
 
 	def get_action(self):
+		action_module = 'prove.actions.' + self.args.action
+		action_module = importlib.import_module(action_module)
 		action_class = prove.util.snake_to_camel_case(self.args.action)
-		action_class = getattr(prove.actions, action_class + 'Action')
+		action_class = getattr(action_module, action_class + 'Action')
 		return action_class(self.args.action_args)
 
 

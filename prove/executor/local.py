@@ -1,7 +1,10 @@
+import logging
 import socket
 import subprocess
 
 import prove.executor
+
+log = logging.getLogger(__name__)
 
 
 class Connection(prove.executor.Connection):
@@ -12,13 +15,10 @@ class Connection(prove.executor.Connection):
 		pass
 
 	def run_command(self, command):
-		if not isinstance(command, list):
-			command = command.split()
-		if len(command) == 1 and ' ' in command[0]:
-			command = command[0].split()
+		log.debug('Running command: `%s`', self._cmd_as_string(command))
 
 		p = subprocess.Popen(
-			command,
+			self._cmd_as_list(command),
 			stdout=subprocess.PIPE,
 			stderr=subprocess.PIPE,
 		)

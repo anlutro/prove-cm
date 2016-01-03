@@ -119,7 +119,7 @@ class StateInvocation:
 
 
 class StateResult:
-	def __init__(self, success, changes, comment):
+	def __init__(self, success=None, changes=None, comment=None):
 		self.success = success
 		self.changes = changes
 		self.comment = comment

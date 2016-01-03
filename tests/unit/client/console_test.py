@@ -4,7 +4,7 @@ import prove.client.console
 
 
 def test_instantiates_correct_action_class():
-	with mock.patch('prove.actions.StatesAction', return_value='test_retval'):
+	with mock.patch('prove.actions.states.StatesAction', return_value='test_retval'):
 		action = prove.client.console.ConsoleClient(['states']).get_action()
 		assert 'test_retval' is action
 

@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 import logging
+import shlex
 
 import prove.config
 import prove.environment
@@ -13,6 +14,19 @@ class Connection:
 		self.host = host
 		assert isinstance(env, prove.environment.HostEnvironment)
 		self.env = env
+		self.info = ConnectionInfo(self)
+
+	def _cmd_as_list(self, command):
+		if not isinstance(command, list):
+			command = shlex.split(command)
+		if len(command) == 1 and ' ' in command[0]:
+			command = shlex.split(command[0])
+		return command
+
+	def _cmd_as_string(self, command):
+		if isinstance(command, list):
+			command = ' '.join(command)
+		return command
 
 	def connect(self):
 		raise NotImplementedError()
@@ -20,8 +34,31 @@ class Connection:
 	def disconnect(self):
 		raise NotImplementedError()
 
-	def run_command(self):
+	def run_command(self, command):
 		raise NotImplementedError()
+
+
+class ConnectionInfo:
+	def __init__(self, connection):
+		self.connection = connection
+		self._lsb_release = None
+
+	def _load_lsb_release(self):
+		log.info('Loading lsb_release data')
+		result = self.connection.run_command('lsb_release -a -s')
+		self._lsb_release = result.stdout.splitlines()
+
+	@property
+	def distro(self):
+		if self._lsb_release is None:
+			self._load_lsb_release()
+		return self._lsb_release[0]
+
+	@property
+	def distro_version(self):
+		if self._lsb_release is None:
+			self._load_lsb_release()
+		return self._lsb_release[2]
 
 
 class CommandResult:
