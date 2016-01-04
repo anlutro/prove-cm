@@ -1,7 +1,5 @@
-import collections
 import os
 import os.path
-import yaml
 
 
 def deep_dict_merge(old_dict, new_dict):

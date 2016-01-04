@@ -6,5 +6,5 @@ def supports(filename):
 
 
 def load(path, variables=None):
-	with open(path, 'r') as f:
-		return json.load(f)
+	with open(path, 'r') as file:
+		return json.load(file)

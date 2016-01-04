@@ -15,3 +15,9 @@ class Client:
 	def parse_configfile(self, path):
 		with open(path) as file:
 			return yaml.load(file)
+
+	def get_config(self):
+		raise NotImplementedError()
+
+	def get_action(self):
+		raise NotImplementedError()

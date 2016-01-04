@@ -1,7 +1,10 @@
+import logging
 import paramiko
 import paramiko.ssh_exception
 
 import prove.executor
+
+log = logging.getLogger(__name__)
 
 
 class LazyParamikoCommandResult(prove.executor.CommandResult):

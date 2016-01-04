@@ -1,5 +1,5 @@
-import yaml
 from collections import OrderedDict
+import yaml
 
 
 def _construct_mapping(loader, node):
@@ -16,7 +16,7 @@ OrderedLoader.add_constructor(
 	_construct_mapping)
 
 
-def _ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
+def _ordered_load(stream):
 	return yaml.load(stream, OrderedLoader)
 
 
@@ -25,5 +25,5 @@ def supports(filename):
 
 
 def load(path, variables=None):
-	with open(path, 'r') as f:
-		return _ordered_load(f)
+	with open(path, 'r') as file:
+		return _ordered_load(file)

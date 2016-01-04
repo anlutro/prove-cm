@@ -31,7 +31,7 @@ def cmd_result(result):
 
 
 def state_invocation_start(state, state_invocation):
-	print('=> {} -- {}'.format(state.name, state_invocation.fn))
+	print('=> {} -- {}'.format(state.name, state_invocation.func))
 
 
 def state_invocation_finish(state, state_invocation, result):

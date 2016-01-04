@@ -11,7 +11,7 @@ class StateMissingException(StateException):
 class StateNotLoadedException(StateException):
 	msg = 'State "{}" (required by "{}") was not found'
 	def __init__(self, required_state, requiree_state):
-		super().__init__(self.msg.format(required_state_name, requiree_state))
+		super().__init__(self.msg.format(required_state, requiree_state))
 
 
 class StateWrongDataException(StateException):
@@ -70,12 +70,12 @@ class StateFile:
 			else:
 				invocations = []
 				if isinstance(value, dict):
-					for fn, args in value.items():
-						invocations.append(StateInvocation(fn, args))
+					for func, args in value.items():
+						invocations.append(StateInvocation(func, args))
 				elif isinstance(value, list):
 					for args in value:
-						fn = args.pop('fn')
-						invocations.append(StateInvocation(fn, args))
+						func = args.pop('fn')
+						invocations.append(StateInvocation(func, args))
 				else:
 					raise Exception('State data must be dict or list')
 				states.append(State(key, invocations))
@@ -106,8 +106,8 @@ class State:
 
 
 class StateInvocation:
-	def __init__(self, fn, args):
-		self.fn = fn
+	def __init__(self, func, args):
+		self.func = func
 		self.requires = args.pop('requires', None)
 		self.change_listeners = args.pop('change_listeners', None)
 		self.success_listeners = args.pop('success_listeners', None)

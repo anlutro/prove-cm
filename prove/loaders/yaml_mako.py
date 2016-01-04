@@ -10,8 +10,8 @@ def load(path, variables=None):
 	if variables is None:
 		variables = {}
 
-	with open(path, 'r') as f:
-		template = mako.template.Template(f.read(), strict_undefined=True)
+	with open(path, 'r') as file:
+		template = mako.template.Template(file.read(), strict_undefined=True)
 
 	yaml_str = template.render(**variables)
 

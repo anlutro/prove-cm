@@ -1,5 +1,4 @@
 import logging
-import socket
 import subprocess
 import random
 
@@ -23,22 +22,22 @@ class Connection(prove.executor.Connection):
 
 		if self.options.get('sudo'):
 			command = self._cmd_as_string(command)
-			heredoc_marker = 'PROVE_{}_EOF'.format(random.randint(10000,99999))
+			heredoc_marker = 'PROVE_{}_EOF'.format(random.randint(10000, 99999))
 			command = 'sudo {0} -c <<{1}\n{2}\n{1}'.format(
 				self.options.get('shell', '/bin/sh'),
 				heredoc_marker,
 				self._cmd_as_string(command),
 			)
 
-		p = subprocess.Popen(
+		proc = subprocess.Popen(
 			self._cmd_as_list(command),
 			stdout=subprocess.PIPE,
 			stderr=subprocess.PIPE,
 		)
-		stdout, stderr = p.communicate()
+		stdout, stderr = proc.communicate()
 
 		result = prove.executor.CommandResult(
-			exit_code=p.returncode,
+			exit_code=proc.returncode,
 			stdout=stdout.decode(),
 			stderr=stderr.decode(),
 		)
