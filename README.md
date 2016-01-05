@@ -26,6 +26,10 @@ Tests are ran with pytest:
 
 	$ py.test
 
+To generate test coverage reports:
+
+	$ py.test --cov=prove
+
 Linting is done with pylint:
 
 	$ pylint prove

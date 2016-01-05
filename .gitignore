@@ -10,5 +10,6 @@ share
 pip-selfcheck.json
 *.egg-info
 
-# pytest cache
+# pytest data
 .cache
+.coverage
