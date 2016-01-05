@@ -1,5 +1,5 @@
-def __virtual__(connection):
-	os_info = connection.info
+def __virtual__(session):
+	os_info = session.info
 
 	if os_info.distro == 'Debian' and os_info.distro_version >= '8.0':
 		import prove.states.service.debian8

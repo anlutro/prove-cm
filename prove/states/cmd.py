@@ -1,8 +1,8 @@
 from prove.state import StateResult
 
 
-def run(connection, args):
-	result = connection.run_command(args.get('command'))
+def run(session, args):
+	result = session.run_command(args.get('command'))
 
 	comments = []
 	if result.stderr:

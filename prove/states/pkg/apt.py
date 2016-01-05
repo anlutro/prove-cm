@@ -5,29 +5,29 @@ class AptError(Exception):
 	pass
 
 
-def _is_installed(connection, package):
-	result = connection.run_command('dpkg -s {}'.format(package))
+def _is_installed(session, package):
+	result = session.run_command('dpkg -s {}'.format(package))
 	return result.exit_code == 0
 
 
-def _install(connection, package):
+def _install(session, package):
 	cmd = ('apt-get'
 		'-o DPkg::Options::=--force-confnew'
 		'-o DPkg::Options::=--force-confdef'
 		'--assume-yes install {pkg}')
 	cmd = cmd.format(pkg=package)
-	return connection.run_command(cmd)
+	return session.run_command(cmd)
 
 
-def installed(connection, args):
+def installed(session, args):
 	result = StateResult()
 
-	if _is_installed(connection, args['package']):
+	if _is_installed(session, args['package']):
 		result.success = True
 		result.comment = 'Package {} is already installed'.format(args['package'])
 		return result
 
-	cmd_result = _install(connection, args['package'])
+	cmd_result = _install(session, args['package'])
 	if cmd_result.was_successful:
 		result.success = True
 		result.comment = 'Package {} was installed'.format(args['package'])

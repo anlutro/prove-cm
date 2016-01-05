@@ -2,8 +2,8 @@ from prove.state import StateResult
 
 
 class _FileState:
-	def __init__(self, connection):
-		self.connection = connection
+	def __init__(self, session):
+		self.session = session
 
 	def upload_tmpfile(self, source):
 		raise NotImplementedError()
@@ -52,5 +52,5 @@ class FileManagedState(_FileState):
 		return result
 
 
-def managed(connection, args):
-	return FileManagedState(connection).run(**args)
+def managed(session, args):
+	return FileManagedState(session).run(**args)

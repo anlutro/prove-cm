@@ -7,7 +7,7 @@ import prove.executor
 log = logging.getLogger(__name__)
 
 
-class Connection(prove.executor.Connection):
+class Session(prove.executor.Session):
 	def connect(self):
 		pass
 
@@ -46,4 +46,4 @@ class Connection(prove.executor.Connection):
 
 
 class Executor(prove.executor.Executor):
-	connection_cls = Connection
+	session_cls = Session

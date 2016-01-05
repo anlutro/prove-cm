@@ -8,14 +8,14 @@ import prove.environment
 log = logging.getLogger(__name__)
 
 
-class Connection:
+class Session:
 	def __init__(self, host, env):
 		assert isinstance(host, prove.config.HostConfig)
 		self.host = host
 		assert isinstance(env, prove.environment.HostEnvironment)
 		self.env = env
 		self.options = env.options
-		self.info = ConnectionInfo(self)
+		self.info = SessionInfo(self)
 
 	def _cmd_as_list(self, command):
 		if not isinstance(command, list):
@@ -39,14 +39,14 @@ class Connection:
 		raise NotImplementedError()
 
 
-class ConnectionInfo:
-	def __init__(self, connection):
-		self.connection = connection
+class SessionInfo:
+	def __init__(self, session):
+		self.session = session
 		self._lsb_release = None
 
 	def _load_lsb_release(self):
 		log.info('Loading lsb_release data')
-		result = self.connection.run_command('lsb_release -a -s')
+		result = self.session.run_command('lsb_release -a -s')
 		self._lsb_release = result.stdout.splitlines()
 
 	@property
@@ -74,7 +74,7 @@ class CommandResult:
 
 
 class Executor:
-	connection_cls = Connection
+	session_cls = Session
 
 	def __init__(self, app):
 		self.app = app
@@ -83,22 +83,22 @@ class Executor:
 	def connect(self, host):
 		log.info('Connecting to host: %s', host.host)
 		self.app.output.connect_start(host)
-		connection = self.get_connection(host)
+		session = self.get_session(host)
 
 		try:
-			connection.connect()
+			session.connect()
 			self.app.output.connect_success(host)
 		except:
 			self.app.output.connect_failure(host)
 			raise
 
 		try:
-			yield connection
+			yield session
 		finally:
 			log.info('Diconnecting host: %s', host.host)
-			connection.disconnect()
+			session.disconnect()
 			self.app.output.disconnected(host)
 
-	def get_connection(self, host):
+	def get_session(self, host):
 		env = self.app.get_host_env(host)
-		return self.connection_cls(host, env)
+		return self.session_cls(host, env)

@@ -10,32 +10,32 @@ class StatesAction(prove.actions.Action):
 			while num_changes != 0:
 				num_changes = 0
 				for host in app.hosts:
-					with app.executor_connect(host) as connection:
-						result = self.run_states(app, host, connection)
+					with app.executor_connect(host) as session:
+						result = self.run_states(app, host, session)
 						if result.num_states_with_changes == 0:
 							app.hosts.remove(host)
 							num_changes += result.num_states_with_changes
 		else:
 			for host in app.hosts:
-				with app.executor_connect(host) as connection:
-					self.run_states(app, host, connection)
+				with app.executor_connect(host) as session:
+					self.run_states(app, host, session)
 
-	def run_states(self, app, host, connection):
-		for state in connection.env.states:
+	def run_states(self, app, host, session):
+		for state in session.env.states:
 			for invocation in state.invocations:
 				app.output.state_invocation_start(state, invocation)
-				result = self.run_invocation(invocation, connection)
+				result = self.run_invocation(invocation, session)
 				app.output.state_invocation_finish(state, invocation, result)
 
-	def run_invocation(self, invocation, connection):
+	def run_invocation(self, invocation, session):
 		state_mod, state_fn = invocation.fn.split('.')
 		state_mod = importlib.import_module('prove.states.' + state_mod)
 
 		if hasattr(state_mod, '__virtual__'):
-			state_mod = state_mod.__virtual__(connection)
+			state_mod = state_mod.__virtual__(session)
 
 		state_fn = getattr(state_mod, state_fn)
-		result = state_fn(connection, invocation.args)
+		result = state_fn(session, invocation.args)
 		if not isinstance(result, prove.state.StateResult):
 			raise ValueError('State function {}.{} did not return a StateResult object'.format(
 				state_mod.__name__, state_fn.__name__))

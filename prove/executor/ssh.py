@@ -34,7 +34,7 @@ class LazyParamikoCommandResult(prove.executor.CommandResult):
 		return self._exit_code
 
 
-class Connection(prove.executor.Connection):
+class Session(prove.executor.Session):
 	def __init__(self, ssh_client, *args):
 		self.ssh_client = ssh_client
 		super().__init__(*args)
@@ -73,8 +73,8 @@ class Connection(prove.executor.Connection):
 
 
 class Executor(prove.executor.Executor):
-	def get_connection(self, host):
+	def get_session(self, host):
 		env = self.app.get_host_env(host)
 		ssh_client = paramiko.SSHClient()
 		ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-		return Connection(ssh_client, host, env)
+		return Session(ssh_client, host, env)
