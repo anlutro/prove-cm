@@ -20,6 +20,12 @@ class StateWrongDataException(StateException):
 		super().__init__(self.msg.format(state_name))
 
 
+class StateRequireRecursionException(StateException):
+	def __init__(self, stack):
+		stack_str = ' -> '.join(stack)
+		super().__init__('State requirement recursion detected: ' + stack_str)
+
+
 def sort_states(state_files):
 	if isinstance(state_files, dict):
 		state_files = state_files.values()
@@ -31,16 +37,25 @@ def sort_states(state_files):
 
 	states = []
 	states_added = []
-	def append_states(states_to_append):
+
+	def append_states(states_to_append, stack):
 		for state in states_to_append:
-			append_states([avail_states[require] for require in state.requires])
+			if state.name in stack:
+				raise StateRequireRecursionException(stack + [state.name])
+
+			append_states(
+				[avail_states[require] for require in state.requires],
+				stack + [state.name]
+			)
+
 			if state.name in states_added:
 				continue
+
 			states.append(state)
 			states_added.append(state.name)
 
 	for loaded_state_file in state_files:
-		append_states(loaded_state_file.states)
+		append_states(loaded_state_file.states, [])
 
 	return states
 
