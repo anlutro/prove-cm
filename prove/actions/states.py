@@ -28,15 +28,15 @@ class StatesAction(prove.actions.Action):
 				app.output.state_invocation_finish(state, invocation, result)
 
 	def run_invocation(self, invocation, session):
-		state_mod, state_fn = invocation.fn.split('.')
+		state_mod, state_func = invocation.func.split('.')
 		state_mod = importlib.import_module('prove.states.' + state_mod)
 
 		if hasattr(state_mod, '__virtual__'):
 			state_mod = state_mod.__virtual__(session)
 
-		state_fn = getattr(state_mod, state_fn)
-		result = state_fn(session, invocation.args)
+		state_func = getattr(state_mod, state_func)
+		result = state_func(session, invocation.args)
 		if not isinstance(result, prove.state.StateResult):
 			raise ValueError('State function {}.{} did not return a StateResult object'.format(
-				state_mod.__name__, state_fn.__name__))
+				state_mod.__name__, state_func.__name__))
 		return result
