@@ -1,0 +1,15 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+			"folder_exclude_patterns": [
+				"bin*",
+				"include*",
+				"lib*",
+				"share*",
+				"node_modules*",
+			],
+		}
+	],
+}
