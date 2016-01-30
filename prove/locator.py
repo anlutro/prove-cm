@@ -1,11 +1,14 @@
 import collections
 import glob
+import logging
 import os
 import os.path
 
 from prove.environment import Role, VariableFile
 from prove.state import StateFile
 import prove.util
+
+log = logging.getLogger(__name__)
 
 
 class LocatorException(Exception):
@@ -44,6 +47,7 @@ class Locator:
 		if component:
 			roles_file = self._get_component_file(component, 'roles')
 			if roles_file:
+				log.debug('Found role file: %s -- %s', component, roles_file)
 				return {component: self._load_file_data(roles_file)}
 		roles_dir = self._get_path('roles', component)
 		paths = prove.util.list_files(roles_dir)
@@ -52,14 +56,16 @@ class Locator:
 			name = _get_file_name(path, roles_dir, component=component)
 			data = self._load_file_data(path)
 			roles[name] = Role.from_dict(name, data)
+			log.debug('Found role: %s', name)
 		return roles
 
 	def locate_states(self, component=None):
 		if component:
-			state_file = self._get_component_file(component, 'state')
+			state_file = self._get_component_file(component, 'states')
 			if state_file:
+				log.debug('Found state: %s -- %s', component, state_file)
 				loader_module = self._get_loader(state_file)
-				state_file = StateFile(name, path, loader_module)
+				state_file = StateFile(component, state_file, loader_module)
 				return {component: state_file}
 		states_dir = self._get_path('states', component)
 		paths = prove.util.list_files(states_dir)
@@ -69,6 +75,7 @@ class Locator:
 			loader_module = self._get_loader(path)
 			state_file = StateFile(name, path, loader_module)
 			state_files[name] = state_file
+			log.debug('Found state: %s -- %s', name, path)
 		return state_files
 
 	def locate_variables(self, component=None):
@@ -76,6 +83,7 @@ class Locator:
 			variables_file = self._get_component_file(component, 'variables')
 			if variables_file:
 				data = self._load_file_data(path)
+				log.debug('Found variable file: %s -- %s', component, path)
 				return {component: VariableFile(name, data)}
 		variables_dir = self._get_path('variables', component)
 		paths = prove.util.list_files(variables_dir)
@@ -84,6 +92,7 @@ class Locator:
 			name = _get_file_name(path, variables_dir, component=component)
 			data = self._load_file_data(path)
 			variable_files[name] = VariableFile(name, data)
+			log.debug('Found variable file: %s -- %s', name, path)
 		return variable_files
 
 	def locate_files(self, component=None):
@@ -92,12 +101,14 @@ class Locator:
 		for path in prove.util.list_files(files_dir):
 			name = _get_file_name(path, files_dir, strip_extension=False, component=component)
 			files[name] = path
+			log.debug('Found file: %s -- %s', name, path)
 		return files
 
 	def locate_components(self):
 		components_dir = self._get_path('components')
 		components = []
 		for component_name in prove.util.list_subdirs(components_dir):
+			log.debug('Found component: %s', component_name)
 			roles = self.locate_roles(component_name)
 			state_files = self.locate_states(component_name)
 			variable_files = self.locate_variables(component_name)
@@ -115,7 +126,8 @@ class Locator:
 
 	def _get_component_file(self, component, file_name):
 		component_dir = os.path.join(self.root_dir, 'components', component)
-		paths = glob.glob(file_name + '.*')
+		log.debug('Globbing %s', os.path.join(component_dir, file_name + '.*'))
+		paths = glob.glob(os.path.join(component_dir, file_name + '.*'))
 		for loader in self.loaders:
 			for path in paths:
 				if loader.supports(path):
