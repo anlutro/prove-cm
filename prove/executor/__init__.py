@@ -90,6 +90,10 @@ class CommandResult:
 	def was_successful(self):
 		return self.exit_code == 0
 
+	@property
+	def text(self):
+		return '\n'.join([self.stdout, self.stderr])
+
 
 class Executor:
 	session_cls = Session

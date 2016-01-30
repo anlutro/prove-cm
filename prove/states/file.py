@@ -3,7 +3,7 @@ import difflib
 from prove.state import StateResult
 
 
-class _FileState:
+class FileState:
 	def __init__(self, session):
 		self.session = session
 
@@ -44,7 +44,7 @@ class _FileState:
 		raise NotImplementedError()
 
 
-class FileManagedState(_FileState):
+class FileManagedState(FileState):
 	def run(self, path, source=None, user=None, group=None, mode=None):
 		result = StateResult()
 		result.changes = []
