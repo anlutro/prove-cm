@@ -11,10 +11,10 @@ def _is_installed(session, package):
 
 
 def _install(session, package):
-	cmd = ('apt-get'
+	cmd = ('apt-get install {pkg}'
 		'-o DPkg::Options::=--force-confnew'
 		'-o DPkg::Options::=--force-confdef'
-		'--assume-yes install {pkg}')
+		'--assume-yes')
 	cmd = cmd.format(pkg=package)
 	return session.run_command(cmd)
 

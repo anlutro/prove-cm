@@ -6,7 +6,14 @@ class _FileState:
 		self.session = session
 
 	def upload_tmpfile(self, source):
-		raise NotImplementedError()
+		result = self.session.run_command('mktemp --suffix=prove')
+		tmp_path = result.stdout.strip()
+		self.session.upload_file(source, tmp_path)
+		return tmp_path
+
+	def upload_tmpdir(self, source):
+		result = self.session.run_command('mktemp --suffix=prove')
+		return result.stdout.strip()
 
 	def get_diff(self, path1, path2):
 		raise NotImplementedError()

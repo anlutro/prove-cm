@@ -22,5 +22,9 @@ def list_files(path):
 	return result_files
 
 
+def list_subdirs(path):
+	return next(os.walk(path))[1]
+
+
 def snake_to_camel_case(string):
 	return ''.join(s.title() for s in string.split('_'))

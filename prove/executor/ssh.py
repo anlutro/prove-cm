@@ -71,6 +71,25 @@ class Session(prove.executor.Session):
 		chan.exec_command(command)
 		return LazyParamikoCommandResult(chan)
 
+	def upload_file(self, local_path, remote_path):
+		if local_path.startswith('http://') or local_path.startswith('https://'):
+			if self.run_command('which wget').was_successful:
+				return self.run_command('wget -nv {} -O {}'.format(local_path, remote_path)).was_successful
+			elif self.run_command('which curl').was_successful:
+				return self.run_command('curl {} -o {}'.format(local_path, remote_path)).was_successful
+			raise Exception('curl or wget not found')
+
+		if local_path.startswith('prove://'):
+			local_path = self._locate_file(local_path)
+
+		sftp = paramiko.SFTPClient.from_transport(self.ssh_client.get_transport())
+		sftp.put(local_path, remote_path)
+		sftp.close()
+		return True
+
+	def _locate_file(self):
+		raise NotImplementedError()
+
 
 class Executor(prove.executor.Executor):
 	def get_session(self, host):

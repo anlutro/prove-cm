@@ -40,8 +40,7 @@ class HostEnvironment:
 
 
 class Environment:
-	def __init__(self, options, roles, variables, variable_files,
-			state_files):
+	def __init__(self, options, roles, variables, variable_files, state_files, files):
 		assert isinstance(options, prove.config.Options)
 		self.options = options
 		assert isinstance(roles, dict)
@@ -52,6 +51,8 @@ class Environment:
 		self.variable_files = variable_files
 		assert isinstance(state_files, dict)
 		self.state_files = state_files
+		assert isinstance(files, dict)
+		self.files = files
 
 	@classmethod
 	def from_options_and_config(cls, options, config):
@@ -73,9 +74,16 @@ class Environment:
 		roles.update(locator.locate_roles())
 		variable_files = locator.locate_variables()
 		state_files = locator.locate_states()
+		files = locator.locate_files()
+
+		for component in locator.locate_components().values():
+			roles.update(component.roles)
+			variable_files.update(component.variable_files)
+			state_files.update(component.state_files)
+			files.update(component.files)
 
 		return cls(options=options, roles=roles, variables=variables,
-			variable_files=variable_files, state_files=state_files)
+			variable_files=variable_files, state_files=state_files, files=files)
 
 	def make_host_env(self, host_config):
 		assert isinstance(host_config, prove.config.HostConfig)

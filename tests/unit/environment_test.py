@@ -10,8 +10,9 @@ def make_env(options=None):
 	variables = {}
 	variable_files = {}
 	state_files = {}
+	files = {}
 	return Environment(options=options, roles=roles, variables=variables,
-		variable_files=variable_files, state_files=state_files)
+		variable_files=variable_files, state_files=state_files, files=files)
 
 
 def test_make_host_env():

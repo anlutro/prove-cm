@@ -1,4 +1,8 @@
+import logging
+
 from prove.states.service import systemd, sysv
+
+log = logging.getLogger(__name__)
 
 
 def running(session, args):
