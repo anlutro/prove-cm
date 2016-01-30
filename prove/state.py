@@ -119,6 +119,9 @@ class State:
 				requires += invocation.requires
 		return requires
 
+	def __repr__(self):
+		return '<{} "{}">'.format(self.__class__.__name__, self.name)
+
 
 class StateInvocation:
 	def __init__(self, func, args):

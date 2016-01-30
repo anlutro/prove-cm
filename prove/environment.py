@@ -30,13 +30,15 @@ class VariableFile:
 
 
 class HostEnvironment:
-	def __init__(self, options, states, variables):
+	def __init__(self, options, states, variables, files):
 		assert isinstance(options, prove.config.Options)
 		self.options = options
 		assert isinstance(states, list)
 		self.states = states
 		assert isinstance(variables, dict)
 		self.variables = variables
+		assert isinstance(files, dict)
+		self.files = files
 
 
 class Environment:
@@ -120,4 +122,4 @@ class Environment:
 
 		host_states = prove.state.sort_states(loaded_states)
 
-		return HostEnvironment(host_options, host_states, host_variables)
+		return HostEnvironment(host_options, host_states, host_variables, self.files)

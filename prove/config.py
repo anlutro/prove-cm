@@ -15,6 +15,9 @@ class Options:
 	def make_copy(self, overrides):
 		return Options(prove.util.deep_dict_merge(self.data, overrides))
 
+	def __repr__(self):
+		return repr(self.data)
+
 
 class HostConfig:
 	def __init__(self,

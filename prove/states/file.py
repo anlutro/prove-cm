@@ -1,3 +1,5 @@
+import difflib
+
 from prove.state import StateResult
 
 
@@ -6,20 +8,31 @@ class _FileState:
 		self.session = session
 
 	def upload_tmpfile(self, source):
-		result = self.session.run_command('mktemp --suffix=prove')
+		result = self.session.run_command('mktemp --suffix=.prove')
 		tmp_path = result.stdout.strip()
 		self.session.upload_file(source, tmp_path)
 		return tmp_path
 
 	def upload_tmpdir(self, source):
-		result = self.session.run_command('mktemp --suffix=prove')
+		result = self.session.run_command('mktemp --suffix=.prove')
 		return result.stdout.strip()
 
 	def get_diff(self, path1, path2):
-		raise NotImplementedError()
+		def get_file_lines(path):
+			if self.session.run_command('test -f {}'.format(path)).was_successful:
+				result = self.session.run_command('cat {}'.format(path))
+				return result.stdout.splitlines()
+			else:
+				return []
+
+		diff = difflib.unified_diff(get_file_lines(path1), get_file_lines(path2))
+		if diff:
+			diff = [line.rstrip() for line in diff]
+			diff = diff[2:]
+		return diff
 
 	def move_tmpfile(self, tmpfile, path):
-		raise NotImplementedError()
+		return self.session.run_command('mv {} {}'.format(tmpfile, path))
 
 	def ensure_user(self, path, user):
 		raise NotImplementedError()
@@ -38,8 +51,8 @@ class FileManagedState(_FileState):
 
 		if source is not None:
 			tmpfile = self.upload_tmpfile(source)
-			result.changes += self.get_diff(path, tmpfile)
-			self.move_tmpfile(tmpfile, path)
+			result.changes.extend(self.get_diff(path, tmpfile))
+			mv_result = self.move_tmpfile(tmpfile, path)
 
 		if user is not None:
 			old_user, new_user = self.ensure_user(path, user)
@@ -56,6 +69,7 @@ class FileManagedState(_FileState):
 			if old_mode != new_mode:
 				result.changes.append('Mode changed from {} to {}'.format(old_mode, new_mode))
 
+		result.success = True
 		return result
 
 

@@ -1,9 +1,12 @@
 import importlib
+import logging
 
 import prove.actions
 import prove.config
 import prove.locator
 import prove.util
+
+log = logging.getLogger(__name__)
 
 
 class Application:
@@ -32,6 +35,7 @@ class Application:
 
 	def run_action(self, action):
 		assert isinstance(action, prove.actions.Action)
+		log.info('Running action: %s', action.__class__.__name__)
 		action.run(self)
 
 	def get_host_env(self, host):
@@ -42,6 +46,7 @@ class Application:
 		ex_type = host.options.get('executor', self.options['executor'])
 		if ex_type not in self.executors:
 			self.executors[ex_type] = self._make_executor(ex_type)
+		log.info('Using executor type: %s', ex_type)
 		return self.executors[ex_type].connect(host)
 
 	def _make_executor(self, module):

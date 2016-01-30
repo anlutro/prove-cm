@@ -44,6 +44,9 @@ class Session(prove.executor.Session):
 
 		return result
 
+	def _upload_file(self, source, path):
+		return self.run_command('cp {} {}'.format(source, path)).was_successful
+
 
 class Executor(prove.executor.Executor):
 	session_cls = Session

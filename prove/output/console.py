@@ -36,7 +36,10 @@ def state_invocation_start(state, state_invocation):
 
 def state_invocation_finish(state, state_invocation, result):
 	print('Result: ', 'success' if result.success else 'failure')
-	print('Changes:', result.changes)
+	if result.changes:
+		print('Changes:', '\n         '.join(result.changes))
+	else:
+		print('Changes: None')
 	if result.comment:
 		print(result.comment)
 

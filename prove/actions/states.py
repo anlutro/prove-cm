@@ -1,6 +1,9 @@
 import importlib
+import logging
 
 import prove.actions
+
+log = logging.getLogger(__name__)
 
 
 class StatesAction(prove.actions.Action):
@@ -23,6 +26,9 @@ class StatesAction(prove.actions.Action):
 	def run_states(self, app, host, session):
 		for state in session.env.states:
 			for invocation in state.invocations:
+				if invocation.lazy is True:
+					log.debug('Skipping lazy invocation: %s %s', state.name, invocation.func)
+					continue
 				app.output.state_invocation_start(state, invocation)
 				result = self.run_invocation(invocation, session)
 				app.output.state_invocation_finish(state, invocation, result)

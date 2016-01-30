@@ -3,17 +3,13 @@ import sys
 
 
 def setup_logging(config):
-	log_level = logging.INFO
-	# read the logging level from the config file, defaulting to INFO
+	log_level = logging.WARNING
 	if 'log_level' in config:
 		log_level = getattr(logging, config['log_level'].upper())
-
-	# set the level
 	root = logging.getLogger()
 	root.setLevel(log_level)
 
-	log_path = config.get('log_path')
-
+	log_path = config.get('log_path', 'stdout')
 	if not log_path or log_path == 'stdout':
 		handler = logging.StreamHandler(sys.stdout)
 	elif log_path == 'stderr':

@@ -38,6 +38,24 @@ class Session:
 	def run_command(self, command):
 		raise NotImplementedError()
 
+	def upload_file(self, source, path):
+		if source.startswith('http://') or source.startswith('https://'):
+			if self.run_command('which wget').was_successful:
+				return self.run_command('wget -nv {} -O {}'.format(source, path)).was_successful
+			elif self.run_command('which curl').was_successful:
+				return self.run_command('curl {} -o {}'.format(source, path)).was_successful
+			raise Exception('curl or wget not found')
+
+		if source.startswith('prove://'):
+			source = source.replace('prove://', '')
+			source = self.env.files[source]
+			return self._upload_file(source, path)
+
+		if source.startswith('file://'):
+			return self.run_command('cp {} {}'.format(source, path)).was_successful
+
+		raise Exception('Unknown file protocol: %s', source)
+
 
 class SessionInfo:
 	def __init__(self, session):
@@ -100,5 +118,9 @@ class Executor:
 			self.app.output.disconnected(host)
 
 	def get_session(self, host):
+		log.debug('Creating host environment for host: %s', host.host)
 		env = self.app.get_host_env(host)
+		log.debug('Host environment options: %s', env.options)
+		log.debug('Host environment states: %s', env.states)
+		log.debug('Host environment variables: %s', env.variables)
 		return self.session_cls(host, env)
