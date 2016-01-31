@@ -40,6 +40,11 @@ class HostEnvironment:
 		assert isinstance(files, dict)
 		self.files = files
 
+	def find_state(self, state_name):
+		for state in self.states:
+			if state.name == state_name:
+				return state
+
 
 class Environment:
 	def __init__(self, options, roles, variables, variable_files, state_files, files):

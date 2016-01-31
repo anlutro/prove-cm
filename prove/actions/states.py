@@ -27,13 +27,30 @@ class StatesAction(prove.actions.Action):
 		for state in session.env.states:
 			for invocation in state.invocations:
 				if invocation.lazy is True:
-					log.debug('Skipping lazy invocation: %s %s', state.name, invocation.func)
+					log.debug('Skipping lazy invocation: %s %s',
+						state.name, invocation.func)
 					continue
 				app.output.state_invocation_start(state, invocation)
 				result = self.run_invocation(invocation, session)
 				app.output.state_invocation_finish(state, invocation, result)
 
 	def run_invocation(self, invocation, session):
+		if invocation.unless:
+			for cmd in invocation.unless:
+				if session.run_command(cmd).was_successful:
+					return prove.state.StateResult(
+						success=True,
+						comment='unless command was successful: ' + cmd
+					)
+
+		if invocation.onlyif:
+			for cmd in invocation.onlyif:
+				if not session.run_command(cmd).was_successful:
+					return prove.state.StateResult(
+						success=True,
+						comment='onlyif command failed: ' + cmd
+					)
+
 		state_mod, state_func = invocation.func.split('.')
 		state_mod = importlib.import_module('prove.states.' + state_mod)
 
@@ -45,4 +62,13 @@ class StatesAction(prove.actions.Action):
 		if not isinstance(result, prove.state.StateResult):
 			raise ValueError('State function {}.{} did not return a StateResult object'.format(
 				state_mod.__name__, state_func.__name__))
+
+		if result.changes and invocation.change_listeners:
+			for listener in invocation.change_listeners:
+				state = session.env.find_state(listener)
+				if state:
+					for invocation in state.invocations:
+						if invocation.lazy:
+							invocation.lazy = False
+
 		return result

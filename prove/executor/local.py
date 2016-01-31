@@ -17,20 +17,20 @@ class Session(prove.executor.Session):
 	def run_command(self, command):
 		log.debug('Running command%s: `%s`',
 			' with sudo' if self.options.get('sudo') else '',
-			self._cmd_as_string(command),
+			prove.executor._cmd_as_string(command),
 		)
 
 		if self.options.get('sudo'):
-			command = self._cmd_as_string(command)
+			command = prove.executor._cmd_as_string(command)
 			heredoc_marker = 'PROVE_{}_EOF'.format(random.randint(10000, 99999))
 			command = 'sudo {0} -c <<{1}\n{2}\n{1}'.format(
 				self.options.get('shell', '/bin/sh'),
 				heredoc_marker,
-				self._cmd_as_string(command),
+				prove.executor._cmd_as_string(command),
 			)
 
 		proc = subprocess.Popen(
-			self._cmd_as_list(command),
+			prove.executor._cmd_as_list(command),
 			stdout=subprocess.PIPE,
 			stderr=subprocess.PIPE,
 		)

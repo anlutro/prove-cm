@@ -84,7 +84,7 @@ class Locator:
 			if variables_file:
 				data = self._load_file_data(variables_file)
 				log.debug('Found variable file: %s -- %s', component, variables_file)
-				return {component: VariableFile(name, data)}
+				return {component: VariableFile(component, data)}
 		variables_dir = self._get_path('variables', component)
 		paths = prove.util.list_files(variables_dir)
 		variable_files = collections.OrderedDict()

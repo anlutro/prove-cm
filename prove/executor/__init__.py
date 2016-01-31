@@ -8,6 +8,19 @@ import prove.environment
 log = logging.getLogger(__name__)
 
 
+def _cmd_as_list(command):
+	if not isinstance(command, list):
+		command = shlex.split(command)
+	if len(command) == 1 and ' ' in command[0]:
+		command = shlex.split(command[0])
+	return command
+
+def _cmd_as_string(command):
+	if isinstance(command, list):
+		command = ' '.join(command)
+	return command
+
+
 class Session:
 	def __init__(self, host, env):
 		assert isinstance(host, prove.config.HostConfig)
@@ -16,18 +29,6 @@ class Session:
 		self.env = env
 		self.options = env.options
 		self.info = SessionInfo(self)
-
-	def _cmd_as_list(self, command):
-		if not isinstance(command, list):
-			command = shlex.split(command)
-		if len(command) == 1 and ' ' in command[0]:
-			command = shlex.split(command[0])
-		return command
-
-	def _cmd_as_string(self, command):
-		if isinstance(command, list):
-			command = ' '.join(command)
-		return command
 
 	def connect(self):
 		raise NotImplementedError()

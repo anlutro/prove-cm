@@ -127,6 +127,12 @@ class StateInvocation:
 	def __init__(self, func, args):
 		self.func = func
 		self.requires = args.pop('requires', None)
+		self.unless = args.pop('unless', None)
+		if self.unless and not isinstance(self.unless, list):
+			self.unless = [self.unless]
+		self.onlyif = args.pop('onlyif', None)
+		if self.onlyif and not isinstance(self.onlyif, list):
+			self.onlyif = [self.onlyif]
 		self.change_listeners = args.pop('change_listeners', None)
 		self.success_listeners = args.pop('success_listeners', None)
 		self.failure_listeners = args.pop('failure_listeners', None)
