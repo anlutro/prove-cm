@@ -56,6 +56,9 @@ class Session:
 
 		raise Exception('Unknown file protocol: %s', source)
 
+	def _upload_file(self, source, path):
+		raise NotImplementedError()
+
 
 class SessionInfo:
 	def __init__(self, session):
