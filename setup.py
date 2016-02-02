@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 from __future__ import print_function
-from setuptools import setup
-import os.path
+from setuptools import setup, find_packages
 import sys
 
 if sys.version_info[0] != 3:
@@ -11,7 +10,7 @@ if sys.version_info[0] != 3:
 
 setup(
     name='prove',
-    packages=['prove'],
+    packages=find_packages(include=['prove', 'prove.*']),
     license='MIT',
     author='Andreas Lutro',
     author_email='anlutro@gmail.com',
