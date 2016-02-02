@@ -3,13 +3,18 @@ __pycache__
 *.pyc
 
 # virtualenv/pip
-bin
-include
-lib
-share
-pip-selfcheck.json
+/bin
+/include
+/lib
+/share
+/pip-selfcheck.json
 *.egg-info
 
 # pytest data
-.cache
-.coverage
+/.cache
+/.coverage
+
+# debian build
+/dist
+/deb_dist
+prove-*.tar.gz
