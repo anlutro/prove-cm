@@ -29,6 +29,7 @@ class Application:
 		hosts = [prove.config.HostConfig(**h) for h in config.get('targets', [])]
 
 		output_module = 'prove.output.' + options.get('output', 'console')
+		log.debug('importing output module: %s', output_module)
 		output = importlib.import_module(output_module)
 
 		return cls(options, env, hosts, output)
