@@ -23,6 +23,6 @@ def make_app(options=None, hosts=None):
 
 def test_calls_run_on_action_class():
 	app = make_app()
-	mock_action = mock.Mock(spec=prove.actions.Action)
-	app.run_action(mock_action)
-	mock_action.run.assert_called_once()
+	mock_command = mock.Mock(spec=prove.actions.Command)
+	app.run_command(mock_command)
+	mock_command.run.assert_called_once()

@@ -6,10 +6,9 @@ import prove.executor
 import prove.actions.cmd
 
 
-def test_CmdAction():
-	action = prove.actions.cmd.CmdAction(args=['test-cmd'])
+def test_CmdCommand():
+	command = prove.actions.cmd.CmdCommand(args=['test-cmd'])
 	app, conn = make_app_conn()
-	result = prove.executor.CommandResult(exit_code=0, stdout='', stderr='')
-	conn.run_command = mock.Mock(return_value=result)
-	action.run(app=app)
-	conn.run_command.assert_called_with(['test-cmd'])
+	command.run(app=app)
+	action = conn.run_action.call_args[0][0]
+	assert isinstance(action, prove.actions.cmd.CmdAction)

@@ -7,32 +7,18 @@ log = logging.getLogger(__name__)
 
 
 class StatesAction(prove.actions.Action):
-	def run(self, app):
-		if app.options.get('run_until_no_changes'):
-			num_changes = -1
-			while num_changes != 0:
-				num_changes = 0
-				for host in app.hosts:
-					with app.executor_connect(host) as session:
-						result = self.run_states(app, host, session)
-						if result.num_states_with_changes == 0:
-							app.hosts.remove(host)
-							num_changes += result.num_states_with_changes
-		else:
-			for host in app.hosts:
-				with app.executor_connect(host) as session:
-					self.run_states(app, host, session)
+	name = 'states'
 
-	def run_states(self, app, host, session):
+	def run(self, session):
 		for state in session.env.states:
 			for invocation in state.invocations:
 				if invocation.lazy is True:
 					log.debug('Skipping lazy invocation: %s %s',
 						state.name, invocation.func)
 					continue
-				app.output.state_invocation_start(state, invocation)
+				session.output.state_invocation_start(state, invocation)
 				result = self.run_invocation(invocation, session)
-				app.output.state_invocation_finish(state, invocation, result)
+				session.output.state_invocation_finish(state, invocation, result)
 
 	def run_invocation(self, invocation, session):
 		if invocation.unless:
@@ -72,3 +58,23 @@ class StatesAction(prove.actions.Action):
 							invocation.lazy = False
 
 		return result
+
+
+class StatesCommand(prove.actions.Command):
+	action_cls = StatesAction
+
+	def run(self, app):
+		if app.options.get('run_until_no_changes'):
+			num_changes = -1
+			while num_changes != 0:
+				num_changes = 0
+				for host in app.hosts:
+					with app.executor_connect(host) as session:
+						result = self.run_action(session)
+						if result.num_states_with_changes == 0:
+							app.hosts.remove(host)
+							num_changes += result.num_states_with_changes
+		else:
+			for host in app.hosts:
+				with app.executor_connect(host) as session:
+					self.run_action(session)

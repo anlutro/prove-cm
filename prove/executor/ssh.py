@@ -39,6 +39,9 @@ class Session(prove.executor.Session):
 		self.ssh_client = ssh_client
 		super().__init__(*args)
 
+	def run_action(self, action):
+		action.run(self)
+
 	def connect(self):
 		kwargs = {}
 		if self.options.get('port'):
@@ -84,4 +87,4 @@ class Executor(prove.executor.Executor):
 		env = self.app.get_host_env(host)
 		ssh_client = paramiko.SSHClient()
 		ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-		return Session(ssh_client, host, env)
+		return Session(ssh_client, host, env, self.app.output)

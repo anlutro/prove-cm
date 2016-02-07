@@ -6,8 +6,8 @@ import prove.actions.states
 from prove.state import State, StateInvocation, StateResult
 
 
-def test_StatesAction():
-	action = prove.actions.states.StatesAction(args=[])
+def test_StatesCommand():
+	command = prove.actions.states.StatesCommand(args=[])
 	state = State('test', [
 		StateInvocation('test.noop', {})
 	])
@@ -19,10 +19,8 @@ def test_StatesAction():
 			return_value=result,
 	) as mock_noop:
 		mock_noop.__name__ = 'noop'
-		action.run(app=app)
+		command.run(app=app)
+
 	app.executor_connect.assert_called_once_with('host1')
-	app.output.state_invocation_start.assert_called_once_with(
-		state, state.invocations[0])
-	mock_noop.assert_called_once()
-	app.output.state_invocation_finish.assert_called_once_with(
-		state, state.invocations[0], result)
+	action = conn.run_action.call_args[0][0]
+	assert isinstance(action, prove.actions.states.StatesAction)

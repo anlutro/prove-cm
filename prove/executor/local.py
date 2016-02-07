@@ -14,6 +14,9 @@ class Session(prove.executor.Session):
 	def disconnect(self):
 		pass
 
+	def run_action(self, action):
+		action.run(self)
+
 	def run_command(self, command):
 		log.debug('Running command%s: `%s`',
 			' with sudo' if self.options.get('sudo') else '',

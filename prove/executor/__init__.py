@@ -22,11 +22,12 @@ def _cmd_as_string(command):
 
 
 class Session:
-	def __init__(self, host, env):
+	def __init__(self, host, env, output):
 		assert isinstance(host, prove.config.HostConfig)
 		self.host = host
 		assert isinstance(env, prove.environment.HostEnvironment)
 		self.env = env
+		self.output = output
 		self.options = env.options
 		self.info = SessionInfo(self)
 
@@ -34,6 +35,9 @@ class Session:
 		raise NotImplementedError()
 
 	def disconnect(self):
+		raise NotImplementedError()
+
+	def run_action(self, command):
 		raise NotImplementedError()
 
 	def run_command(self, command):
@@ -131,4 +135,4 @@ class Executor:
 		log.debug('Host environment options: %s', env.options)
 		log.debug('Host environment states: %s', env.states)
 		log.debug('Host environment variables: %s', env.variables)
-		return self.session_cls(host, env)
+		return self.session_cls(host, env, self.app.output)

@@ -34,10 +34,10 @@ class Application:
 
 		return cls(options, env, hosts, output)
 
-	def run_action(self, action):
-		assert isinstance(action, prove.actions.Action)
-		log.info('Running action: %s', action.__class__.__name__)
-		action.run(self)
+	def run_command(self, command):
+		assert isinstance(command, prove.actions.Command)
+		log.info('Running command: %s', command.__class__.__name__)
+		command.run(self)
 
 	def get_host_env(self, host):
 		return self.global_env.make_host_env(host)
