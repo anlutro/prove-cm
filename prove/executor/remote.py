@@ -29,9 +29,11 @@ class Session(prove.executor.Session):
 
 class Executor(prove.executor.Executor):
 	def get_session(self, host):
+		# TODO: remove dummy callback
 		def callback(data):
 			if data:
 				print(repr(data))
+
 		env = self.app.get_host_env(host)
 		socket = prove.remote.client.RemoteSocket(host.host, 9999)
 		client = prove.remote.client.RemoteClient(socket, callback, host, env)

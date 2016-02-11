@@ -31,6 +31,8 @@ class VariableFile:
 
 class HostEnvironment:
 	def __init__(self, options, states, variables, files):
+		if isinstance(options, dict):
+			options = prove.config.Options(options)
 		assert isinstance(options, prove.config.Options)
 		self.options = options
 		assert isinstance(states, list)

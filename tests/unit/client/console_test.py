@@ -11,17 +11,19 @@ def test_instantiates_correct_action_class():
 
 def test_loads_config_file():
 	client = prove.client.console.ConsoleClient(['states', '-c', '/dir/test.yml'])
-	client.parse_configfile = mock.Mock(return_value={'foo': 'bar'})
-	config = client.get_config()
+	with mock.patch('prove.client._read_config') as mock_read:
+		mock_read.return_value = {'foo': 'bar'}
+		config = client.get_config()
 	assert config['foo'] == 'bar'
-	client.parse_configfile.assert_called_once_with('/dir/test.yml')
+	mock_read.assert_called_once_with('/dir/test.yml')
 
 
 def test_searches_for_config_file_if_not_specified():
 	client = prove.client.console.ConsoleClient(['states'])
-	client.parse_configfile = mock.Mock(return_value={'foo': 'bar'})
-	with mock.patch('prove.client._locate_config') as mock_locate:
+	with mock.patch('prove.client._locate_config') as mock_locate, \
+	     mock.patch('prove.client._read_config') as mock_read:
 		mock_locate.return_value = 'located.yml'
+		mock_read.return_value = {'foo': 'bar'}
 		config = client.get_config()
 	assert config['foo'] == 'bar'
-	client.parse_configfile.assert_called_once_with('located.yml')
+	mock_read.assert_called_once_with('located.yml')

@@ -16,6 +16,11 @@ def _locate_config():
 	raise Exception('Could not locate prove.yml')
 
 
+def _read_config(config_path):
+	with open(config_path) as file:
+		return yaml.load(file)
+
+
 class AbstractClient:
 	def __init__(self, args):
 		self.args = args
@@ -34,8 +39,7 @@ class AbstractClient:
 
 	def get_config(self):
 		config_path = self.args.config or _locate_config()
-		with open(config_path) as file:
-			config = yaml.load(file)
+		config = _read_config(config_path)
 
 		# set some sensible defaults
 		if 'options' not in config:

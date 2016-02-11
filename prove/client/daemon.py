@@ -1,6 +1,7 @@
 import argparse
 
 import prove.client
+import prove.remote
 import prove.remote.server
 
 
@@ -13,11 +14,15 @@ class DaemonClient(prove.client.AbstractClient):
 			help="Set the log level")
 		parser.add_argument('--log-path',
 			help="Set the log path")
+		parser.add_argument('-b', '--bind', default='localhost',
+			help="Address to bind to")
+		parser.add_argument('-p', '--port', default=prove.remote.DEFAULT_PORT,
+			help="Port to listen on")
 		super().__init__(parser.parse_args(args))
 
 	def main(self):
 		self.read_config()
-		prove.remote.server.run_server('0.0.0.0')
+		prove.remote.server.run_server(self.args.bind, self.args.port)
 
 
 def main():
