@@ -4,6 +4,7 @@ __pycache__
 
 # virtualenv/pip
 /bin
+/dist
 /include
 /lib
 /share
@@ -13,8 +14,3 @@ __pycache__
 # pytest data
 /.cache
 /.coverage
-
-# debian build
-/dist
-/deb_dist
-prove-*.tar.gz
