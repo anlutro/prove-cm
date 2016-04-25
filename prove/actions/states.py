@@ -65,15 +65,16 @@ class StatesCommand(prove.actions.Command):
 
 	def run(self, app):
 		if app.options.get('run_until_no_changes'):
+			hosts = app.hosts.copy()
 			num_changes = -1
 			while num_changes != 0:
 				num_changes = 0
-				for host in app.hosts:
+				for host in hosts:
 					with app.executor_connect(host) as session:
 						result = self.run_action(session)
 						if result.num_states_with_changes == 0:
-							app.hosts.remove(host)
-							num_changes += result.num_states_with_changes
+							hosts.remove(host)
+						num_changes += result.num_states_with_changes
 		else:
 			for host in app.hosts:
 				with app.executor_connect(host) as session:
