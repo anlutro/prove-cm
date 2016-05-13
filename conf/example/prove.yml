@@ -1,0 +1,48 @@
+# this is an example prove config file. it contains some basic options, but is
+# mostly role and target host definitions.
+
+options:
+  # local, ssh or remote - this can be overridden on a per-host basis
+  executor: ssh
+  # console, log or json
+  output: log
+  log_path: stderr
+  log_level: debug
+
+# roles are a way to easily assign matching default variables and states at the
+# same time, which reduces duplication.
+
+# this can also be put in /etc/prove/roles.yml or /etc/prove/roles.d/*
+roles:
+  example_role:
+    components: [ example_component ]
+    states: [ example_state ]
+    variable_files: [ test_vars ]
+    variables:
+      foo: bar
+
+# target groups are ways to add roles, variables or states to hosts based on
+# their hostname, either with regexes or globs. you can also manually add hosts
+# to groups. if you give the group a name, when running a prove command from the
+# master, you can choose to run only against hosts of the speficied group.
+
+# this can also be put in /etc/prove/groups.yml or /etc/prove/groups.d/*
+groups:
+  - name: vagrant
+    glob: '*.vagrant.local'
+    variable_files: [ vagrant ]
+  - name: appservers
+    regex: 'app\d+\.prod\..*'
+    states: [ myapp/deployment ]
+
+# targets are hosts that the master can connect to and give instructions
+# you can assign roles, states or variables to each host
+
+# this can also be put in /etc/prove/targets or /etc/prove/targets.d/*
+targets:
+  - host: localhost
+    executor: local
+  - host: myserver1.example.com
+    executor: ssh
+  - host: myserver2.example.com
+    executor: remote

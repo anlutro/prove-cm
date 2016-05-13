@@ -1,0 +1,8 @@
+_include:
+  - python/install
+
+pip_installed:
+  - fn: pkg.installed
+    package: python-pip
+    require:
+      - python_installed

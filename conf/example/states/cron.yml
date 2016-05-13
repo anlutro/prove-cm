@@ -1,0 +1,21 @@
+cron_installed:
+  - fn: pkg.installed
+    package: cron
+  - fn: service.running
+    service: cron
+  - fn: service.enabled
+    service: cron
+
+/etc/default/cron:
+  - fn: file.managed
+    path: /etc/default/cron
+    src: prove://files/cron_default
+    trigger:
+      - restart_cron
+
+restart_cron:
+  - fn: service.restart
+    service: cron
+    lazy: true
+    watch:
+      - /etc/default/cron

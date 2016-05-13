@@ -1,0 +1,23 @@
+webserver_installed:
+  - fn: pkg.installed
+    package: nginx-light
+
+webserver_enabled:
+  - fn: service.enabled
+    service: nginx
+
+webserver_running:
+  - fn: service.running
+    service: nginx
+
+nginx_configs:
+  - fn: file.managed
+    path: /etc/nginx/nginx.conf
+    src: prove://webserver/nginx.conf
+
+reload_webserver:
+  - fn: service.reload
+    service: nginx
+    lazy: true
+    watch:
+      - nginx_configs

@@ -1,0 +1,8 @@
+_include:
+  - cron
+
+timezone:
+  - fn: timezone.set
+    timezone: Europe/Oslo
+    change_listeners:
+      - restart_cron

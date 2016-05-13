@@ -1,0 +1,8 @@
+_include:
+  - python/install
+
+virtualenv_installed:
+  - fn: pkg.installed
+    package: python-virtualenv
+    require:
+      - python_installed

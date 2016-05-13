@@ -1,0 +1,18 @@
+options:
+  executor: ssh
+  output: log
+  log_path: stderr
+  log_level: debug
+
+groups:
+  - name: local
+    glob: '*.localhost'
+    states: [ hello_world ]
+
+targets:
+  - name: local.localhost
+    host: localhost
+    executor: local
+  - name: remote.localhost
+    host: localhost
+    executor: remote

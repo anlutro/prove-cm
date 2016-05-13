@@ -1,0 +1,10 @@
+openssl_installed:
+  - fn: pkg.installed
+    package: openssl
+
+dhparams_generated:
+  - fn: cmd.run
+    cmd: openssl dhparam -out /etc/ssl/dhparams.pem 2048
+    unless: test -f /etc/ssl/dhparams.pem
+    require:
+      - openssl_installed
