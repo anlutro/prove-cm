@@ -23,6 +23,8 @@ def list_files(path):
 
 
 def list_subdirs(path):
+	if not os.path.exists(path):
+		return []
 	return next(os.walk(path))[1]
 
 
