@@ -1,5 +1,5 @@
 options:
-  executor: ssh
+  executor: local
   output: log
   log_path: stderr
   log_level: debug
@@ -7,12 +7,13 @@ options:
 groups:
   - name: local
     glob: '*.localhost'
-    states: [ hello_world ]
+    states:
+      - hello_world
+      - test_file
 
 targets:
   - name: local.localhost
     host: localhost
-    executor: local
   - name: remote.localhost
     host: localhost
     executor: remote

@@ -16,9 +16,9 @@ class ConsoleClient(prove.client.SingleCommandClient):
 		parser.add_argument('-d', '--dry-run', action='store_true',
 			help="Do a dry/test run")
 		parser.add_argument('-g', '--groups',
-			help="Choose which groups to run against")
+			help="Choose which groups to run against. Accepts multiple, comma-separated.")
 		parser.add_argument('-t', '--targets',
-			help="Choose which targets to run against")
+			help="Choose which targets to run against. Accepts a glob pattern. Accepts multiple, comma-separated.")
 		parser.add_argument('-l', '--log-level',
 			help="Set the log level")
 		parser.add_argument('--log-path',
