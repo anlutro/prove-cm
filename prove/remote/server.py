@@ -12,7 +12,7 @@ import prove.executor.local
 import prove.actions
 import prove.output.log
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def unpickle_jsonsafe(string):
@@ -24,14 +24,14 @@ def unpickle_jsonsafe(string):
 def run_server(bind_addr, bind_port=prove.remote.DEFAULT_PORT):
 	class RequestHandler(socketserver.BaseRequestHandler):
 		def handle(self):
-			log.debug('Handling request')
+			LOG.debug('Handling request')
 			self.request.sendall(b'STARTING')
 			try:
 				host, env, action = self._read()
 				output = prove.output.log
 				session = prove.executor.local.Session(host, env, output)
 				action.run(session)
-				log.debug('Finished handling request')
+				LOG.debug('Finished handling request')
 			finally:
 				self.request.sendall(b'\x00')
 
@@ -56,10 +56,10 @@ def run_server(bind_addr, bind_port=prove.remote.DEFAULT_PORT):
 	server = socketserver.TCPServer((bind_addr, bind_port), RequestHandler)
 
 	try:
-		log.debug('Listening on %s:%s', bind_addr, bind_port)
+		LOG.debug('Listening on %s:%s', bind_addr, bind_port)
 		server.serve_forever()
 	finally:
-		log.debug('Closing server')
+		LOG.debug('Closing server')
 		server.server_close()
 
 

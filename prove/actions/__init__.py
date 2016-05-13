@@ -1,3 +1,8 @@
+import logging
+
+LOG = logging.getLogger(__name__)
+
+
 class Action:
 	def __init__(self, args):
 		self.args = args
@@ -12,8 +17,8 @@ class Command:
 	def __init__(self, args):
 		self.args = args
 
-	def run(self, app):
-		for host in app.hosts:
+	def run(self, app, hosts):
+		for host in hosts:
 			with app.executor_connect(host) as session:
 				self.run_action(session)
 

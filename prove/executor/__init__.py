@@ -1,24 +1,11 @@
 from contextlib import contextmanager
 import logging
-import shlex
 
 import prove.config
 import prove.environment
+import prove.util
 
-log = logging.getLogger(__name__)
-
-
-def _cmd_as_list(command):
-	if not isinstance(command, list):
-		command = shlex.split(command)
-	if len(command) == 1 and ' ' in command[0]:
-		command = shlex.split(command[0])
-	return command
-
-def _cmd_as_string(command):
-	if isinstance(command, list):
-		command = ' '.join(command)
-	return command
+LOG = logging.getLogger(__name__)
 
 
 class Session:
@@ -71,7 +58,7 @@ class SessionInfo:
 		self._lsb_release = None
 
 	def _load_lsb_release(self):
-		log.info('Loading lsb_release data')
+		LOG.info('Loading lsb_release data')
 		result = self.session.run_command('lsb_release -a -s')
 		self._lsb_release = result.stdout.splitlines()
 
@@ -111,7 +98,7 @@ class Executor:
 
 	@contextmanager
 	def connect(self, host):
-		log.info('Connecting to host: %s', host.host)
+		LOG.info('Connecting to host: %s', host.host)
 		self.app.output.connect_start(host)
 		session = self.get_session(host)
 
@@ -125,7 +112,7 @@ class Executor:
 		try:
 			yield session
 		finally:
-			log.info('Diconnecting host: %s', host.host)
+			LOG.info('Diconnecting host: %s', host.host)
 			session.disconnect()
 			self.app.output.disconnected(host)
 
@@ -134,9 +121,9 @@ class Executor:
 		return self.session_cls(host, env, self.app.output)
 
 	def get_env_for_host(self, host):
-		log.debug('Creating host environment for host: %s', host.host)
+		LOG.debug('Creating host environment for host: %s', host.host)
 		env = self.app.get_host_env(host)
-		log.debug('Host environment options: %s', env.options)
-		log.debug('Host environment states: %s', env.states)
-		log.debug('Host environment variables: %s', env.variables)
+		LOG.debug('Host environment options: %s', env.options)
+		LOG.debug('Host environment states: %s', env.states)
+		LOG.debug('Host environment variables: %s', env.variables)
 		return env

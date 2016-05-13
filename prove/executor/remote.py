@@ -3,7 +3,7 @@ import logging
 import prove.executor
 import prove.remote.client
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class Session(prove.executor.Session):
@@ -20,10 +20,10 @@ class Session(prove.executor.Session):
 	def run_action(self, action):
 		return self.remote_client.run_action(action)
 
-	def run_command(self, command, timeout=None, get_pty=False):
+	def run_command(self, *args, **kwargs):
 		raise RuntimeError('Remote session does not run commands')
 
-	def _upload_file(self, local_path, remote_path):
+	def _upload_file(self, *args, **kwargs):
 		raise RuntimeError('Remote session does not upload files')
 
 

@@ -4,7 +4,7 @@ import logging
 import pickle
 import socket
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class RemoteClientException(Exception):
@@ -56,7 +56,7 @@ class RemoteSocket:
 		self.socket = None
 
 	def connect(self):
-		log.debug('Looking up address info for %s:%s', self.host, self.port)
+		LOG.debug('Looking up address info for %s:%s', self.host, self.port)
 		addrinfo = socket.getaddrinfo(
 			self.host, self.port,
 			socket.AF_UNSPEC, socket.SOCK_STREAM
@@ -73,7 +73,7 @@ class RemoteSocket:
 
 			try:
 				self.socket.settimeout(10)
-				log.debug('Trying to connect to %s:%s', address[0], address[1])
+				LOG.debug('Trying to connect to %s:%s', address[0], address[1])
 				self.socket.connect(address)
 			except OSError:
 				self.close()

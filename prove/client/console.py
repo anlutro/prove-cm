@@ -1,5 +1,4 @@
 import argparse
-import fnmatch
 import importlib
 
 import prove.client
@@ -37,17 +36,10 @@ class ConsoleClient(prove.client.SingleCommandClient):
 			config['options']['output'] = self.args.output
 
 		if self.args.targets:
-			target_patterns = self.args.targets.split(',')
-			config['targets'] = [
-				target for target in config['targets']
-				if any([
-					fnmatch.fnmatch(target.get('name', target['host']), pattern)
-					for pattern in target_patterns
-				])
-			]
+			config['options']['_target_patterns'] = self.args.targets.split(',')
 
 		if self.args.groups:
-			raise NotImplementedError()
+			config['options']['_target_groups'] = self.args.groups.split(',')
 
 		return config
 

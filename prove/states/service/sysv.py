@@ -2,7 +2,7 @@ import logging
 
 from prove.states.service import ServiceState
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class SysvError(Exception):
@@ -24,7 +24,7 @@ class SysvServiceState(ServiceState):
 	def is_service_enabled(self, session, service):
 		result = session.run_command('chkconfig {}'.format(service))
 		if result.exit_code == 127:
-			log.warning('Could not determine if service is enabled because chkconfig'
+			LOG.warning('Could not determine if service is enabled because chkconfig'
 				' is not installed or is not in $PATH.')
 			return False
 		if result.stdout.endswith('on'):
@@ -36,7 +36,7 @@ class SysvServiceState(ServiceState):
 	def enable_service(self, session, service):
 		result = session.run_command('chkconfig {} on'.format(service))
 		if result.exit_code == 127:
-			log.warning('Could not determine if service is enabled because chkconfig'
+			LOG.warning('Could not determine if service is enabled because chkconfig'
 				' is not installed or is not in $PATH.')
 		return result
 

@@ -2,7 +2,7 @@ import logging
 
 from prove.states.service import ServiceState
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class SystemdError(Exception):

@@ -1,22 +1,22 @@
 import logging
 
-log = logging.getLogger('prove.output')
+LOG = logging.getLogger('prove.output')
 
 
 def connect_start(host):
-	log.info('Connecting to %s...', host.host)
+	LOG.info('Connecting to %s...', host.host)
 
 
 def connect_success(host):
-	log.info('Connected to %s!', host.host)
+	LOG.info('Connected to %s!', host.host)
 
 
 def connect_failure(host):
-	log.info('Failed to connect to %s!', host.host)
+	LOG.info('Failed to connect to %s!', host.host)
 
 
 def disconnected(host):
-	log.info('Disconnected from %s', host.host)
+	LOG.info('Disconnected from %s', host.host)
 
 
 def cmd_result(result):
@@ -25,11 +25,11 @@ def cmd_result(result):
 		logstr += '\nSTDERR:\n{}'.format(result.stderr)
 	if result.stdout:
 		logstr += '\nSTDOUT:\n{}'.format(result.stdout)
-	log.info(logstr)
+	LOG.info(logstr)
 
 
 def state_invocation_start(state, state_invocation):
-	log.info('Starting state invocation: %s -- %s',
+	LOG.info('Starting state invocation: %s -- %s',
 		state.name, state_invocation.func)
 
 
@@ -41,7 +41,7 @@ def state_invocation_finish(state, state_invocation, result):
 		logstr += '\n  '.join(result.changes)
 	if result.comment:
 		logstr += '\n' + result.comment
-	log.info(logstr)
+	LOG.info(logstr)
 
 
 def state_summary():

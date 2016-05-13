@@ -1,5 +1,20 @@
 import os
 import os.path
+import shlex
+
+
+def cmd_as_list(command):
+	if not isinstance(command, list):
+		command = shlex.split(command)
+	if len(command) == 1 and ' ' in command[0]:
+		command = shlex.split(command[0])
+	return command
+
+
+def cmd_as_string(command):
+	if isinstance(command, list):
+		command = ' '.join(command)
+	return command
 
 
 def deep_dict_merge(old_dict, new_dict):

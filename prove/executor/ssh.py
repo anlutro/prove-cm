@@ -3,8 +3,9 @@ import paramiko
 import paramiko.ssh_exception
 
 import prove.executor
+import prove.util
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class LazyParamikoCommandResult(prove.executor.CommandResult):
@@ -57,15 +58,15 @@ class Session(prove.executor.Session):
 		self.ssh_client.connect(self.host.host, **kwargs)
 
 		if self.options.get('sudo'):
-			log.debug('Switching to root')
+			LOG.debug('Switching to root')
 			self.run_command('sudo -su')
 
 	def disconnect(self):
 		self.ssh_client.close()
 
 	def run_command(self, command, timeout=None, get_pty=False):
-		command = prove.executor._cmd_as_string(command)
-		log.debug('Running command: `%s`', command)
+		command = prove.util.cmd_as_string(command)
+		LOG.debug('Running command: `%s`', command)
 
 		chan = self.ssh_client.get_transport().open_session()
 		if get_pty:
