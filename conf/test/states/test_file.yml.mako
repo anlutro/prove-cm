@@ -1,5 +1,5 @@
 <%
-path = '/tmp/prove-file'
+  path = '/tmp/prove-file'
 %>
 
 create_file:

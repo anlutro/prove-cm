@@ -126,20 +126,24 @@ class State:
 class StateInvocation:
 	def __init__(self, func, args):
 		self.func = func
-		self.requires = args.pop('requires', None)
-		self.unless = args.pop('unless', None)
-		if self.unless and not isinstance(self.unless, list):
-			self.unless = [self.unless]
-		self.onlyif = args.pop('onlyif', None)
-		if self.onlyif and not isinstance(self.onlyif, list):
-			self.onlyif = [self.onlyif]
-		self.change_listeners = args.pop('change_listeners', None)
-		self.success_listeners = args.pop('success_listeners', None)
-		self.failure_listeners = args.pop('failure_listeners', None)
-		self.listen_to_changes = args.pop('listen_to_changes', None)
-		self.listen_to_success = args.pop('listen_to_success', None)
-		self.listen_to_failure = args.pop('listen_to_failure', None)
-		lazy_def = self.listen_to_changes or self.listen_to_success or self.listen_to_failure
+
+		def _default_list(name):
+			arg = args.pop(name, None)
+			if arg is not None and not isinstance(arg, list):
+				arg = [arg]
+			return arg
+
+		self.requires = _default_list('requires')
+		self.unless = _default_list('unless')
+		self.onlyif = _default_list('onlyif')
+		self.changes_trigger = _default_list('changes_trigger')
+		self.success_trigger = _default_list('success_trigger')
+		self.failure_trigger = _default_list('failure_trigger')
+		self.listen_changes = _default_list('listen_changes')
+		self.listen_success = _default_list('listen_success')
+		self.listen_failure = _default_list('listen_failure')
+
+		lazy_def = self.listen_changes or self.listen_success or self.listen_failure
 		self.lazy = args.pop('lazy', lazy_def)
 		self.defer = args.pop('defer', False)
 		self.args = args
