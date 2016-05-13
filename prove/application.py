@@ -26,13 +26,24 @@ class Application:
 
 		env = prove.environment.Environment.from_options_and_config(options, config)
 
-		hosts = [prove.config.HostConfig(**h) for h in config.get('targets', [])]
+		groups = {
+			group['name']: prove.config.Group(**group)
+			for group in config.get('groups', [])
+		}
+
+		targets = []
+		for target in config.get('targets', []):
+			target = prove.config.Target(**target)
+			for group_name, group in groups.items():
+				if group.matches(target):
+					group.merge_into(target)
+			targets.append(target)
 
 		output_module = 'prove.output.' + options.get('output', 'console')
 		log.debug('importing output module: %s', output_module)
 		output = importlib.import_module(output_module)
 
-		return cls(options, env, hosts, output)
+		return cls(options, env, targets, output)
 
 	def run_command(self, command):
 		assert isinstance(command, prove.actions.Command)
