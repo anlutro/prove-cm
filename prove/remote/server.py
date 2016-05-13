@@ -26,12 +26,14 @@ def run_server(bind_addr, bind_port=prove.remote.DEFAULT_PORT):
 		def handle(self):
 			log.debug('Handling request')
 			self.request.sendall(b'STARTING')
-			host, env, action = self._read()
-			output = prove.output.log
-			session = prove.executor.local.Session(host, env, output)
-			action.run(session)
-			log.debug('Finished handling request')
-			self.request.sendall(b'\x00')
+			try:
+				host, env, action = self._read()
+				output = prove.output.log
+				session = prove.executor.local.Session(host, env, output)
+				action.run(session)
+				log.debug('Finished handling request')
+			finally:
+				self.request.sendall(b'\x00')
 
 		def _read(self):
 			payload = self.request.recv(4096).decode('ASCII').strip()
