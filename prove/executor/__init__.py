@@ -130,9 +130,13 @@ class Executor:
 			self.app.output.disconnected(host)
 
 	def get_session(self, host):
+		env = self.get_env_for_host(host)
+		return self.session_cls(host, env, self.app.output)
+
+	def get_env_for_host(self, host):
 		log.debug('Creating host environment for host: %s', host.host)
 		env = self.app.get_host_env(host)
 		log.debug('Host environment options: %s', env.options)
 		log.debug('Host environment states: %s', env.states)
 		log.debug('Host environment variables: %s', env.variables)
-		return self.session_cls(host, env, self.app.output)
+		return env

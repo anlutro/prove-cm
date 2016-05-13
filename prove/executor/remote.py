@@ -34,7 +34,7 @@ class Executor(prove.executor.Executor):
 			if data:
 				print(repr(data))
 
-		env = self.app.get_host_env(host)
+		env = self.get_env_for_host(host)
 		socket = prove.remote.client.RemoteSocket(
 			host.host,
 			host.options.get('port', prove.remote.DEFAULT_PORT)
