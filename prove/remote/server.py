@@ -5,8 +5,8 @@ import importlib
 import pickle
 import socketserver
 
-from prove.config import HostConfig
-from prove.environment import HostEnvironment
+from prove.config import Target
+from prove.environment import TargetEnvironment
 import prove.remote
 import prove.executor.local
 import prove.actions
@@ -27,9 +27,9 @@ def run_server(bind_addr, bind_port=prove.remote.DEFAULT_PORT):
 			LOG.debug('Handling request')
 			self.request.sendall(b'STARTING')
 			try:
-				host, env, action = self._read()
+				target, env, action = self._read()
 				output = prove.output.log
-				session = prove.executor.local.Session(host, env, output)
+				session = prove.executor.local.Session(target, env, output)
 				action.run(session)
 				LOG.debug('Finished handling request')
 			finally:
@@ -39,18 +39,18 @@ def run_server(bind_addr, bind_port=prove.remote.DEFAULT_PORT):
 			payload = self.request.recv(4096).decode('ASCII').strip()
 			data = json.loads(payload)
 
-			host = unpickle_jsonsafe(data['host_pickle'])
-			assert isinstance(host, HostConfig)
+			target = unpickle_jsonsafe(data['target_pickle'])
+			assert isinstance(target, Target)
 
 			env = unpickle_jsonsafe(data['env_pickle'])
-			assert isinstance(env, HostEnvironment)
+			assert isinstance(env, TargetEnvironment)
 
 			action_mod = importlib.import_module('prove.actions.' + data['action'])
 			action_class = prove.util.snake_to_camel_case(data['action'])
 			action_class = getattr(action_mod, action_class + 'Action')
 			action = action_class(data.get('args', {}))
 
-			return host, env, action
+			return target, env, action
 
 	socketserver.TCPServer.allow_reuse_address = True
 	server = socketserver.TCPServer((bind_addr, bind_port), RequestHandler)

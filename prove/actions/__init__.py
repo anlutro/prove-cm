@@ -17,9 +17,11 @@ class Command:
 	def __init__(self, args):
 		self.args = args
 
-	def run(self, app, hosts):
-		for host in hosts:
-			with app.executor_connect(host) as session:
+	def run(self, app, targets=None):
+		if targets is None:
+			targets = app.targets
+		for target in targets:
+			with app.executor_connect(target) as session:
 				self.run_action(session)
 
 	def run_action(self, session):

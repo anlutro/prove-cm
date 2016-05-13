@@ -9,9 +9,9 @@ LOG = logging.getLogger(__name__)
 
 
 class Session:
-	def __init__(self, host, env, output):
-		assert isinstance(host, prove.config.HostConfig)
-		self.host = host
+	def __init__(self, target, env, output):
+		assert isinstance(target, prove.config.Target)
+		self.target = target
 		assert isinstance(env, prove.environment.HostEnvironment)
 		self.env = env
 		self.output = output
@@ -97,32 +97,32 @@ class Executor:
 		self.app = app
 
 	@contextmanager
-	def connect(self, host):
-		LOG.info('Connecting to host: %s', host.host)
-		self.app.output.connect_start(host)
-		session = self.get_session(host)
+	def connect(self, target):
+		LOG.info('Connecting to target: %s', target.host)
+		self.app.output.connect_start(target)
+		session = self.get_session(target)
 
 		try:
 			session.connect()
-			self.app.output.connect_success(host)
+			self.app.output.connect_success(target)
 		except:
-			self.app.output.connect_failure(host)
+			self.app.output.connect_failure(target)
 			raise
 
 		try:
 			yield session
 		finally:
-			LOG.info('Diconnecting host: %s', host.host)
+			LOG.info('Diconnecting target: %s', target.host)
 			session.disconnect()
-			self.app.output.disconnected(host)
+			self.app.output.disconnected(target)
 
-	def get_session(self, host):
-		env = self.get_env_for_host(host)
-		return self.session_cls(host, env, self.app.output)
+	def get_session(self, target):
+		env = self.get_env(target)
+		return self.session_cls(target, env, self.app.output)
 
-	def get_env_for_host(self, host):
-		LOG.debug('Creating host environment for host: %s', host.host)
-		env = self.app.get_host_env(host)
+	def get_env(self, target):
+		LOG.debug('Creating environment for target: %s', target.host)
+		env = self.app.get_target_env(target)
 		LOG.debug('Host environment options: %s', env.options)
 		LOG.debug('Host environment states: %s', env.states)
 		LOG.debug('Host environment variables: %s', env.variables)

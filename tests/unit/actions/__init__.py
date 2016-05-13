@@ -3,7 +3,7 @@ from unittest import mock
 
 def make_app_conn(states=None):
 	app = mock.Mock()
-	app.hosts = ['host1']
+	app.targets = ['host1']
 	app.options = {'run_until_no_changes': False}
 	context_manager = mock.MagicMock()
 	app.executor_connect = mock.Mock(return_value=context_manager)

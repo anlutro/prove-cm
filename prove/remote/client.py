@@ -18,10 +18,10 @@ def pickle_jsonsafe(obj):
 
 
 class RemoteClient:
-	def __init__(self, sock, callback, host, env):
+	def __init__(self, sock, callback, target, env):
 		self.socket = sock
 		self.callback = callback
-		self.host = host
+		self.target = target
 		self.env = env
 
 	def connect(self):
@@ -29,7 +29,7 @@ class RemoteClient:
 
 	def run_action(self, action):
 		data = {
-			'host_pickle': pickle_jsonsafe(self.host),
+			'target_pickle': pickle_jsonsafe(self.target),
 			'env_pickle': pickle_jsonsafe(self.env),
 			'action': action.name,
 			'args': action.args,

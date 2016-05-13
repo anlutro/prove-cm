@@ -1,22 +1,22 @@
 import sys
 
 
-def connect_start(host):
-	sys.stdout.write('Connecting to {}...'.format(host.host))
+def connect_start(target):
+	sys.stdout.write('Connecting to {}...'.format(target.host))
 	sys.stdout.flush()
 
 
-def connect_success(host):
+def connect_success(target):
 	sys.stdout.write(' Connected!\n')
 	sys.stdout.flush()
 
 
-def connect_failure(host):
+def connect_failure(target):
 	sys.stdout.write(' Failed!\n')
 	sys.stdout.flush()
 
 
-def disconnected(host):
+def disconnected(target):
 	pass
 
 

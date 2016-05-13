@@ -55,7 +55,7 @@ class Session(prove.executor.Session):
 			kwargs['key_filename'] = self.options('ssh_key')
 			kwargs['look_for_keys'] = True
 
-		self.ssh_client.connect(self.host.host, **kwargs)
+		self.ssh_client.connect(self.target.host, **kwargs)
 
 		if self.options.get('sudo'):
 			LOG.debug('Switching to root')
@@ -84,8 +84,8 @@ class Session(prove.executor.Session):
 
 
 class Executor(prove.executor.Executor):
-	def get_session(self, host):
-		env = self.app.get_host_env(host)
+	def get_session(self, target):
+		env = self.get_env(target)
 		ssh_client = paramiko.SSHClient()
 		ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-		return Session(ssh_client, host, env, self.app.output)
+		return Session(ssh_client, target, env, self.app.output)

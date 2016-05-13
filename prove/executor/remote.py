@@ -28,16 +28,16 @@ class Session(prove.executor.Session):
 
 
 class Executor(prove.executor.Executor):
-	def get_session(self, host):
+	def get_session(self, target):
 		# TODO: remove dummy callback
 		def callback(data):
 			if data:
 				print(repr(data))
 
-		env = self.get_env_for_host(host)
+		env = self.get_env(target)
 		socket = prove.remote.client.RemoteSocket(
-			host.host,
-			host.options.get('port', prove.remote.DEFAULT_PORT)
+			target.host,
+			target.options.get('port', prove.remote.DEFAULT_PORT)
 		)
-		client = prove.remote.client.RemoteClient(socket, callback, host, env)
-		return Session(client, host, env, self.app.output)
+		client = prove.remote.client.RemoteClient(socket, callback, target, env)
+		return Session(client, target, env, self.app.output)

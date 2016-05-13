@@ -63,18 +63,22 @@ class StatesAction(prove.actions.Action):
 class StatesCommand(prove.actions.Command):
 	action_cls = StatesAction
 
-	def run(self, app, hosts):
+	def run(self, app, targets=None):
+		if targets is None:
+			targets = app.targets
+
 		if app.options.get('run_until_no_changes'):
 			num_changes = -1
 			while num_changes != 0:
 				num_changes = 0
-				for host in hosts:
-					with app.executor_connect(host) as session:
+				for target in targets:
+					with app.executor_connect(target) as session:
 						result = self.run_action(session)
 						if result.num_states_with_changes == 0:
-							hosts.remove(host)
+							targets.remove(target)
 						num_changes += result.num_states_with_changes
+
 		else:
-			for host in hosts:
-				with app.executor_connect(host) as session:
+			for target in targets:
+				with app.executor_connect(target) as session:
 					self.run_action(session)

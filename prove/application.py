@@ -11,12 +11,12 @@ LOG = logging.getLogger(__name__)
 
 
 class Application:
-	def __init__(self, options, env, hosts, output):
+	def __init__(self, options, env, targets, output):
 		assert isinstance(options, prove.config.Options)
 		self.options = options
 		assert isinstance(env, prove.environment.Environment)
 		self.global_env = env
-		self.hosts = hosts
+		self.targets = targets
 		self.output = output
 		self.executors = {}
 
@@ -49,43 +49,43 @@ class Application:
 	def run_command(self, command):
 		assert isinstance(command, prove.actions.Command)
 		LOG.info('Running command: %s', command.__class__.__name__)
-		command.run(self, self.filter_hosts())
+		command.run(self, self.filter_targets())
 
-	def filter_hosts(self):
-		hosts = []
+	def filter_targets(self):
+		targets = []
 		target_patterns = self.options.get('_target_patterns', [])
 		target_groups = set(self.options.get('_target_groups', []))
 
-		for host in self.hosts:
+		for target in self.targets:
 			if target_patterns:
 				if not any((
-					fnmatch.fnmatch(host.name, pattern)
+					fnmatch.fnmatch(target.name, pattern)
 					for pattern in target_patterns
 				)):
-					LOG.debug('host %s matches none of the target patterns, skipping',
-						host)
+					LOG.debug('target %s matches none of the target patterns, skipping',
+						target)
 					continue
 
 			if target_groups:
-				if not set(host.groups).intersection(target_groups):
-					LOG.debug('host %s matches none of the target groups, skipping',
-						host)
+				if not set(target.groups).intersection(target_groups):
+					LOG.debug('target %s matches none of the target groups, skipping',
+						target)
 					continue
 
-			hosts.append(host)
+			targets.append(target)
 
-		return hosts
+		return targets
 
-	def get_host_env(self, host):
-		return self.global_env.make_host_env(host)
+	def get_target_env(self, target):
+		return self.global_env.make_target_env(target)
 
-	def executor_connect(self, host):
-		assert isinstance(host, prove.config.HostConfig)
-		ex_type = host.options.get('executor', self.options['executor'])
+	def executor_connect(self, target):
+		assert isinstance(target, prove.config.Target)
+		ex_type = target.options.get('executor', self.options['executor'])
 		if ex_type not in self.executors:
 			self.executors[ex_type] = self._make_executor(ex_type)
 		LOG.info('Using executor type: %s', ex_type)
-		return self.executors[ex_type].connect(host)
+		return self.executors[ex_type].connect(target)
 
 	def _make_executor(self, module):
 		executor_module = importlib.import_module('prove.executor.' + module)

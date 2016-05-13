@@ -1,4 +1,4 @@
-from prove.environment import Environment, HostEnvironment
+from prove.environment import Environment, TargetEnvironment
 import prove.config
 
 
@@ -15,8 +15,8 @@ def make_env(options=None):
 		variable_files=variable_files, state_files=state_files, files=files)
 
 
-def test_make_host_env():
+def test_make_target_env():
 	env = make_env()
-	host_config = prove.config.HostConfig('localhost')
-	host_env = env.make_host_env(host_config)
-	assert isinstance(host_env, HostEnvironment)
+	target_config = prove.config.Target('localhost')
+	target_env = env.make_target_env(target_config)
+	assert isinstance(target_env, TargetEnvironment)

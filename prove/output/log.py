@@ -3,20 +3,20 @@ import logging
 LOG = logging.getLogger('prove.output')
 
 
-def connect_start(host):
-	LOG.info('Connecting to %s...', host.host)
+def connect_start(target):
+	LOG.info('Connecting to %s...', target.host)
 
 
-def connect_success(host):
-	LOG.info('Connected to %s!', host.host)
+def connect_success(target):
+	LOG.info('Connected to %s!', target.host)
 
 
-def connect_failure(host):
-	LOG.info('Failed to connect to %s!', host.host)
+def connect_failure(target):
+	LOG.info('Failed to connect to %s!', target.host)
 
 
-def disconnected(host):
-	LOG.info('Disconnected from %s', host.host)
+def disconnected(target):
+	LOG.info('Disconnected from %s', target.host)
 
 
 def cmd_result(result):

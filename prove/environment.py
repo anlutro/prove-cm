@@ -29,7 +29,7 @@ class VariableFile:
 		self.variables = variables
 
 
-class HostEnvironment:
+class TargetEnvironment:
 	def __init__(self, options, states, variables, files):
 		if isinstance(options, dict):
 			options = prove.config.Options(options)
@@ -46,6 +46,9 @@ class HostEnvironment:
 		for state in self.states:
 			if state.name == state_name:
 				return state
+
+
+HostEnvironment = TargetEnvironment
 
 
 class Environment:
@@ -94,19 +97,19 @@ class Environment:
 		return cls(options=options, roles=roles, variables=variables,
 			variable_files=variable_files, state_files=state_files, files=files)
 
-	def make_host_env(self, host_config):
-		assert isinstance(host_config, prove.config.HostConfig)
-		host_variables = self.variables.copy()
-		host_options = self.options.make_copy(host_config.options)
+	def make_target_env(self, target):
+		assert isinstance(target, prove.config.Target)
+		tgt_variables = self.variables.copy()
+		tgt_options = self.options.make_copy(target.options)
 
-		for role in host_config.roles:
+		for role in target.roles:
 			role = self.roles[role]
 			for variable_file in role.variable_files:
-				host_variables.update(self.variable_files[variable_file].variables)
-			host_variables.update(role.variables)
-		for variable_file in host_config.variable_files:
-			host_variables.update(self.variable_files[variable_file].variables)
-		host_variables.update(host_config.variables)
+				tgt_variables.update(self.variable_files[variable_file].variables)
+			tgt_variables.update(role.variables)
+		for variable_file in target.variable_files:
+			tgt_variables.update(self.variable_files[variable_file].variables)
+		tgt_variables.update(target.variables)
 
 		loaded_states = collections.OrderedDict()
 		def load_states(states):
@@ -115,18 +118,18 @@ class Environment:
 					continue
 				if state_name not in self.state_files:
 					raise prove.state.StateMissingException(state_name)
-				state = self.state_files[state_name].load(host_variables)
+				state = self.state_files[state_name].load(tgt_variables)
 				load_states(state.includes)
 				loaded_states[state_name] = state
-		for role in host_config.roles:
+		for role in target.roles:
 			load_states(self.roles[role].states)
-		load_states(host_config.states)
+		load_states(target.states)
 
 		for state_name, state in loaded_states.items():
 			for required_state_name in state.requires:
 				if required_state_name not in loaded_states:
 					raise prove.state.StateNotLoadedException(required_state_name, state_name)
 
-		host_states = prove.state.sort_states(loaded_states)
+		tgt_states = prove.state.sort_states(loaded_states)
 
-		return HostEnvironment(host_options, host_states, host_variables, self.files)
+		return TargetEnvironment(tgt_options, tgt_states, tgt_variables, self.files)

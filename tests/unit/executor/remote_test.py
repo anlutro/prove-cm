@@ -7,8 +7,8 @@ import prove.executor.remote
 def _make_session(remote_client, host=None, env=None, output=None):
 	return prove.executor.remote.Session(
 		remote_client,
-		env or prove.config.HostConfig('localhost'),
-		host or prove.environment.HostEnvironment({}, [], {}, {}),
+		env or prove.config.Target('localhost'),
+		host or prove.environment.TargetEnvironment({}, [], {}, {}),
 		output or mock.Mock(),
 	)
 
