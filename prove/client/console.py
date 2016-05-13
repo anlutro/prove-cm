@@ -1,4 +1,5 @@
 import argparse
+import fnmatch
 import importlib
 
 import prove.client
@@ -14,6 +15,10 @@ class ConsoleClient(prove.client.SingleCommandClient):
 			help="Path to config file")
 		parser.add_argument('-d', '--dry-run', action='store_true',
 			help="Do a dry/test run")
+		parser.add_argument('-g', '--groups',
+			help="Choose which groups to run against")
+		parser.add_argument('-t', '--targets',
+			help="Choose which targets to run against")
 		parser.add_argument('-l', '--log-level',
 			help="Set the log level")
 		parser.add_argument('--log-path',
@@ -30,6 +35,19 @@ class ConsoleClient(prove.client.SingleCommandClient):
 		config['options']['dry_run'] = self.args.dry_run
 		if self.args.output is not None:
 			config['options']['output'] = self.args.output
+
+		if self.args.targets:
+			target_patterns = self.args.targets.split(',')
+			config['targets'] = [
+				target for target in config['targets']
+				if any([
+					fnmatch.fnmatch(target.get('name', target['host']), pattern)
+					for pattern in target_patterns
+				])
+			]
+
+		if self.args.groups:
+			raise NotImplementedError()
 
 		return config
 

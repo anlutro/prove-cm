@@ -22,6 +22,7 @@ class Options:
 class HostConfig:
 	def __init__(self,
 		host,
+		name=None,
 		roles=None,
 		states=None,
 		variables=None,
@@ -29,6 +30,7 @@ class HostConfig:
 		**kwargs
 	):
 		self.host = host
+		self.name = name or host
 		self.roles = roles or []
 		self.states = states or []
 		self.variables = variables or {}

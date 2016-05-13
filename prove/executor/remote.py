@@ -35,6 +35,9 @@ class Executor(prove.executor.Executor):
 				print(repr(data))
 
 		env = self.app.get_host_env(host)
-		socket = prove.remote.client.RemoteSocket(host.host, 9999)
+		socket = prove.remote.client.RemoteSocket(
+			host.host,
+			host.options.get('port', prove.remote.DEFAULT_PORT)
+		)
 		client = prove.remote.client.RemoteClient(socket, callback, host, env)
 		return Session(client, host, env, self.app.output)

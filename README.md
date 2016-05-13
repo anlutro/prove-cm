@@ -33,3 +33,14 @@ To generate test coverage reports:
 Linting is done with pylint:
 
 	$ pylint prove
+
+## Try out the remote system
+
+Open two terminals, activate the virtualenv in both. In the first, run the agent:
+
+	$ prove-agent -c conf/test/prove.yml
+
+Next, run prove against the host:
+
+	$ prove -c conf/test/prove.yml -t remote.localhost echo hello world
+	$ prove -c conf/test/prove.yml -t remote.localhost states

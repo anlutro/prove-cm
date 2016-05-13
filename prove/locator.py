@@ -106,6 +106,8 @@ class Locator:
 
 	def locate_components(self):
 		components_dir = self._get_path('components')
+		if not os.path.exists(components_dir):
+			return {}
 		components = []
 		for component_name in prove.util.list_subdirs(components_dir):
 			log.debug('Found component: %s', component_name)
