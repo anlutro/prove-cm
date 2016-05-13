@@ -10,7 +10,7 @@ def test_run():
 	conn = mock.Mock()
 	conn.run_command = mock.Mock(return_value=cmd_result)
 
-	state_result = cmd.run(conn, {'command': 'fake_command'})
+	state_result = cmd.run(conn, {'cmd': 'fake_command'})
 	conn.run_command.assert_called_once_with('fake_command')
 	assert True == state_result.success
 	assert 'STDERR:\nstderr\nSTDOUT:\nstdout' == state_result.comment
