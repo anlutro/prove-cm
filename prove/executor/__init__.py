@@ -12,7 +12,7 @@ class Session:
 	def __init__(self, target, env, output):
 		assert isinstance(target, prove.config.Target)
 		self.target = target
-		assert isinstance(env, prove.environment.HostEnvironment)
+		assert isinstance(env, prove.environment.TargetEnvironment)
 		self.env = env
 		self.output = output
 		self.options = env.options

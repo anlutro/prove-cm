@@ -77,6 +77,3 @@ class Target:
 		self.variables = variables or {}
 		self.variable_files = variable_files or []
 		self.options = kwargs
-
-# TODO: remove, backwards compat
-HostConfig = Target

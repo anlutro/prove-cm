@@ -48,9 +48,6 @@ class TargetEnvironment:
 				return state
 
 
-HostEnvironment = TargetEnvironment
-
-
 class Environment:
 	def __init__(self, options, roles, variables, variable_files, state_files, files):
 		assert isinstance(options, prove.config.Options)
