@@ -2,8 +2,8 @@ from prove.state import StateResult
 
 
 def run(session, args):
-	assert 'cmd' in args, 'Must provide "cmd" argument'
-	result = session.run_command(args.get('cmd'))
+	assert 'command' in args, 'Must provide "command" argument'
+	result = session.run_command(args.get('command'))
 
 	comments = []
 	if result.stderr:

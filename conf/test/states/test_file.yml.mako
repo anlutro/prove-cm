@@ -6,9 +6,9 @@ create_file:
   - fn: file.managed
     path: ${path}
     source: prove://test-file
-  - fn: cmd.run
-    cmd: cat ${path}
+  - fn: command.run
+    command: cat ${path}
 
 delete_file:
-  - fn: cmd.run
-    cmd: rm -v ${path}
+  - fn: command.run
+    command: rm -v ${path}
