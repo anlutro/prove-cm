@@ -1,8 +1,6 @@
-import base64
 import json
 import logging
 import importlib
-import pickle
 import socketserver
 
 from prove.config import Target
@@ -10,39 +8,46 @@ from prove.environment import TargetEnvironment
 import prove.remote
 import prove.executor.local
 import prove.actions
+import prove.output.composite
 import prove.output.log
+import prove.output.remote
 
 LOG = logging.getLogger(__name__)
-
-
-def unpickle_jsonsafe(string):
-	bytes_value = string.encode('ascii')
-	pickle_value = base64.b64decode(bytes_value)
-	return pickle.loads(pickle_value)
 
 
 def run_server(bind_addr, bind_port=prove.remote.DEFAULT_PORT):
 	class RequestHandler(socketserver.BaseRequestHandler):
 		def handle(self):
 			LOG.debug('Handling request')
-			self.request.sendall(b'STARTING')
+			self._send('starting')
 			try:
 				target, env, action = self._read()
-				output = prove.output.log
+				output = prove.output.composite.CompositeOutput(
+					prove.output.log,
+					prove.output.remote.RemoteOutput(self._send)
+				)
 				session = prove.executor.local.Session(target, env, output)
 				action.run(session)
 				LOG.debug('Finished handling request')
 			finally:
-				self.request.sendall(b'\x00')
+				self._send('finished')
+
+		def _send(self, status, data=None):
+			json_data = json.dumps({
+				'status': status,
+				'data': data,
+			})
+			LOG.debug(json_data)
+			self.request.sendall((json_data + '\n').encode('ascii'))
 
 		def _read(self):
 			payload = self.request.recv(4096).decode('ASCII').strip()
 			data = json.loads(payload)
 
-			target = unpickle_jsonsafe(data['target_pickle'])
+			target = prove.remote.unserialize(data['target'])
 			assert isinstance(target, Target)
 
-			env = unpickle_jsonsafe(data['env_pickle'])
+			env = prove.remote.unserialize(data['env'])
 			assert isinstance(env, TargetEnvironment)
 
 			action_mod = importlib.import_module('prove.actions.' + data['action'])

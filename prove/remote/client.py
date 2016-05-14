@@ -1,20 +1,14 @@
-import base64
 import json
 import logging
-import pickle
 import socket
+
+import prove.remote
 
 LOG = logging.getLogger(__name__)
 
 
 class RemoteClientException(Exception):
 	pass
-
-
-def pickle_jsonsafe(obj):
-	pickle_value = pickle.dumps(obj)
-	bytes_value = base64.b64encode(pickle_value)
-	return bytes_value.decode('ascii')
 
 
 class RemoteClient:
@@ -29,21 +23,34 @@ class RemoteClient:
 
 	def run_action(self, action):
 		data = {
-			'target_pickle': pickle_jsonsafe(self.target),
-			'env_pickle': pickle_jsonsafe(self.env),
 			'action': action.name,
 			'args': action.args,
+			'env': prove.remote.serialize(self.env),
+			'target': prove.remote.serialize(self.target),
 		}
 		self.socket.send(json.dumps(data))
+		response = {'status': None}
 
 		try:
-			data = self.socket.recv()
-			self.callback(data)
-			while data != b'\x00':
-				data = self.socket.recv()
-				self.callback(data)
+			while response['status'] != 'finished':
+				responses = self._receive()
+				for response in responses:
+					self.callback(response)
 		finally:
 			self.disconnect()
+
+	def _receive(self):
+		data = self.socket.recv(4196).decode('ascii')
+		while data[-1] != '\n':
+			data += self.socket.recv(4196).decode('ascii')
+
+		responses = []
+
+		for line in data.split('\n'):
+			if line:
+				responses.append(json.loads(line))
+
+		return responses
 
 	def disconnect(self):
 		self.socket.close()

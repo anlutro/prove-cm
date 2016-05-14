@@ -30,9 +30,15 @@ class Session(prove.executor.Session):
 class Executor(prove.executor.Executor):
 	def get_session(self, target):
 		# TODO: remove dummy callback
-		def callback(data):
-			if data:
-				print(repr(data))
+		def callback(response):
+			if not response:
+				return
+			# print(repr(response))
+			if response['data'] and 'output' in response['data']:
+				func = getattr(self.app.output, response['data']['output'])
+				args = prove.remote.unserialize(response['data']['args'])
+				kwargs = prove.remote.unserialize(response['data']['kwargs'])
+				func(*args, **kwargs)
 
 		env = self.get_env(target)
 		socket = prove.remote.client.RemoteSocket(
