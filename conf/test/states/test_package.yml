@@ -1,0 +1,3 @@
+tmux_installed:
+  - fn: package.installed
+    package: tmux

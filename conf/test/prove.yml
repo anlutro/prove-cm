@@ -10,6 +10,8 @@ groups:
     states:
       - hello_world
       - test_file
+      - test_package
+      - test_service
 
 targets:
   - name: local.localhost

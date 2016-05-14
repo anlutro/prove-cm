@@ -1,0 +1,7 @@
+cron_running:
+  - fn: service.running
+    service: cron
+
+cron_enabled:
+  - fn: service.enabled
+    service: cron
