@@ -1,7 +1,7 @@
-import prove.environment
-import prove.state
-from prove.locator import _get_file_name, Locator, Component
 from unittest import mock
+import prove.environment
+import prove.states
+from prove.locator import _get_file_name, Locator, Component
 
 
 def mock_loader():
@@ -38,7 +38,7 @@ def test_locate_states():
 		states = locator.locate_states()
 		mock_list_files.assert_called_once_with('/root/states')
 	assert 'test_state' in states
-	assert isinstance(states['test_state'], prove.state.StateFile)
+	assert isinstance(states['test_state'], prove.states.StateFile)
 	assert 'test_state' == states['test_state'].name
 
 

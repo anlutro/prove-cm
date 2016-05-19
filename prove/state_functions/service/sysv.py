@@ -1,6 +1,6 @@
 import logging
 
-from prove.states.service import ServiceState
+from prove.state_functions.service import ServiceState
 
 LOG = logging.getLogger(__name__)
 

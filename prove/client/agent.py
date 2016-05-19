@@ -5,7 +5,7 @@ import prove.remote
 import prove.remote.server
 
 
-class DaemonClient(prove.client.AbstractClient):
+class AgentDaemon(prove.client.AbstractClient):
 	def __init__(self, args=None):
 		parser = argparse.ArgumentParser(description="Prove - a configuration manager")
 		parser.add_argument('-c', '--config',
@@ -26,4 +26,4 @@ class DaemonClient(prove.client.AbstractClient):
 
 
 def main():
-	DaemonClient().main()
+	AgentDaemon().main()

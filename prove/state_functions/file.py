@@ -1,6 +1,6 @@
 import difflib
 
-from prove.state import StateResult
+from prove.states import StateResult
 
 
 class FileState:

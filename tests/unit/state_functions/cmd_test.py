@@ -1,5 +1,5 @@
 from unittest import mock
-from prove.states import command
+from prove.state_functions import command
 
 
 def test_run():

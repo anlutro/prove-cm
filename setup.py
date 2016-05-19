@@ -22,7 +22,7 @@ setup(
     entry_points={
         'console_scripts': [
             'prove=prove.client.console:main',
-            'prove-client=prove.client.daemon:main',
+            'prove-agent=prove.client.agent:main',
         ],
     },
 )

@@ -2,6 +2,7 @@ import importlib
 import logging
 
 import prove.actions
+import prove.states
 
 LOG = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class StatesAction(prove.actions.Action):
 		if invocation.unless:
 			for cmd in invocation.unless:
 				if self.session.run_command(cmd).was_successful:
-					return prove.state.StateResult(
+					return prove.states.StateResult(
 						success=True,
 						comment='unless command was successful: ' + cmd
 					)
@@ -32,20 +33,20 @@ class StatesAction(prove.actions.Action):
 		if invocation.onlyif:
 			for cmd in invocation.onlyif:
 				if not self.session.run_command(cmd).was_successful:
-					return prove.state.StateResult(
+					return prove.states.StateResult(
 						success=True,
 						comment='onlyif command failed: ' + cmd
 					)
 
 		state_mod, state_func = invocation.func.split('.')
-		state_mod = importlib.import_module('prove.states.' + state_mod)
+		state_mod = importlib.import_module('prove.state_functions.' + state_mod)
 
 		if hasattr(state_mod, '__virtual__'):
 			state_mod = state_mod.__virtual__(self.session)
 
 		state_func = getattr(state_mod, state_func)
 		result = state_func(self.session, invocation.args)
-		if not isinstance(result, prove.state.StateResult):
+		if not isinstance(result, prove.states.StateResult):
 			raise ValueError('State function {}.{} did not return a StateResult object'.format(
 				state_mod.__name__, state_func.__name__))
 

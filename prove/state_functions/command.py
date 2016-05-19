@@ -1,4 +1,4 @@
-from prove.state import StateResult
+from prove.states import StateResult
 
 
 def run(session, args):

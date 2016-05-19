@@ -5,7 +5,7 @@ import os
 import os.path
 
 from prove.environment import Role, VariableFile
-from prove.state import StateFile
+from prove.states import StateFile
 import prove.util
 
 LOG = logging.getLogger(__name__)

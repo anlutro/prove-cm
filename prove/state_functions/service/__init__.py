@@ -1,12 +1,12 @@
-from prove.state import StateResult
+from prove.states import StateResult
 
 
 def __virtual__(session):
 	os_info = session.info
 
 	if os_info.distro == 'Debian' and os_info.distro_version >= '8.0':
-		import prove.states.service.debian8
-		return prove.states.service.debian8
+		import prove.state_functions.service.debian8
+		return prove.state_functions.service.debian8
 
 	raise Exception('No appropriate service state module found')
 

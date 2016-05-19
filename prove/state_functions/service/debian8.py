@@ -1,6 +1,6 @@
 import logging
 
-from prove.states.service import systemd, sysv
+from prove.state_functions.service import systemd, sysv
 
 LOG = logging.getLogger(__name__)
 

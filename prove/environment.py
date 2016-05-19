@@ -1,6 +1,7 @@
 import collections
 
 import prove.config
+import prove.states
 
 
 class Role:
@@ -114,7 +115,7 @@ class Environment:
 				if state_name in loaded_states:
 					continue
 				if state_name not in self.state_files:
-					raise prove.state.StateMissingException(state_name)
+					raise prove.states.StateMissingException(state_name)
 				state = self.state_files[state_name].load(tgt_variables)
 				load_states(state.includes)
 				loaded_states[state_name] = state
@@ -125,8 +126,8 @@ class Environment:
 		for state_name, state in loaded_states.items():
 			for required_state_name in state.requires:
 				if required_state_name not in loaded_states:
-					raise prove.state.StateNotLoadedException(required_state_name, state_name)
+					raise prove.states.StateNotLoadedException(required_state_name, state_name)
 
-		tgt_states = prove.state.sort_states(loaded_states)
+		tgt_states = prove.states.sort_states(loaded_states)
 
 		return TargetEnvironment(tgt_options, tgt_states, tgt_variables, self.files)

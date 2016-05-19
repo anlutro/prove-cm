@@ -1,7 +1,15 @@
+cron_installed:
+  - fn: package.installed
+    package: cron
+
 cron_running:
   - fn: service.running
     service: cron
+    require:
+      - cron_installed
 
 cron_enabled:
   - fn: service.enabled
     service: cron
+    require:
+      - cron_installed
