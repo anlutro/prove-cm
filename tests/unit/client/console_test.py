@@ -5,7 +5,7 @@ import prove.client.console
 
 def test_instantiates_correct_action_class():
 	with mock.patch('prove.actions.states.StatesCommand', return_value='test_retval'):
-		command = prove.client.console.ConsoleClient(['states']).get_command()
+		command = prove.client.console.ConsoleClient(['states']).get_command(None)
 		assert 'test_retval' is command
 
 

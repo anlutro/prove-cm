@@ -7,11 +7,11 @@ from prove.state import State, StateInvocation, StateResult
 
 
 def test_StatesCommand():
-	command = prove.actions.states.StatesCommand(args=[])
 	state = State('test', [
 		StateInvocation('test.noop', {})
 	])
 	app, conn = make_app_conn([state])
+	command = prove.actions.states.StatesCommand(app, args=[])
 	result = StateResult()
 	with mock.patch(
 			'prove.states.test.noop',
@@ -19,7 +19,7 @@ def test_StatesCommand():
 			return_value=result,
 	) as mock_noop:
 		mock_noop.__name__ = 'noop'
-		command.run(app=app)
+		command.run()
 
 	app.executor_connect.assert_called_once_with('host1')
 	action = conn.run_action.call_args[0][0]

@@ -21,13 +21,28 @@ def run_server(bind_addr, bind_port=prove.remote.DEFAULT_PORT):
 			LOG.debug('Handling request')
 			self._send('starting')
 			try:
-				target, env, action = self._read()
+				payload = self.request.recv(4096).decode('ascii').strip()
+				data = json.loads(payload)
+
+				target = prove.remote.unserialize(data['target'])
+				assert isinstance(target, Target)
+
+				env = prove.remote.unserialize(data['env'])
+				assert isinstance(env, TargetEnvironment)
+
 				output = prove.output.composite.CompositeOutput(
 					prove.output.log,
 					prove.output.remote.RemoteOutput(self._send)
 				)
+
 				session = prove.executor.local.Session(target, env, output)
-				action.run(session)
+
+				action_mod = importlib.import_module('prove.actions.' + data['action'])
+				action_cls = prove.util.snake_to_camel_case(data['action'])
+				action_cls = getattr(action_mod, action_cls + 'Action')
+				action = action_cls(session, data.get('args', {}))
+				action.run()
+
 				LOG.debug('Finished handling request')
 			finally:
 				self._send('finished')
@@ -39,23 +54,6 @@ def run_server(bind_addr, bind_port=prove.remote.DEFAULT_PORT):
 			})
 			LOG.debug(json_data)
 			self.request.sendall((json_data + '\n').encode('ascii'))
-
-		def _read(self):
-			payload = self.request.recv(4096).decode('ASCII').strip()
-			data = json.loads(payload)
-
-			target = prove.remote.unserialize(data['target'])
-			assert isinstance(target, Target)
-
-			env = prove.remote.unserialize(data['env'])
-			assert isinstance(env, TargetEnvironment)
-
-			action_mod = importlib.import_module('prove.actions.' + data['action'])
-			action_class = prove.util.snake_to_camel_case(data['action'])
-			action_class = getattr(action_mod, action_class + 'Action')
-			action = action_class(data.get('args', {}))
-
-			return target, env, action
 
 	socketserver.TCPServer.allow_reuse_address = True
 	server = socketserver.TCPServer((bind_addr, bind_port), RequestHandler)

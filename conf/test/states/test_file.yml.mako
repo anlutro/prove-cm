@@ -1,14 +1,10 @@
-<%
-  path = '/tmp/prove-file'
-%>
-
 create_file:
   - fn: file.managed
-    path: ${path}
+    path: ${test_file_path}
     source: prove://test-file
   - fn: command.run
-    command: cat ${path}
+    command: cat ${test_file_path}
 
 delete_file:
   - fn: command.run
-    command: rm -v ${path}
+    command: rm -v ${test_file_path}

@@ -8,8 +8,7 @@ import prove.util
 class ConsoleClient(prove.client.SingleCommandClient):
 	def __init__(self, args=None):
 		parser = argparse.ArgumentParser(description="Prove - a configuration manager")
-		parser.add_argument('command', choices=['states', 'cmd', 'ping'],
-			help="Which command to run")
+		parser.add_argument('command', help="Which command to run")
 		parser.add_argument('-c', '--config',
 			help="Path to config file")
 		parser.add_argument('-d', '--dry-run', action='store_true',
@@ -43,12 +42,12 @@ class ConsoleClient(prove.client.SingleCommandClient):
 
 		return config
 
-	def get_command(self):
-		cmd_module = 'prove.actions.' + self.args.command
+	def get_command(self, app):
+		cmd_module = 'prove.actions.' + self.args.command.replace('-', '_')
 		cmd_module = importlib.import_module(cmd_module)
 		cmd_class = prove.util.snake_to_camel_case(self.args.command)
 		cmd_class = getattr(cmd_module, cmd_class + 'Command')
-		return cmd_class(self.args.command_args)
+		return cmd_class(app, self.args.command_args)
 
 
 def main():

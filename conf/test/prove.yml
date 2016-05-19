@@ -4,9 +4,23 @@ options:
   log_path: stderr
   log_level: debug
 
+roles:
+  test_role:
+    states:
+      - test_file
+      - test_package
+      - test_service
+
 groups:
   - name: local
     glob: '*.localhost'
+    variables:
+      test_file_path: /tmp/prove-file
+      test_dict:
+        test_list:
+          [ foo: bar, baz ]
+    roles:
+      - test_role
     states:
       - hello_world
       - test_file

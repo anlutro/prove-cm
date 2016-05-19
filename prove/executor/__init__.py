@@ -98,9 +98,9 @@ class Executor:
 
 	@contextmanager
 	def connect(self, target):
+		session = self.get_session(target)
 		LOG.info('Connecting to target: %s', target.host)
 		self.app.output.connect_start(target)
-		session = self.get_session(target)
 
 		try:
 			session.connect()

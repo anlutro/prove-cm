@@ -49,7 +49,7 @@ class Application:
 	def run_command(self, command):
 		assert isinstance(command, prove.actions.Command)
 		LOG.info('Running command: %s', command.__class__.__name__)
-		command.run(self, self.filter_targets())
+		command.run(self.filter_targets())
 
 	def filter_targets(self):
 		targets = []
@@ -79,13 +79,19 @@ class Application:
 	def get_target_env(self, target):
 		return self.global_env.make_target_env(target)
 
-	def executor_connect(self, target):
+	def get_target_executor(self, target):
 		assert isinstance(target, prove.config.Target)
 		ex_type = target.options.get('executor', self.options['executor'])
 		if ex_type not in self.executors:
 			self.executors[ex_type] = self._make_executor(ex_type)
 		LOG.info('Using executor type: %s', ex_type)
-		return self.executors[ex_type].connect(target)
+		return self.executors[ex_type]
+
+	def make_session(self, target):
+		return self.get_target_executor(target).get_session(target)
+
+	def executor_connect(self, target):
+		return self.get_target_executor(target).connect(target)
 
 	def _make_executor(self, module):
 		executor_module = importlib.import_module('prove.executor.' + module)

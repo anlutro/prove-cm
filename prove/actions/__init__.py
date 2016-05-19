@@ -4,26 +4,34 @@ LOG = logging.getLogger(__name__)
 
 
 class Action:
-	def __init__(self, args):
+	def __init__(self, session, args):
+		self.session = session
 		self.args = args
 
-	def run(self, session):
+	def run(self):
 		raise NotImplementedError()
 
 
 class Command:
-	action_cls = None # needs to be overridden
-
-	def __init__(self, args):
+	def __init__(self, app, args):
+		self.app = app
 		self.args = args
 
-	def run(self, app, targets=None):
+	def run(self, targets=None):
 		if targets is None:
-			targets = app.targets
+			targets = self.app.targets
+
 		for target in targets:
-			with app.executor_connect(target) as session:
-				self.run_action(session)
+			self.run_target(target)
+
+	def run_target(self, target):
+		with self.app.executor_connect(target) as session:
+			self.run_action(session)
 
 	def run_action(self, session):
-		action = self.action_cls(self.args)  # pylint: disable=not-callable
+		action_cls = getattr(self, 'action_cls')
+		if not action_cls:
+			raise RuntimeError(('action_cls must be set '
+				'or one of the run methods must be overridden'))
+		action = action_cls(session, self.args)
 		return session.run_action(action)
