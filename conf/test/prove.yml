@@ -33,3 +33,6 @@ targets:
   - name: remote.localhost
     host: localhost
     executor: remote
+  - name: remote.vagrant
+    host: 10.90.10.10
+    executor: remote

@@ -52,3 +52,7 @@ class ConsoleClient(prove.client.SingleCommandClient):
 
 def main():
 	ConsoleClient().main()
+
+
+if __name__ == '__main__':
+	main()

@@ -45,5 +45,14 @@ Open two terminals, activate the virtualenv in both. In the first, run the agent
 
 Next, run prove against the host:
 
-	$ prove -c conf/test/prove.yml -t remote.localhost cmd echo hello world
+	$ prove -c conf/test/prove.yml -t remote.localhost cmd 'echo hello world'
 	$ prove -c conf/test/prove.yml -t remote.localhost states
+
+You can also test it by running the agent in a Vagrant VM:
+
+	$ sudo apt-get install python3
+	$ PYTHONPATH=/vagrant /vagrant/bin/python -m prove.client.agent -c /vagrant/conf/vagrant/prove.yml -b 0.0.0.0
+
+On your host machine:
+
+	$ prove -c conf/test/prove.yml -t remote.vagrant cmd 'echo hello world'

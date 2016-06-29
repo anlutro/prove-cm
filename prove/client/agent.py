@@ -27,3 +27,7 @@ class AgentDaemon(prove.client.AbstractClient):
 
 def main():
 	AgentDaemon().main()
+
+
+if __name__ == '__main__':
+	main()
