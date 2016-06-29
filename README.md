@@ -4,13 +4,16 @@ Prove is a configuration management system, similar to Puppet, Chef, Ansible and
 
 ## Installation
 
-Make sure `$HOME/.local/bin` is in your `$PATH`:
-
 	$ pip install --user prove
+
+This will install prove into `$HOME/.local`. I recommend adding
+`$HOME/.local/bin` to your `$PATH`.
 
 Alternatively, if you're not concerned about using sudo:
 
 	$ sudo pip install prove
+
+You may need to install libffi-dev through your system's package manager.
 
 ## Development
 
