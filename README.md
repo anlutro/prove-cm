@@ -42,5 +42,5 @@ Open two terminals, activate the virtualenv in both. In the first, run the agent
 
 Next, run prove against the host:
 
-	$ prove -c conf/test/prove.yml -t remote.localhost echo hello world
+	$ prove -c conf/test/prove.yml -t remote.localhost cmd echo hello world
 	$ prove -c conf/test/prove.yml -t remote.localhost states
