@@ -18,3 +18,7 @@ def fail_without_changes(session, args):
 
 def fail_with_changes(session, args):
 	return StateResult(success=False, changes=['changes'])
+
+
+def throw_exception(session, args):
+	raise RuntimeError('Test error')
