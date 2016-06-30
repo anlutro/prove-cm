@@ -39,6 +39,8 @@ class Executor(prove.executor.Executor):
 				args = prove.remote.unserialize(response['data']['args'])
 				kwargs = prove.remote.unserialize(response['data']['kwargs'])
 				func(*args, **kwargs)
+			if response['status'] == 'error':
+				self.app.output.error(response['data'])
 
 		env = self.get_env(target)
 		socket = prove.remote.client.RemoteSocket(

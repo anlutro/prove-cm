@@ -44,6 +44,9 @@ def run_server(bind_addr, bind_port=prove.remote.DEFAULT_PORT):
 				action.run()
 
 				LOG.debug('Finished handling request')
+			except Exception as e:
+				self._send('error', str(e))
+				raise
 			finally:
 				self._send('finished')
 

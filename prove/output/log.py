@@ -46,3 +46,7 @@ def state_invocation_finish(state, state_invocation, result):
 
 def state_summary():
 	pass
+
+
+def error(error_string):
+	LOG.error(error_string)
