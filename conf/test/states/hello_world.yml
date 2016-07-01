@@ -1,3 +1,6 @@
 hello_world:
   - fn: command.run
     command: echo hello world!
+
+# test_error:
+#   - fn: test.throw_exception

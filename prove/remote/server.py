@@ -2,6 +2,7 @@ import json
 import logging
 import importlib
 import socketserver
+import traceback
 
 from prove.config import Target
 from prove.environment import TargetEnvironment
@@ -45,7 +46,7 @@ def run_server(bind_addr, bind_port=prove.remote.DEFAULT_PORT):
 
 				LOG.debug('Finished handling request')
 			except Exception as e:
-				self._send('error', str(e))
+				self._send('error', traceback.format_exc())
 				raise
 			finally:
 				self._send('finished')

@@ -48,5 +48,6 @@ def state_summary():
 	pass
 
 
-def error(error_string):
-	LOG.error(error_string)
+def remote_error(error_string, target):
+	LOG.error('remote target "%s" had an uncaught error:\n%s',
+		target.name, error_string.strip())
