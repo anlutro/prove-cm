@@ -69,6 +69,8 @@ def run_server(bind_addr, bind_port=prove.remote.DEFAULT_PORT):
 	try:
 		LOG.info('listening on %s:%s', bind_addr, bind_port)
 		server.serve_forever()
+	except KeyboardInterrupt:
+		pass
 	finally:
 		LOG.debug('closing server')
 		server.server_close()
