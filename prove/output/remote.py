@@ -35,3 +35,6 @@ class RemoteOutput:
 
 	def state_summary(self, *args, **kwargs):
 		self._send('state_summary', args, kwargs)
+
+	def comment(self, *args, **kwargs):
+		self._send('comment', args, kwargs)

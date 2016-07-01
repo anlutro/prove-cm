@@ -28,11 +28,12 @@ class RemoteClient:
 			'target': prove.remote.serialize(self.target),
 		}
 		self.socket.send(prove.remote.encode(data))
-		response = {'status': None}
+		response = {'status': 'initiating'}
 
 		try:
 			while response['status'] != 'finished':
-				LOG.debug('status != finished, waiting for more data')
+				LOG.debug('status "%s" != finished, waiting for more data',
+					response['status'])
 				responses = self._receive()
 				for response in responses:
 					self.callback(response)

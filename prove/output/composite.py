@@ -29,3 +29,6 @@ class CompositeOutput:
 
 	def state_summary(self, *args, **kwargs):
 		self._forward('state_summary', args, kwargs)
+
+	def comment(self, *args, **kwargs):
+		self._forward('comment', args, kwargs)

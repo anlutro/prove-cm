@@ -51,3 +51,7 @@ def state_summary():
 def remote_error(error_string, target):
 	LOG.error('remote target "%s" had an uncaught error:\n%s',
 		target.name, error_string.strip())
+
+
+def comment(string):
+	LOG.info(string)
