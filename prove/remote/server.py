@@ -1,4 +1,3 @@
-import json
 import logging
 import importlib
 import socketserver
@@ -22,8 +21,9 @@ def run_server(bind_addr, bind_port=prove.remote.DEFAULT_PORT):
 			LOG.debug('Handling request')
 			self._send('starting')
 			try:
-				payload = self.request.recv(4096).decode('ascii').strip()
-				data = json.loads(payload)
+				payload = prove.remote.read_socket(self.request)
+				LOG.debug('received: %r', payload)
+				data = prove.remote.decode(payload)
 
 				target = prove.remote.unserialize(data['target'])
 				assert isinstance(target, Target)
@@ -44,7 +44,7 @@ def run_server(bind_addr, bind_port=prove.remote.DEFAULT_PORT):
 				action = action_cls(session, data.get('args', {}))
 				action.run()
 
-				LOG.debug('Finished handling request')
+				LOG.debug('successfully finished handling request')
 			except Exception as e:
 				self._send('error', traceback.format_exc())
 				raise
@@ -52,18 +52,18 @@ def run_server(bind_addr, bind_port=prove.remote.DEFAULT_PORT):
 				self._send('finished')
 
 		def _send(self, status, data=None):
-			json_data = json.dumps({
+			response = prove.remote.encode({
 				'status': status,
 				'data': data,
 			})
-			LOG.debug(json_data)
-			self.request.sendall((json_data + '\n').encode('ascii'))
+			LOG.debug('sending response: %r', response)
+			self.request.sendall(response)
 
 	socketserver.TCPServer.allow_reuse_address = True
 	server = socketserver.TCPServer((bind_addr, bind_port), RequestHandler)
 
 	try:
-		LOG.debug('Listening on %s:%s', bind_addr, bind_port)
+		LOG.info('Listening on %s:%s', bind_addr, bind_port)
 		server.serve_forever()
 	finally:
 		LOG.debug('Closing server')

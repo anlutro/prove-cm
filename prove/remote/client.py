@@ -1,4 +1,3 @@
-import json
 import logging
 import socket
 
@@ -28,11 +27,12 @@ class RemoteClient:
 			'env': prove.remote.serialize(self.env),
 			'target': prove.remote.serialize(self.target),
 		}
-		self.socket.send(json.dumps(data))
+		self.socket.send(prove.remote.encode(data))
 		response = {'status': None}
 
 		try:
 			while response['status'] != 'finished':
+				LOG.debug('status != finished, waiting for more data')
 				responses = self._receive()
 				for response in responses:
 					self.callback(response)
@@ -40,15 +40,13 @@ class RemoteClient:
 			self.disconnect()
 
 	def _receive(self):
-		data = self.socket.recv(4196).decode('ascii')
-		while data[-1] != '\n':
-			data += self.socket.recv(4196).decode('ascii')
+		data = prove.remote.read_socket(self.socket)
 
 		responses = []
 
-		for line in data.split('\n'):
+		for line in data.split(prove.remote.LINE_DELIMITER):
 			if line:
-				responses.append(json.loads(line))
+				responses.append(prove.remote.decode(line))
 
 		return responses
 
@@ -102,6 +100,7 @@ class RemoteSocket:
 	def send(self, data):
 		if isinstance(data, str):
 			data = data.encode('utf-8')
+		LOG.debug('sending data: %r', data)
 		return self.socket.send(data)
 
 	def close(self):
