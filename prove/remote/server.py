@@ -46,9 +46,10 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
 		session = prove.executor.local.Session(target, env, output)
 
-		action_mod = importlib.import_module('prove.actions.' + data['action'])
-		action_cls = prove.util.snake_to_camel_case(data['action'])
-		action_cls = getattr(action_mod, action_cls + 'Action')
+		action_cls = getattr(
+			importlib.import_module('prove.actions.' + data['action']),
+			prove.util.snake_to_camel_case(data['action']) + 'Action'
+		)
 		action = action_cls(session, data.get('args', {}))
 		action.run()
 
