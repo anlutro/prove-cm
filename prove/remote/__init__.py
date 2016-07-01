@@ -28,7 +28,6 @@ def encode(data):
 
 def decode(payload):
 	string = payload.rstrip(LINE_DELIMITER).decode('ascii')
-	print(string)
 	return json.loads(string)
 
 

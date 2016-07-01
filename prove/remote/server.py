@@ -68,10 +68,3 @@ def run_server(bind_addr, bind_port=prove.remote.DEFAULT_PORT):
 	finally:
 		LOG.debug('Closing server')
 		server.server_close()
-
-
-def main():
-	run_server('0.0.0.0')
-
-if __name__ == '__main__':
-	main()
