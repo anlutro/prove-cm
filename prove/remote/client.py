@@ -32,7 +32,7 @@ class RemoteClient:
 
 		try:
 			while response['status'] != 'finished':
-				LOG.debug('status "%s" != finished, waiting for more data',
+				LOG.debug('status %r != finished, waiting for more data',
 					response['status'])
 				responses = self._receive()
 				for response in responses:

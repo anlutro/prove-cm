@@ -33,8 +33,13 @@ def decode(payload):
 
 def serialize(obj):
 	# base64 encode the pickle data so that it can be embedded in json
-	return base64.b64encode(pickle.dumps(obj)).decode('ascii')
+	return 'pickle::' + base64.b64encode(pickle.dumps(obj)).decode('ascii')
 
 
 def unserialize(string):
-	return pickle.loads(base64.b64decode(string))
+	if string.startswith('pickle::'):
+		return pickle.loads(base64.b64decode(string[8:]))
+
+	if len(string) > 16:
+		string = '{}...'.format(string[:16])
+	raise RuntimeError("don't know how to unserialize %r" % string)
