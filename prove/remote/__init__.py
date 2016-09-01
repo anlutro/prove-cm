@@ -15,7 +15,10 @@ def read_socket(socket, buf_size=4096):
 	# 0 == b'\0'
 	while payload and payload[-1] != 0:
 		LOG.debug('socket.recv incomplete, waiting for more')
-		payload += socket.recv(buf_size)
+		add_payload = socket.recv(buf_size)
+		if add_payload == b'':
+			raise ValueError('received empty binary data')
+		payload += add_payload
 
 	LOG.debug('finished socket.recv')
 	return payload

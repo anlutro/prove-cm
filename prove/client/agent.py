@@ -21,8 +21,15 @@ class AgentDaemon(prove.client.AbstractClient):
 		super().__init__(parser.parse_args(args))
 
 	def main(self):
-		self.read_config()
-		prove.remote.server.run_server(self.args.bind, self.args.port)
+		config = self.read_config()
+		ssl_opts = config.get('options', {}).get('ssl', {})
+		prove.remote.server.run_server(
+			self.args.bind,
+			self.args.port,
+			ca_path=ssl_opts['ca_path'],
+			ssl_cert=ssl_opts['agent_cert'],
+			ssl_key=ssl_opts['agent_key'],
+		)
 
 
 def main():

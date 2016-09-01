@@ -43,7 +43,10 @@ class Executor(prove.executor.Executor):
 		env = self.get_env(target)
 		socket = prove.remote.client.RemoteSocket(
 			target.host,
-			target.options.get('port', prove.remote.DEFAULT_PORT)
+			target.options.get('port', prove.remote.DEFAULT_PORT),
+			cafile=self.app.options['ssl']['ca_path'],
+			certfile=self.app.options['ssl']['master_cert'],
+			keyfile=self.app.options['ssl']['master_key'],
 		)
 		client = prove.remote.client.RemoteClient(socket, callback, target, env)
 		return Session(client, target, env, self.app.output)

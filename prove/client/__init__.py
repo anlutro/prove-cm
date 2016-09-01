@@ -47,6 +47,13 @@ class AbstractClient:
 		if 'root_dir' not in config['options']:
 			config['options']['root_dir'] = os.path.dirname(config_path)
 
+		for key in config['options']['ssl'].keys():
+			if not config['options']['ssl'][key].startswith('/'):
+				config['options']['ssl'][key] = os.path.join(
+					config['options']['root_dir'],
+					config['options']['ssl'][key],
+				)
+
 		# override with command-line args
 		if self.args.log_level is not None:
 			config['options']['log_level'] = self.args.log_level

@@ -1,5 +1,6 @@
 import logging
 import importlib
+import ssl
 import socketserver
 import traceback
 
@@ -62,9 +63,45 @@ class RequestHandler(socketserver.BaseRequestHandler):
 		self.request.sendall(response)
 
 
-def run_server(bind_addr, bind_port=prove.remote.DEFAULT_PORT):
+class RemoteServer(socketserver.TCPServer):
+	def __init__(self, *args, cafile, certfile, keyfile, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.certfile = certfile
+		self.keyfile = keyfile
+		self.ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+		self.ssl_context.verify_mode = ssl.CERT_REQUIRED
+		LOG.info('loading ssl ca: %r', cafile)
+		self.ssl_context.load_verify_locations(cafile=cafile)
+		LOG.info('loading ssl cert: %r', certfile)
+		LOG.info('loading ssl key: %r', keyfile)
+		self.ssl_context.load_cert_chain(certfile, keyfile)
+
+	def get_request(self):
+		sock, fromaddr = self.socket.accept()
+		try:
+			sock = self.ssl_context.wrap_socket(
+				sock,
+				server_side=True,
+			)
+		except:
+			LOG.exception('uncaught exception in ssl.wrap_socket')
+			raise
+		return sock, fromaddr
+
+
+class ThreadedRemoteServer(socketserver.ThreadingMixIn, RemoteServer):
+	pass
+
+
+def run_server(bind_addr, bind_port, ca_path, ssl_cert, ssl_key):
 	socketserver.TCPServer.allow_reuse_address = True
-	server = socketserver.TCPServer((bind_addr, bind_port), RequestHandler)
+	server = RemoteServer(
+		(bind_addr, bind_port),
+		RequestHandler,
+		cafile=ca_path,
+		certfile=ssl_cert,
+		keyfile=ssl_key,
+	)
 
 	try:
 		LOG.info('listening on %s:%s', bind_addr, bind_port)

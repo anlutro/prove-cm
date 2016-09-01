@@ -4,6 +4,13 @@ options:
   log_path: stderr
   log_level: debug
 
+  ssl:
+    ca_path: ssl/ca.crt
+    agent_key: ssl/agent.key
+    agent_cert: ssl/agent.crt
+    master_key: ssl/master.key
+    master_cert: ssl/master.crt
+
 roles:
   test_role:
     states:
