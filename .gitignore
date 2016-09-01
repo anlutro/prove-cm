@@ -3,6 +3,8 @@ __pycache__
 *.pyc
 
 # virtualenv/pip
+/.virtualenv
+/.venv
 /bin
 /dist
 /include
