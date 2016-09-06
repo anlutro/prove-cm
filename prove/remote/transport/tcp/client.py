@@ -7,6 +7,17 @@ import prove.remote
 LOG = logging.getLogger(__name__)
 
 
+def get_client(target, env, callback):
+	socket = RemoteSocket(
+		target.host,
+		target.options.get('port', prove.remote.DEFAULT_PORT),
+		cafile=env.options['ssl']['ca_path'],
+		certfile=env.options['ssl']['master_cert'],
+		keyfile=env.options['ssl']['master_key'],
+	)
+	return RemoteClient(socket, callback, target, env)
+
+
 class RemoteClientException(Exception):
 	pass
 

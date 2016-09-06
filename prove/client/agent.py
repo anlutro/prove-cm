@@ -2,7 +2,6 @@ import argparse
 
 import prove.client
 import prove.remote
-import prove.remote.server
 
 
 class AgentDaemon(prove.client.AbstractClient):
@@ -20,16 +19,22 @@ class AgentDaemon(prove.client.AbstractClient):
 			help="Port to listen on")
 		super().__init__(parser.parse_args(args))
 
+	def get_config(self):
+		config = super().get_config()
+
+		if 'agent' not in config['options']:
+			config['options']['agent'] = {}
+
+		if self.args.bind:
+			config['options']['agent']['bind'] = self.args.bind
+
+		if self.args.port:
+			config['options']['agent']['port'] = self.args.port
+
+		return config
+
 	def main(self):
-		config = self.read_config()
-		ssl_opts = config.get('options', {}).get('ssl', {})
-		prove.remote.server.run_server(
-			self.args.bind,
-			self.args.port,
-			ca_path=ssl_opts['ca_path'],
-			ssl_cert=ssl_opts['agent_cert'],
-			ssl_key=ssl_opts['agent_key'],
-		)
+		prove.remote.run_server(self.read_config())
 
 
 def main():

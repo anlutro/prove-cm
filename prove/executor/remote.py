@@ -1,7 +1,7 @@
 import logging
 
 import prove.executor
-import prove.remote.client
+import prove.remote
 
 LOG = logging.getLogger(__name__)
 
@@ -41,12 +41,5 @@ class Executor(prove.executor.Executor):
 				func(*args, **kwargs)
 
 		env = self.get_env(target)
-		socket = prove.remote.client.RemoteSocket(
-			target.host,
-			target.options.get('port', prove.remote.DEFAULT_PORT),
-			cafile=self.app.options['ssl']['ca_path'],
-			certfile=self.app.options['ssl']['master_cert'],
-			keyfile=self.app.options['ssl']['master_key'],
-		)
-		client = prove.remote.client.RemoteClient(socket, callback, target, env)
+		client = prove.remote.get_client(target, env, callback)
 		return Session(client, target, env, self.app.output)

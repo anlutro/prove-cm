@@ -3,6 +3,7 @@ options:
   output: log
   log_path: stderr
   log_level: debug
+  remote_transport: tcp
 
   ssl:
     ca_path: ssl/ca.crt
