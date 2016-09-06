@@ -12,8 +12,7 @@ def read_socket(socket, buf_size=4096):
 	LOG.debug('waiting for socket.recv')
 
 	payload = socket.recv(buf_size)
-	# 0 == b'\0'
-	while payload and payload[-1] != 0:
+	while payload and not payload.endswith(LINE_DELIMITER):
 		LOG.debug('socket.recv incomplete, waiting for more')
 		add_payload = socket.recv(buf_size)
 		if add_payload == b'':
