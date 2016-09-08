@@ -47,7 +47,7 @@ class AbstractClient:
 		if 'root_dir' not in config['options']:
 			config['options']['root_dir'] = os.path.dirname(config_path)
 
-		for key in config['options']['ssl'].keys():
+		for key in config['options'].get('ssl', {}).keys():
 			if not config['options']['ssl'][key].startswith('/'):
 				config['options']['ssl'][key] = os.path.join(
 					config['options']['root_dir'],

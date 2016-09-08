@@ -15,7 +15,7 @@ class AgentDaemon(prove.client.AbstractClient):
 			help="Set the log path")
 		parser.add_argument('-b', '--bind', default='localhost',
 			help="Address to bind to")
-		parser.add_argument('-p', '--port', default=prove.remote.DEFAULT_PORT,
+		parser.add_argument('-p', '--port', type=int, default=prove.remote.DEFAULT_PORT,
 			help="Port to listen on")
 		super().__init__(parser.parse_args(args))
 
