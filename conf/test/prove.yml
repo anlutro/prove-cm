@@ -1,6 +1,6 @@
 options:
   executor: local
-  output: log
+  output: console
   log_path: stderr
   log_level: debug
   remote_transport: tcp

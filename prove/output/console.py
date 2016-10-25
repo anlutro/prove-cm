@@ -17,7 +17,7 @@ def connect_failure(target):
 
 
 def disconnected(target):
-	pass
+	print('\nDisconnected from {}.'.format(target.host))
 
 
 def cmd_result(result):
@@ -31,17 +31,20 @@ def cmd_result(result):
 
 
 def state_invocation_start(state, state_invocation):
-	print('=> {} -- {}'.format(state.name, state_invocation.func))
+	sys.stdout.write('\n=> {} -- {}'.format(state.name, state_invocation.func))
+	sys.stdout.flush()
 
 
 def state_invocation_finish(state, state_invocation, result):
-	print('Result: ', 'success' if result.success else 'failure')
+	print(' --', 'success' if result.success else 'failure')
 	if result.changes:
-		print('Changes:', '\n         '.join(result.changes))
-	else:
-		print('Changes: None')
-	if result.comment:
-		print(result.comment)
+		if len(result.changes) > 1:
+			print('Changes:\n  ', '\n  '.join(result.changes))
+		else:
+			print('Changes:', result.changes[0])
+	comment = result.format_comment()
+	if comment:
+		print(comment)
 
 
 def state_summary():
