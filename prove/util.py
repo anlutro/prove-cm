@@ -45,3 +45,7 @@ def list_subdirs(path):
 
 def snake_to_camel_case(string):
 	return ''.join(s.title() for s in string.split('_'))
+
+
+def indent_string(string, spaces):
+	return '\n'.join((((' ' * spaces) + line) for line in string.splitlines()))

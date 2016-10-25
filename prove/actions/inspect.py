@@ -1,9 +1,6 @@
 import yaml
 import prove.actions
-
-
-def _indent(string, spaces):
-	return '\n'.join((((' ' * spaces) + line) for line in string.splitlines()))
+import prove.utils
 
 
 class InspectCommand(prove.actions.Command):
@@ -33,7 +30,7 @@ class InspectCommand(prove.actions.Command):
 
 		if self.inspect_variables:
 			print('  variables:')
-			print(_indent(yaml.dump(session.env.variables, default_flow_style=False), 4))
+			print(prove.util.indent_string(yaml.dump(session.env.variables, default_flow_style=False), 4))
 
 		if self.inspect_states:
 			print('  states:')
