@@ -1,3 +1,6 @@
+import prove.util
+
+
 class StateException(Exception):
 	pass
 
@@ -150,7 +153,25 @@ class StateInvocation:
 
 
 class StateResult:
-	def __init__(self, success=None, changes=None, comment=None):
+	def __init__(self, success=None, changes=None, comment=None, comments=None,
+			stdout=None, stderr=None):
 		self.success = success
 		self.changes = changes
 		self.comment = comment
+		self.comments = comments
+		self.stdout = stdout
+		self.stderr = stderr
+
+	def format_comment(self):
+		comment = self.comment or ''
+
+		if self.comments:
+			comment += '\n' + '\n'.join(self.comments)
+
+		if self.stdout:
+			comment += '\n\nSystem stdout:\n' + prove.util.indent_string(self.stdout, 2)
+
+		if self.stderr:
+			comment += '\n\nSystem stderr:\n' + prove.util.indent_string(self.stderr, 2)
+
+		return comment.strip()

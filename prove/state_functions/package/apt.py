@@ -10,12 +10,12 @@ def _is_installed(session, package):
 	return result.exit_code == 0
 
 
-def _install(session, package):
-	cmd = ('apt-get install {pkg}'
-		'-o DPkg::Options::=--force-confnew'
-		'-o DPkg::Options::=--force-confdef'
-		'--assume-yes')
-	cmd = cmd.format(pkg=package)
+def _apt_install(session, package):
+	cmd = (
+		'apt-get install {pkg} --assume-yes '
+		'-o DPkg::Options::=--force-confnew -o DPkg::Options::=--force-confdef'
+		.format(pkg=package)
+	)
 	return session.run_command(cmd)
 
 
@@ -27,7 +27,7 @@ def installed(session, args):
 		result.comment = 'Package {} is already installed'.format(args['package'])
 		return result
 
-	cmd_result = _install(session, args['package'])
+	cmd_result = _apt_install(session, args['package'])
 	if cmd_result.was_successful:
 		result.success = True
 		result.comment = 'Package {} was installed'.format(args['package'])
@@ -38,4 +38,5 @@ def installed(session, args):
 		result.comment += '\n' + cmd_result.stderr
 	if cmd_result.stdout:
 		result.comment += '\n' + cmd_result.stdout
+
 	return result

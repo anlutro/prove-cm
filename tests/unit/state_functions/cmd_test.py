@@ -13,4 +13,5 @@ def test_run():
 	state_result = command.run(conn, {'command': 'fake_command'})
 	conn.run_command.assert_called_once_with('fake_command')
 	assert True == state_result.success
-	assert 'STDERR:\nstderr\nSTDOUT:\nstdout' == state_result.comment
+	assert 'stderr' == state_result.stderr
+	assert 'stdout' == state_result.stdout
