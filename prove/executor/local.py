@@ -16,7 +16,7 @@ class Session(prove.executor.Session):
 		pass
 
 	def run_action(self, action):
-		action.run(self)
+		action.run()
 
 	def run_command(self, command):
 		LOG.debug('Running command%s: `%s`',
