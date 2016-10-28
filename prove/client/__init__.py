@@ -2,7 +2,7 @@ import os
 import os.path
 import yaml
 
-from prove import setup_logging
+import allib.logging
 from prove.application import Application
 
 
@@ -34,7 +34,11 @@ class AbstractClient:
 
 	def read_config(self):
 		config = self.get_config()
-		setup_logging(config.get('options', {}))
+		opts = config.get('options', {})
+		allib.logging.setup_logging(
+			log_file=opts.get('log_path'),
+			log_level=opts.get('log_level'),
+		)
 		return config
 
 	def get_config(self):

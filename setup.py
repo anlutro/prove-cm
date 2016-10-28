@@ -15,6 +15,7 @@ setup(
     author='Andreas Lutro',
     author_email='anlutro@gmail.com',
     install_requires=[
+        'allib',
         'mako',
         'paramiko',
         'pyyaml',
