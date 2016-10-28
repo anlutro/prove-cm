@@ -38,6 +38,7 @@ class LazyParamikoCommandResult(prove.executor.CommandResult):
 class Session(prove.executor.Session):
 	def __init__(self, ssh_client, *args):
 		self.ssh_client = ssh_client
+		self.sftp_client = None
 		super().__init__(*args)
 
 	def run_action(self, action):
@@ -63,6 +64,8 @@ class Session(prove.executor.Session):
 
 	def disconnect(self):
 		self.ssh_client.close()
+		if self.sftp_client:
+			self.sftp_client.close()
 
 	def run_command(self, command, timeout=None, get_pty=False):
 		command = prove.util.cmd_as_string(command)
@@ -76,9 +79,10 @@ class Session(prove.executor.Session):
 		return LazyParamikoCommandResult(chan)
 
 	def _upload_file(self, local_path, remote_path):
-		sftp = paramiko.SFTPClient.from_transport(self.ssh_client.get_transport())
-		sftp.put(local_path, remote_path)
-		sftp.close()
+		if not self.sftp_client:
+			self.sftp_client = paramiko.SFTPClient.from_transport(self.ssh_client.get_transport())
+
+		self.sftp_client.put(local_path, remote_path)
 
 		return True
 
