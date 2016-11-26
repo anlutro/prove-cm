@@ -1,11 +1,11 @@
 import argparse
 import importlib
 
-import prove.client
+import prove.cli
 import prove.util
 
 
-class ConsoleClient(prove.client.SingleCommandClient):
+class ActionRunner(prove.cli.SingleCommandClient):
 	def __init__(self, args=None):
 		parser = argparse.ArgumentParser(description="Prove - a configuration manager")
 		parser.add_argument('command', help="Which command to run")
@@ -51,7 +51,7 @@ class ConsoleClient(prove.client.SingleCommandClient):
 
 
 def main():
-	ConsoleClient().main()
+	ActionRunner().main()
 
 
 if __name__ == '__main__':

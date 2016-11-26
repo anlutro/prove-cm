@@ -51,7 +51,7 @@ Next, run prove against the host:
 You can also test it by running the agent in a Vagrant VM:
 
 	$ sudo apt-get install python3
-	$ PYTHONPATH=/vagrant /vagrant/bin/python -m prove.client.agent -c /vagrant/conf/vagrant/prove.yml -b 0.0.0.0
+	$ PYTHONPATH=/vagrant /vagrant/bin/python -m prove.cli.agent -c /vagrant/conf/vagrant/prove.yml -b 0.0.0.0
 
 On your host machine:
 

@@ -16,14 +16,15 @@ setup(
     author_email='anlutro@gmail.com',
     install_requires=[
         'allib',
+        'lazy',
         'mako',
         'paramiko',
         'pyyaml',
     ],
     entry_points={
         'console_scripts': [
-            'prove=prove.client.console:main',
-            'prove-agent=prove.client.agent:main',
+            'prove=prove.cli.action_runner:main',
+            'prove-agent=prove.cli.agent_daemon:main',
         ],
     },
 )

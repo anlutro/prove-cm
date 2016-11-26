@@ -1,10 +1,10 @@
 import argparse
 
-import prove.client
+import prove.cli
 import prove.remote
 
 
-class AgentDaemon(prove.client.AbstractClient):
+class AgentDaemon(prove.cli.AbstractClient):
 	def __init__(self, args=None):
 		parser = argparse.ArgumentParser(description="Prove - a configuration manager")
 		parser.add_argument('-c', '--config',
