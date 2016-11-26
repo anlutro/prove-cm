@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from lazy import lazy
 import logging
 
 import prove.config
@@ -55,25 +56,27 @@ class Session:
 class SessionInfo:
 	def __init__(self, session):
 		self.session = session
-		self._lsb_release = None
 
-	def _load_lsb_release(self):
-		LOG.info('Loading lsb_release data')
-		result = self.session.run_command('lsb_release -a -s')
-		self._lsb_release = result.stdout.splitlines()
+	@lazy
+	def _lsb_release(self):
+		result = self.session.run_command('lsb_release -a')
+		ret = {}
+		for line in result.stdout.splitlines():
+			key, val = line.strip().split(':', 1)
+			ret[key.strip()] = val.strip()
+		return ret
 
 	@property
 	def distro(self):
-		if self._lsb_release is None:
-			self._load_lsb_release()
-		return self._lsb_release[0]
+		return self._lsb_release['Distributor ID']
 
 	@property
 	def distro_version(self):
-		if self._lsb_release is None:
-			self._load_lsb_release()
-		return self._lsb_release[2]
+		return self._lsb_release['Release']
 
+	def program_exists(self, program):
+		result = self.session.run_command(['which', program])
+		return result.stdout.strip() if result.was_successful else False
 
 class CommandResult:
 	def __init__(self, exit_code, stdout, stderr):
