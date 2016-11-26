@@ -104,17 +104,17 @@ class StateFile:
 				for require in value:
 					requires.add(require)
 			else:
-				invocations = []
+				funcalls = []
 				if isinstance(value, dict):
 					for func, args in value.items():
-						invocations.append(StateInvocation(func, args))
+						funcalls.append(StateFuncCall(func, args))
 				elif isinstance(value, list):
 					for args in value:
 						func = args.pop('fn')
-						invocations.append(StateInvocation(func, args))
+						funcalls.append(StateFuncCall(func, args))
 				else:
 					raise Exception('State data must be dict or list')
-				states.append(State(key, invocations))
+				states.append(State(key, funcalls))
 
 		return LoadedStateFile(self.name, states, includes=includes, requires=requires)
 
@@ -128,18 +128,18 @@ class LoadedStateFile:
 
 
 class State:
-	def __init__(self, name, invocations):
+	def __init__(self, name, funcalls):
 		self.name = name
-		self.invocations = invocations
-		self.lazy = self._combine_invocation_prop('lazy', bool)
-		self.defer = self._combine_invocation_prop('defer', bool)
+		self.funcalls = funcalls
+		self.lazy = self._combine_funcall_prop('lazy', bool)
+		self.defer = self._combine_funcall_prop('defer', bool)
 
-	def _combine_invocation_prop(self, prop_name, prop_type):
+	def _combine_funcall_prop(self, prop_name, prop_type):
 		if prop_type is bool:
-			return any([getattr(i, prop_name) for i in self.invocations])
+			return any([getattr(i, prop_name) for i in self.funcalls])
 		elif prop_type is list:
 			combined = []
-			for i in self.invocations:
+			for i in self.funcalls:
 				attr = getattr(i, prop_name)
 				if attr:
 					combined.extend(attr)
@@ -149,21 +149,21 @@ class State:
 
 	@property
 	def notify(self):
-		return self._combine_invocation_prop('notify', list)
+		return self._combine_funcall_prop('notify', list)
 
 	@property
 	def notify_failure(self):
-		return self._combine_invocation_prop('notify_failure', list)
+		return self._combine_funcall_prop('notify_failure', list)
 
 	@property
 	def requires(self):
-		return self._combine_invocation_prop('requires', list)
+		return self._combine_funcall_prop('requires', list)
 
 	def __repr__(self):
 		return '<{} "{}">'.format(self.__class__.__name__, self.name)
 
 
-class StateInvocation:
+class StateFuncCall:
 	def __init__(self, func, args):
 		self.func = func
 

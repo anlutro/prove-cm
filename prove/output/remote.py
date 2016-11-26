@@ -27,11 +27,11 @@ class RemoteOutput:
 	def cmd_result(self, *args, **kwargs):
 		self._send('cmd_result', args, kwargs)
 
-	def state_invocation_start(self, *args, **kwargs):
-		self._send('state_invocation_start', args, kwargs)
+	def state_funcall_start(self, *args, **kwargs):
+		self._send('state_funcall_start', args, kwargs)
 
-	def state_invocation_finish(self, *args, **kwargs):
-		self._send('state_invocation_finish', args, kwargs)
+	def state_funcall_finish(self, *args, **kwargs):
+		self._send('state_funcall_finish', args, kwargs)
 
 	def state_summary(self, *args, **kwargs):
 		self._send('state_summary', args, kwargs)

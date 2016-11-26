@@ -28,13 +28,13 @@ def cmd_result(result):
 	LOG.info(logstr)
 
 
-def state_invocation_start(state, state_invocation):
-	LOG.info('Starting state invocation: %s -- %s',
-		state.name, state_invocation.func)
+def state_funcall_start(state, state_funcall):
+	LOG.info('Starting state function call: %s -- %s',
+		state.name, state_funcall.func)
 
 
-def state_invocation_finish(state, state_invocation, result):
-	logstr = 'State invocation finished: '
+def state_funcall_finish(state, state_funcall, result):
+	logstr = 'State function call finished: '
 	logstr += 'success' if result.success else 'failure'
 	if result.changes:
 		logstr += '\n'

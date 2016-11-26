@@ -4,8 +4,8 @@ from prove import states
 
 def test_state_requires_accumulates_invocation_requires():
 	s = states.State('s1', [
-		states.StateInvocation('f1', {'requires': ['s2']}),
-		states.StateInvocation('f2', {'requires': ['s3']}),
+		states.StateFuncCall('f1', {'requires': ['s2']}),
+		states.StateFuncCall('f2', {'requires': ['s3']}),
 	])
 	assert ['s2', 's3'] == s.requires
 
@@ -13,10 +13,10 @@ def test_state_requires_accumulates_invocation_requires():
 def test_required_states_are_first():
 	s = [
 		states.State('s1', [
-			states.StateInvocation('f1', {'requires': ['s2']})
+			states.StateFuncCall('f1', {'requires': ['s2']})
 		]),
 		states.State('s2', [
-			states.StateInvocation('f2', {})
+			states.StateFuncCall('f2', {})
 		])
 	]
 	sf = states.LoadedStateFile('sf', s)
@@ -28,10 +28,10 @@ def test_required_states_are_first():
 def test_recursive_require_throws_exception():
 	s = [
 		states.State('s1', [
-			states.StateInvocation('f1', {'requires': ['s2']})
+			states.StateFuncCall('f1', {'requires': ['s2']})
 		]),
 		states.State('s2', [
-			states.StateInvocation('f2', {'requires': ['s1']})
+			states.StateFuncCall('f2', {'requires': ['s1']})
 		])
 	]
 	sf = states.LoadedStateFile('sf', s)
@@ -42,7 +42,7 @@ def test_recursive_require_throws_exception():
 def test_lazy_state():
 	sf = states.LoadedStateFile('sf', [
 		states.State('s1', [
-			states.StateInvocation('f1', {'lazy': True})
+			states.StateFuncCall('f1', {'lazy': True})
 		]),
 	])
 	assert [] == states.sort_states([sf])
@@ -51,13 +51,13 @@ def test_lazy_state():
 def test_notify_lazy_state():
 	sf = states.LoadedStateFile('sf', [
 		states.State('s1', [
-			states.StateInvocation('f1', {'lazy': True})
+			states.StateFuncCall('f1', {'lazy': True})
 		]),
 		states.State('s2', [
-			states.StateInvocation('f2', {'notify': ['s1']})
+			states.StateFuncCall('f2', {'notify': ['s1']})
 		]),
 		states.State('s3', [
-			states.StateInvocation('f2', {'notify': ['s1']})
+			states.StateFuncCall('f2', {'notify': ['s1']})
 		]),
 	])
 	s = states.sort_states([sf])
@@ -70,13 +70,13 @@ def test_notify_lazy_state():
 def test_notify_defered_state():
 	sf = states.LoadedStateFile('sf', [
 		states.State('s1', [
-			states.StateInvocation('f1', {'defer': True})
+			states.StateFuncCall('f1', {'defer': True})
 		]),
 		states.State('s2', [
-			states.StateInvocation('f2', {'notify': ['s1']})
+			states.StateFuncCall('f2', {'notify': ['s1']})
 		]),
 		states.State('s3', [
-			states.StateInvocation('f2', {'notify': ['s1']})
+			states.StateFuncCall('f2', {'notify': ['s1']})
 		]),
 	])
 	s = states.sort_states([sf])

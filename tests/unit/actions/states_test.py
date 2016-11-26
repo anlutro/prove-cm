@@ -3,12 +3,12 @@ from unittest import mock
 from tests.unit.actions import make_app_conn
 
 import prove.actions.states
-from prove.states import State, StateInvocation, StateResult
+from prove.states import State, StateFuncCall, StateResult
 
 
 def test_StatesCommand():
 	state = State('test', [
-		StateInvocation('test.noop', {})
+		StateFuncCall('test.noop', {})
 	])
 	app, conn = make_app_conn([state])
 	command = prove.actions.states.StatesCommand(app, args=[])

@@ -12,33 +12,33 @@ class StatesAction(prove.actions.Action):
 
 	def run(self):
 		for state in self.session.env.states:
-			for invocation in state.invocations:
-				if invocation.lazy is True:
-					LOG.debug('Skipping lazy invocation: %s %s',
-						state.name, invocation.func)
+			for funcall in state.funcalls:
+				if funcall.lazy is True:
+					LOG.debug('Skipping lazy funcall: %s %s',
+						state.name, funcall.func)
 					continue
-				self.session.output.state_invocation_start(state, invocation)
-				result = self.run_invocation(invocation)
-				self.session.output.state_invocation_finish(state, invocation, result)
+				self.session.output.state_funcall_start(state, funcall)
+				result = self.run_funcall(funcall)
+				self.session.output.state_funcall_finish(state, funcall, result)
 
-	def run_invocation(self, invocation):
-		if invocation.unless:
-			for cmd in invocation.unless:
+	def run_funcall(self, funcall):
+		if funcall.unless:
+			for cmd in funcall.unless:
 				if self.session.run_command(cmd).was_successful:
 					return prove.states.StateResult(
 						success=True,
 						comment='unless command was successful: ' + cmd
 					)
 
-		if invocation.onlyif:
-			for cmd in invocation.onlyif:
+		if funcall.onlyif:
+			for cmd in funcall.onlyif:
 				if not self.session.run_command(cmd).was_successful:
 					return prove.states.StateResult(
 						success=True,
 						comment='onlyif command failed: ' + cmd
 					)
 
-		state_mod, state_func = invocation.func.split('.')
+		state_mod, state_func = funcall.func.split('.')
 
 		# state_function modules have the ability to lazy-load other modules
 		# depending on things like linux distribution.
@@ -48,18 +48,18 @@ class StatesAction(prove.actions.Action):
 				state_mod = state_mod.__virtual__(self.session)
 
 		state_func = getattr(state_mod, state_func)
-		result = state_func(self.session, invocation.args)
+		result = state_func(self.session, funcall.args)
 		if not isinstance(result, prove.states.StateResult):
 			raise ValueError('State function {}.{} did not return a StateResult object'.format(
 				state_mod.__name__, state_func.__name__))
 
-		if result.changes and invocation.changes_notify:
-			for listener in invocation.changes_notify:
+		if result.changes and funcall.changes_notify:
+			for listener in funcall.changes_notify:
 				state = self.session.env.find_state(listener)
 				if state:
-					for invocation in state.invocations:
-						if invocation.lazy:
-							invocation.lazy = False
+					for funcall in state.funcalls:
+						if funcall.lazy:
+							funcall.lazy = False
 
 		return result
 
