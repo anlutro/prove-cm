@@ -5,8 +5,9 @@ def __virtual__(session):
 	os_info = session.info
 
 	if os_info.distro == 'Debian' and os_info.distro_version >= '8.0':
-		import prove.state_functions.service.debian8
-		return prove.state_functions.service.debian8
+		return 'prove.state_functions.service.debian8'
+	elif session.info.program_exists('systemctl'):
+		return 'prove.state_functions.service.systemd'
 
 	raise Exception('No appropriate service state module found')
 
