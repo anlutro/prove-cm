@@ -1,4 +1,8 @@
+import logging
+
 import prove.util
+
+LOG = logging.getLogger(__name__)
 
 
 class StateException(Exception):
@@ -41,24 +45,38 @@ def sort_states(state_files):
 	states = []
 	states_added = []
 
-	def append_states(states_to_append, stack):
-		for state in states_to_append:
-			if state.name in stack:
-				raise StateRequireRecursionException(stack + [state.name])
+	def iter_states():
+		for loaded_state_file in state_files:
+			for state in loaded_state_file.states:
+				yield state
 
-			append_states(
-				[avail_states[require] for require in state.requires],
-				stack + [state.name]
-			)
+	def append_state(state, stack, only_once=True):
+		if state.name in stack:
+			raise StateRequireRecursionException(stack + [state.name])
 
-			if state.name in states_added:
-				continue
+		if only_once and state.name in states_added:
+			return
 
-			states.append(state)
-			states_added.append(state.name)
+		for require_state in state.requires:
+			append_state(avail_states[require_state], stack + [state.name])
 
-	for loaded_state_file in state_files:
-		append_states(loaded_state_file.states, [])
+		states.append(state)
+		states_added.append(state.name)
+
+		for notify_state in state.notify:
+			notify_state = avail_states[notify_state]
+			if notify_state.defer:
+				notify_state._lazy_notified = True
+			else:
+				append_state(notify_state, stack + [state.name], only_once=False)
+
+	for state in iter_states():
+		if not state.lazy and not state.defer:
+			append_state(state, [], only_once=True)
+
+	for state in iter_states():
+		if state.defer and (not state.lazy or state._lazy_notified):
+			append_state(state, [], only_once=True)
 
 	return states
 
@@ -113,14 +131,33 @@ class State:
 	def __init__(self, name, invocations):
 		self.name = name
 		self.invocations = invocations
+		self.lazy = self._combine_invocation_prop('lazy', bool)
+		self.defer = self._combine_invocation_prop('defer', bool)
+
+	def _combine_invocation_prop(self, prop_name, prop_type):
+		if prop_type is bool:
+			return any([getattr(i, prop_name) for i in self.invocations])
+		elif prop_type is list:
+			combined = []
+			for i in self.invocations:
+				attr = getattr(i, prop_name)
+				if attr:
+					combined.extend(attr)
+			return combined
+		else:
+			raise ValueError("don't know how to combine type %s" % prop_type)
+
+	@property
+	def notify(self):
+		return self._combine_invocation_prop('notify', list)
+
+	@property
+	def notify_failure(self):
+		return self._combine_invocation_prop('notify_failure', list)
 
 	@property
 	def requires(self):
-		requires = []
-		for invocation in self.invocations:
-			if invocation.requires:
-				requires += invocation.requires
-		return requires
+		return self._combine_invocation_prop('requires', list)
 
 	def __repr__(self):
 		return '<{} "{}">'.format(self.__class__.__name__, self.name)
