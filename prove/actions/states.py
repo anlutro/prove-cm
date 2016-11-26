@@ -46,6 +46,8 @@ class StatesAction(prove.actions.Action):
 			state_mod = importlib.import_module('prove.state_functions.' + state_mod)
 			if hasattr(state_mod, '__virtual__'):
 				state_mod = state_mod.__virtual__(self.session)
+				if isinstance(state_mod, str):
+					state_mod = importlib.import_module(state_mod)
 
 		state_func = getattr(state_mod, state_func)
 		result = state_func(self.session, fncall.args)
