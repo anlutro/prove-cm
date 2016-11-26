@@ -37,18 +37,17 @@ def sort_states(state_files):
 	if isinstance(state_files, dict):
 		state_files = state_files.values()
 
-	avail_states = {}
-	for loaded_state_file in state_files:
-		for state in loaded_state_file.states:
-			avail_states[state.name] = state
-
-	states = []
-	states_added = []
-
 	def iter_states():
 		for loaded_state_file in state_files:
 			for state in loaded_state_file.states:
 				yield state
+
+	avail_states = {}
+	for state in iter_states():
+		avail_states[state.name] = state
+
+	states = []
+	states_added = []
 
 	def append_state(state, stack, only_once=True):
 		if state.name in stack:
