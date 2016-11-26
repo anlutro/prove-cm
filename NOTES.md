@@ -40,11 +40,9 @@ write custom states. For example:
 Some states should be "lazy" - that is, they only run if specifically requested
 to do so. Examples of this would be the restarting of a service.
 
-States request other states to run by "triggering" them. This can also be
-inverted - a state can specify which other states it should be triggered on by
-specifying that it's "watching" them.
-
-A trigger only happens when there is a change.
+States request other states to run by notifying them. This can also be inverted
+- a state can specify which other states it should be notified on by specifying
+that it's listening to them.
 
 There should be a set of "meta" state functions that can be used for stuff like
 gathering multiple states into one so that it's easy for other states to require

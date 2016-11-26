@@ -139,15 +139,13 @@ class StateInvocation:
 		self.requires = _default_list('requires')
 		self.unless = _default_list('unless')
 		self.onlyif = _default_list('onlyif')
-		self.changes_trigger = _default_list('changes_trigger')
-		self.success_trigger = _default_list('success_trigger')
-		self.failure_trigger = _default_list('failure_trigger')
-		self.listen_changes = _default_list('listen_changes')
-		self.listen_success = _default_list('listen_success')
+		self.notify = _default_list('notify')
+		self.notify_failure = _default_list('notify_failure')
+		self.listen = _default_list('listen')
 		self.listen_failure = _default_list('listen_failure')
 
-		lazy_def = self.listen_changes or self.listen_success or self.listen_failure
-		self.lazy = args.pop('lazy', lazy_def)
+		# if lazy isn't defined, default to true if any of the "listens" are set
+		self.lazy = args.pop('lazy', self.listen or self.listen_failure)
 		self.defer = args.pop('defer', False)
 		self.args = args
 

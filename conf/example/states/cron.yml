@@ -10,7 +10,7 @@ cron_installed:
   - fn: file.managed
     path: /etc/default/cron
     src: prove://files/cron_default
-    trigger:
+    notify:
       - restart_cron
 
 restart_cron:

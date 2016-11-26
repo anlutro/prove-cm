@@ -88,7 +88,7 @@ letsencrypt_cert_${cert['name']}:
     unless: test -f ${conf_dir}/domains/${cert['name']}.csr
     require:
       - openssl_installed
-    trigger:
+    notify:
       - webserver_vhosts
       - reload_webserver
 
@@ -104,7 +104,7 @@ letsencrypt_cert_${cert['name']}:
     unless: test -f ${conf_dir}/domains/${cert['name']}.pem
     require:
       - webserver_running
-    trigger:
+    notify:
       - webserver_vhosts
       - reload_webserver
 

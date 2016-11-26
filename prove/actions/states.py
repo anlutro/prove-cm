@@ -53,8 +53,8 @@ class StatesAction(prove.actions.Action):
 			raise ValueError('State function {}.{} did not return a StateResult object'.format(
 				state_mod.__name__, state_func.__name__))
 
-		if result.changes and invocation.changes_trigger:
-			for listener in invocation.changes_trigger:
+		if result.changes and invocation.changes_notify:
+			for listener in invocation.changes_notify:
 				state = self.session.env.find_state(listener)
 				if state:
 					for invocation in state.invocations:
