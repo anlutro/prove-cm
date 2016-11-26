@@ -30,12 +30,12 @@ def cmd_result(result):
 		print(result.stdout)
 
 
-def state_funcall_start(state, state_funcall):
-	sys.stdout.write('\n=> {} -- {}'.format(state.name, state_funcall.func))
+def state_fncall_start(state, state_fncall):
+	sys.stdout.write('\n=> {} -- {}'.format(state.name, state_fncall.func))
 	sys.stdout.flush()
 
 
-def state_funcall_finish(state, state_funcall, result):
+def state_fncall_finish(state, state_fncall, result):
 	print(' --', 'success' if result.success else 'failure')
 	if result.changes:
 		if len(result.changes) > 1:

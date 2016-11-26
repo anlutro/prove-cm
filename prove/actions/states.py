@@ -12,33 +12,33 @@ class StatesAction(prove.actions.Action):
 
 	def run(self):
 		for state in self.session.env.states:
-			for funcall in state.funcalls:
-				if funcall.lazy is True:
-					LOG.debug('Skipping lazy funcall: %s %s',
-						state.name, funcall.func)
+			for fncall in state.fncalls:
+				if fncall.lazy is True:
+					LOG.debug('Skipping lazy fncall: %s %s',
+						state.name, fncall.func)
 					continue
-				self.session.output.state_funcall_start(state, funcall)
-				result = self.run_funcall(funcall)
-				self.session.output.state_funcall_finish(state, funcall, result)
+				self.session.output.state_fncall_start(state, fncall)
+				result = self.run_fncall(fncall)
+				self.session.output.state_fncall_finish(state, fncall, result)
 
-	def run_funcall(self, funcall):
-		if funcall.unless:
-			for cmd in funcall.unless:
+	def run_fncall(self, fncall):
+		if fncall.unless:
+			for cmd in fncall.unless:
 				if self.session.run_command(cmd).was_successful:
 					return prove.states.StateResult(
 						success=True,
 						comment='unless command was successful: ' + cmd
 					)
 
-		if funcall.onlyif:
-			for cmd in funcall.onlyif:
+		if fncall.onlyif:
+			for cmd in fncall.onlyif:
 				if not self.session.run_command(cmd).was_successful:
 					return prove.states.StateResult(
 						success=True,
 						comment='onlyif command failed: ' + cmd
 					)
 
-		state_mod, state_func = funcall.func.split('.')
+		state_mod, state_func = fncall.func.split('.')
 
 		# state_function modules have the ability to lazy-load other modules
 		# depending on things like linux distribution.
@@ -48,18 +48,18 @@ class StatesAction(prove.actions.Action):
 				state_mod = state_mod.__virtual__(self.session)
 
 		state_func = getattr(state_mod, state_func)
-		result = state_func(self.session, funcall.args)
+		result = state_func(self.session, fncall.args)
 		if not isinstance(result, prove.states.StateResult):
 			raise ValueError('State function {}.{} did not return a StateResult object'.format(
 				state_mod.__name__, state_func.__name__))
 
-		if result.changes and funcall.changes_notify:
-			for listener in funcall.changes_notify:
+		if result.changes and fncall.changes_notify:
+			for listener in fncall.changes_notify:
 				state = self.session.env.find_state(listener)
 				if state:
-					for funcall in state.funcalls:
-						if funcall.lazy:
-							funcall.lazy = False
+					for fncall in state.fncalls:
+						if fncall.lazy:
+							fncall.lazy = False
 
 		return result
 

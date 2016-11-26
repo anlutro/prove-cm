@@ -36,10 +36,10 @@ class InspectCommand(prove.actions.Command):
 			print('  states:')
 			for state in session.env.states:
 				print('    ' + state.name + ':')
-				for funcall in state.funcalls:
-					print('     - fn:', funcall.func)
-					for key, value in vars(funcall).items():
+				for fncall in state.fncalls:
+					print('     - fn:', fncall.func)
+					for key, value in vars(fncall).items():
 						if value and key not in ('func', 'args'):
 							print('       {}: {}'.format(key, repr(value)))
-					for key, value in funcall.args.items():
+					for key, value in fncall.args.items():
 						print('       {}: {}'.format(key, repr(value)))

@@ -28,12 +28,12 @@ def cmd_result(result):
 	LOG.info(logstr)
 
 
-def state_funcall_start(state, state_funcall):
+def state_fncall_start(state, state_fncall):
 	LOG.info('Starting state function call: %s -- %s',
-		state.name, state_funcall.func)
+		state.name, state_fncall.func)
 
 
-def state_funcall_finish(state, state_funcall, result):
+def state_fncall_finish(state, state_fncall, result):
 	logstr = 'State function call finished: '
 	logstr += 'success' if result.success else 'failure'
 	if result.changes:

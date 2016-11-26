@@ -104,17 +104,17 @@ class StateFile:
 				for require in value:
 					requires.add(require)
 			else:
-				funcalls = []
+				fncalls = []
 				if isinstance(value, dict):
 					for func, args in value.items():
-						funcalls.append(StateFuncCall(func, args))
+						fncalls.append(StateFuncCall(func, args))
 				elif isinstance(value, list):
 					for args in value:
 						func = args.pop('fn')
-						funcalls.append(StateFuncCall(func, args))
+						fncalls.append(StateFuncCall(func, args))
 				else:
 					raise Exception('State data must be dict or list')
-				states.append(State(key, funcalls))
+				states.append(State(key, fncalls))
 
 		return LoadedStateFile(self.name, states, includes=includes, requires=requires)
 
@@ -128,18 +128,18 @@ class LoadedStateFile:
 
 
 class State:
-	def __init__(self, name, funcalls):
+	def __init__(self, name, fncalls):
 		self.name = name
-		self.funcalls = funcalls
-		self.lazy = self._combine_funcall_prop('lazy', bool)
-		self.defer = self._combine_funcall_prop('defer', bool)
+		self.fncalls = fncalls
+		self.lazy = self._combine_fncall_prop('lazy', bool)
+		self.defer = self._combine_fncall_prop('defer', bool)
 
-	def _combine_funcall_prop(self, prop_name, prop_type):
+	def _combine_fncall_prop(self, prop_name, prop_type):
 		if prop_type is bool:
-			return any([getattr(i, prop_name) for i in self.funcalls])
+			return any([getattr(i, prop_name) for i in self.fncalls])
 		elif prop_type is list:
 			combined = []
-			for i in self.funcalls:
+			for i in self.fncalls:
 				attr = getattr(i, prop_name)
 				if attr:
 					combined.extend(attr)
@@ -149,15 +149,15 @@ class State:
 
 	@property
 	def notify(self):
-		return self._combine_funcall_prop('notify', list)
+		return self._combine_fncall_prop('notify', list)
 
 	@property
 	def notify_failure(self):
-		return self._combine_funcall_prop('notify_failure', list)
+		return self._combine_fncall_prop('notify_failure', list)
 
 	@property
 	def requires(self):
-		return self._combine_funcall_prop('requires', list)
+		return self._combine_fncall_prop('requires', list)
 
 	def __repr__(self):
 		return '<{} "{}">'.format(self.__class__.__name__, self.name)
