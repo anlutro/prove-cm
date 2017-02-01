@@ -42,12 +42,24 @@ class ActionRunner(prove.cli.SingleCommandClient):
 
 		return config
 
+	def parse_command_args(self, raw_args):
+		args = []
+		kwargs = {}
+		for arg in raw_args:
+			if '=' in arg:
+				key, val = arg.split('=', 1)
+				kwargs[key] = val
+			else:
+				args.append(arg)
+		return args, kwargs
+
 	def get_command(self, app):
 		cmd_module = 'prove.actions.' + self.args.command.replace('-', '_')
 		cmd_module = importlib.import_module(cmd_module)
 		cmd_class = prove.util.snake_to_camel_case(self.args.command)
 		cmd_class = getattr(cmd_module, cmd_class + 'Command')
-		return cmd_class(app, self.args.command_args)
+		args, kwargs = self.parse_command_args(self.args.command_args)
+		return cmd_class(app, args, kwargs)
 
 
 def main():

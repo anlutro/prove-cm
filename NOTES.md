@@ -51,3 +51,17 @@ the traditional state function pattern.
 
 Some states will be too difficult to code in a way that lets it work over SSH.
 These should give the user a warning that they need to use an agent.
+
+## State types
+
+StateFile
+	contains multiple State
+		contains multiple StatePart
+
+StateRun
+	contains multiple StateInvocation
+		contains multiple StatePartInvocation
+	contains multiple RootNode
+		contains multiple Node
+			contains multiple dependency Node
+			contains multiple notify/notify_failure Node

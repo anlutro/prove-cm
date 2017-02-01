@@ -1,9 +1,12 @@
 options:
   executor: local
-  output: console
+  output: log
   log_path: stderr
   log_level: debug
   remote_transport: tcp
+
+  states:
+    max_workers: 1
 
   ssl:
     ca_path: ssl/ca.crt

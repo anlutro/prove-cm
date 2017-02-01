@@ -1,15 +1,18 @@
 {
-	"folders":
-	[
-		{
-			"path": ".",
-			"folder_exclude_patterns": [
-				"bin*",
-				"include*",
-				"lib*",
-				"share*",
-				"node_modules*",
-			],
-		}
-	],
+  "folders": [
+    {
+      "folder_exclude_patterns": [
+        "build*",
+        ".venv*",
+        ".virtualenv*",
+        "bin*",
+        "dist*",
+        "include*",
+        "lib*",
+        "local*",
+        "share*"
+      ],
+      "path": "."
+    }
+  ]
 }

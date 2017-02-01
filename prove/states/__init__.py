@@ -185,6 +185,9 @@ class StateFuncCall:
 		self.defer = args.pop('defer', False)
 		self.args = args
 
+	def __repr__(self):
+		return '<{} "{}">'.format(self.__class__.__name__, self.func)
+
 
 class StateResult:
 	def __init__(self, success=None, changes=None, comment=None, comments=None,
@@ -195,6 +198,10 @@ class StateResult:
 		self.comments = comments
 		self.stdout = stdout
 		self.stderr = stderr
+
+	@property
+	def failure(self):
+		return not self.success
 
 	def format_comment(self):
 		comment = self.comment or ''
@@ -209,3 +216,19 @@ class StateResult:
 			comment += '\n\nSystem stderr:\n' + prove.util.indent_string(self.stderr, 2)
 
 		return comment.strip()
+
+
+class StateInvocation:
+	def __init__(self, state):
+		self.state = state
+
+	@property
+	def fncalls(self):
+		return self.state.fncalls
+
+
+class LazyStateInvocation:
+	def __init__(self, state):
+		assert state.lazy
+		self.state = state
+		self._lazy_notified = False
