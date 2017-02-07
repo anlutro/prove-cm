@@ -1,3 +1,4 @@
+import pytest
 from prove.states import State, StateFuncCall
 from prove.states.graph import generate_graph
 
@@ -12,6 +13,7 @@ def test_singular_requirements():
 	assert 'a -> (b + (c -> d))' == str(graph)
 
 
+@pytest.mark.skip(reason='not implemented yet')
 def test_mutliple_requirements():
 	states = [
 		State('a', [StateFuncCall('test.noop', {})]),
