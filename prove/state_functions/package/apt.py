@@ -8,7 +8,7 @@ class AptPkgState(AbstractPkgState):
 
 	def _install(self, package):
 		cmd = [
-			'apt-get', 'install', pkg, '--assume-yes',
+			'apt-get', 'install', package, '--assume-yes',
 			'-o', 'DPkg::Options::=--force-confnew',
 			'-o', 'DPkg::Options::=--force-confdef',
 			'-o', 'DPkg::Options::=--force-confmiss',
