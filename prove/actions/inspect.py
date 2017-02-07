@@ -1,6 +1,5 @@
 import yaml
 import prove.actions
-import prove.utils
 
 
 class InspectCommand(prove.actions.Command):

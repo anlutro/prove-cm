@@ -1,4 +1,4 @@
-from prove.state_functions.package import AbstractPkgState
+from prove.state_functions.package.common import AbstractPkgState
 
 
 class AptPkgState(AbstractPkgState):
