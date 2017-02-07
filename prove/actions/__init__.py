@@ -14,10 +14,10 @@ class Action:
 
 
 class Command:
-	def __init__(self, app, args, kwargs):
+	def __init__(self, app, args=None, kwargs=None):
 		self.app = app
-		self.args = args
-		self.kwargs = kwargs
+		self.args = args or []
+		self.kwargs = kwargs or {}
 
 	def run(self, targets=None):
 		if targets is None:
