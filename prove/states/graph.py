@@ -22,7 +22,10 @@ class StateGraphNode:
 						child_strs.append('(' + str(node) + ')')
 					else:
 						child_strs.append(str(node))
-				ret += '(' + ' + '.join(child_strs) + ')'
+				delim = '+'
+				if any(n.children for n in self.children):
+					delim = ' + '
+				ret += '(' + delim.join(child_strs) + ')'
 		return ret
 
 
