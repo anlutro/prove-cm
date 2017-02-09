@@ -40,19 +40,14 @@ class StateGraph:
 def generate_graph(state_list):
 	avail_states = {}
 	rev_requires = {}
-	all_requires = {} # TODO: may not be necessary
 
 	for state in state_list:
 		avail_states[state.name] = state
-
-		if state.name not in all_requires:
-			all_requires[state.name] = []
 
 		for require in state.requires:
 			if require not in rev_requires:
 				rev_requires[require] = []
 			rev_requires[require].append(state.name)
-			all_requires[state.name].append(require)
 
 	branch_endpoints = set()
 	for state in state_list:
