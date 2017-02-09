@@ -22,6 +22,7 @@ def test_multiple_dependents():
 	assert 'a -> (b+c)' == str(graph)
 
 
+@pytest.mark.xfail(reason='not implemented yet')
 def test_singular_requirements():
 	graph = generate_graph([
 		_state('a'),
@@ -32,7 +33,6 @@ def test_singular_requirements():
 	assert 'a -> (b + (c -> d))' == str(graph)
 
 
-@pytest.mark.xfail(reason='not implemented yet')
 def test_multiple_dependencies():
 	graph = generate_graph([
 		_state('a'),
@@ -42,7 +42,6 @@ def test_multiple_dependencies():
 	assert '(a+b) -> c' == str(graph)
 
 
-@pytest.mark.xfail(reason='not implemented yet')
 def test_mutliple_requirements():
 	graph = generate_graph([
 		_state('a'),
@@ -55,7 +54,6 @@ def test_mutliple_requirements():
 	assert '(a+b) -> c -> (d+e) -> f' == str(graph)
 
 
-@pytest.mark.xfail(reason='not implemented yet')
 def test_shared_branches():
 	graph = generate_graph([
 		_state('a'),

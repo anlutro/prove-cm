@@ -161,6 +161,9 @@ class State:
 	def __repr__(self):
 		return '<{} "{}">'.format(self.__class__.__name__, self.name)
 
+	def __gt__(self, other):
+		return self.name > other.name
+
 
 class StateFuncCall:
 	def __init__(self, func, args):
