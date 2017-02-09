@@ -23,14 +23,15 @@ def test_multiple_dependents():
 
 
 @pytest.mark.xfail(reason='not implemented yet')
-def test_singular_requirements():
+def test_branching():
 	graph = generate_graph([
 		_state('a'),
 		_state('b', ['a']),
 		_state('c', ['a']),
-		_state('d', ['c']),
+		_state('d', ['b']),
+		_state('e', ['c']),
 	])
-	assert 'a -> (b + (c -> d))' == str(graph)
+	assert 'a -> (b -> d) + (c -> e)' == str(graph)
 
 
 def test_multiple_dependencies():
