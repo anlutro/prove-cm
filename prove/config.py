@@ -77,3 +77,8 @@ class Target:
 		self.variables = variables or {}
 		self.variable_files = variable_files or []
 		self.options = kwargs
+
+	def __repr__(self):
+		return '<%s.%s "%s" at 0x%x>' % (
+			self.__module__, self.__class__.__name__, self.name, id(self)
+		)
