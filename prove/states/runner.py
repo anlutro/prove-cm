@@ -80,11 +80,11 @@ class StateRunner:
 			result = self.state_prereq(fncall.unless, False)
 		return result
 
-	def state_prereq(self, commands, expect_result):
+	def state_prereq(self, commands, expect_success):
 		for cmd in commands:
-			if self.session.run_command(cmd).was_successful == expect_result:
+			if self.session.run_command(cmd).was_successful == expect_success:
 				msg = 'prerequisite met: %s: %s' % (
-					('success' if expect_result else 'failure'),
+					('success' if expect_success else 'failure'),
 					cmd
 				)
 				return StateResult(success=True, comment=msg)
