@@ -33,6 +33,8 @@ class StateRunner:
 
 		for fncall in state.fncalls:
 			LOG.debug('running state.fncall %r', fncall)
+			self.session.output.state_fncall_start(state, fncall)
+
 			prereq_result = self.state_prereqs(fncall)
 			if prereq_result:
 				result = prereq_result
