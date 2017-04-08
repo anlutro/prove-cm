@@ -42,7 +42,7 @@ class Session(prove.executor.Session):
 		super().__init__(*args)
 
 	def run_action(self, action):
-		action.run(self)
+		action.run()
 
 	def connect(self):
 		kwargs = {}
@@ -53,14 +53,10 @@ class Session(prove.executor.Session):
 		if self.options.get('password'):
 			kwargs['password'] = self.options['password']
 		if self.options.get('ssh_key'):
-			kwargs['key_filename'] = self.options('ssh_key')
-			kwargs['look_for_keys'] = True
+			kwargs['key_filename'] = self.options['ssh_key']
+			kwargs['look_for_keys'] = False
 
 		self.ssh_client.connect(self.target.host, **kwargs)
-
-		if self.options.get('sudo'):
-			LOG.debug('Switching to root')
-			self.run_command('sudo -su')
 
 	def disconnect(self):
 		self.ssh_client.close()
@@ -68,6 +64,8 @@ class Session(prove.executor.Session):
 			self.sftp_client.close()
 
 	def run_command(self, command, timeout=None, get_pty=False):
+		if self.options.get('sudo'):
+			command = ['sudo', '-n', '--'] + command
 		command = prove.util.cmd_as_string(command)
 		LOG.debug('Running command: `%s`', command)
 
