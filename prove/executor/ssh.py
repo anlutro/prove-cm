@@ -58,6 +58,11 @@ class Session(prove.executor.Session):
 
 		self.ssh_client.connect(self.target.host, **kwargs)
 
+		if self.options.get('sudo'):
+			result = self.run_command(['sudo', '-n', '--', 'true'])
+			if result.exit_code > 0:
+				raise Exception(result.stderr.strip())
+
 	def disconnect(self):
 		self.ssh_client.close()
 		if self.sftp_client:
