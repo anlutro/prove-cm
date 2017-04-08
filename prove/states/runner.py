@@ -1,3 +1,4 @@
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 import importlib
 import logging
@@ -25,6 +26,8 @@ class StateRunner:
 
 	def run_state(self, state):
 		LOG.debug('running state %r', state)
+		if state in self.results:
+			raise Exception('state %r already in results!' % state)
 		self.results[state] = {}
 		ret = True
 
@@ -51,21 +54,21 @@ class StateRunner:
 					raise ValueError('State function {}.{} did not return a StateResult object'.format(
 						state_mod.__name__, state_func.__name__))
 
-				if result.success and result.changes:
-					if fncall.notify:
-						for notify_state in fncall.notify:
-							self.run_state(notify_state)
-				elif result.failure:
-					ret = False
-					if fncall.notify_failure:
-						for notify_state in fncall.notify_failure:
-							self.run_state(notify_state)
-					LOG.debug('state.fncall %r failed, aborting', fncall)
-					break
-
 			LOG.debug('finished state.fncall %r', fncall)
-			self.results[state][fncall] = result
 			self.session.output.state_fncall_finish(state, fncall, result)
+			self.results[state][fncall] = result
+
+			if result.failure:
+				ret = False
+				if fncall.notify_failure:
+					for notify_state in fncall.notify_failure:
+						self.run_state(notify_state)
+				LOG.info('state.fncall %r failed, aborting', fncall)
+				break
+
+			if result.success and result.changes and fncall.notify:
+				for notify_state in fncall.notify:
+					self.run_state(notify_state)
 
 		return ret
 
