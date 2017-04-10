@@ -1,3 +1,4 @@
+from prove.loaders import LoaderException
 from collections import OrderedDict
 import yaml
 
@@ -17,7 +18,10 @@ OrderedLoader.add_constructor(
 
 
 def _ordered_load(stream):
-	return yaml.load(stream, OrderedLoader)
+	try:
+		return yaml.load(stream, OrderedLoader)
+	except yaml.scanner.ScannerError as e:
+		raise LoaderException('error while parsing %r' % stream) from e
 
 
 def supports(filename):
