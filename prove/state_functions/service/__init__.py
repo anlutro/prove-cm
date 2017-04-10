@@ -18,17 +18,17 @@ class ServiceState():
 
 		if self.is_service_enabled(session, args['service']):
 			result.success = True
-			result.comment = 'Service {} is already enabled'.format(args['service'])
+			result.comment = 'service {} is already enabled'.format(args['service'])
 			return result
 
 		cmd_result = self.enable_service(session, args['service'])
 		if cmd_result.was_successful:
 			result.success = True
-			result.comment = 'Service {} was enabled'.format(args['service'])
+			result.comment = 'service {} was enabled'.format(args['service'])
 			return result
 
 		result.success = False
-		result.comment = 'Service {} could not be enabled'.format(args['service'])
+		result.comment = 'service {} could not be enabled'.format(args['service'])
 		if cmd_result.stderr:
 			result.comment += '\n' + cmd_result.stderr
 		if cmd_result.stdout:
@@ -40,17 +40,17 @@ class ServiceState():
 
 		if self.is_service_running(session, args['service']):
 			result.success = True
-			result.comment = 'Service {} is already running'.format(args['service'])
+			result.comment = 'service {} is already running'.format(args['service'])
 			return result
 
 		cmd_result = self.start_service(session, args['service'])
 		if cmd_result.was_successful:
 			result.success = True
-			result.comment = 'Service {} was started'.format(args['service'])
+			result.comment = 'service {} was started'.format(args['service'])
 			return result
 
 		result.success = False
-		result.comment = 'Service {} could not be started'.format(args['service'])
+		result.comment = 'service {} could not be started'.format(args['service'])
 		if cmd_result.stderr:
 			result.comment += '\n' + cmd_result.stderr
 		if cmd_result.stdout:

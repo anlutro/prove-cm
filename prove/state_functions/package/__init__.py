@@ -8,4 +8,4 @@ def __virtual__(session):
 		import prove.state_functions.package.zypper
 		return prove.state_functions.package.zypper
 
-	raise Exception('No appropriate package state module found')
+	raise Exception('no appropriate package state module found')

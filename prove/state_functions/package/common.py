@@ -10,16 +10,16 @@ class AbstractPkgState():
 
 		if self._is_installed(args['package']):
 			result.success = True
-			result.comment = 'Package {} is already installed'.format(args['package'])
+			result.comment = 'package {} is already installed'.format(args['package'])
 			return result
 
 		cmd_result = self._install(args['package'])
 		if cmd_result.was_successful:
 			result.success = True
-			result.comment = 'Package {} was installed'.format(args['package'])
+			result.comment = 'package {} was installed'.format(args['package'])
 
 		result.success = False
-		result.comment = 'Package {} could not be installed'.format(args['package'])
+		result.comment = 'package {} could not be installed'.format(args['package'])
 		if cmd_result.stderr:
 			result.comment += '\n' + cmd_result.stderr
 		if cmd_result.stdout:
