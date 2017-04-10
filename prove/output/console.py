@@ -2,31 +2,31 @@ import sys
 
 
 def connect_start(target):
-	sys.stdout.write('Connecting to {}...'.format(target.host))
+	sys.stdout.write('connecting to %s ...' % target.host)
 	sys.stdout.flush()
 
 
 def connect_success(target):
-	sys.stdout.write(' Connected!\n')
+	sys.stdout.write(' connected!\n')
 	sys.stdout.flush()
 
 
 def connect_failure(target):
-	sys.stdout.write(' Failed!\n')
+	sys.stdout.write(' failed!\n')
 	sys.stdout.flush()
 
 
 def disconnected(target):
-	print('\nDisconnected from {}.'.format(target.host))
+	print('\ndisconnected from {}.'.format(target.host))
 
 
 def cmd_result(result):
-	print('Exit code:', result.exit_code)
+	print('exit code:', result.exit_code)
 	if result.stderr:
-		print('STDERR:')
+		print('system stderr:')
 		print(result.stderr)
 	if result.stdout:
-		print('STDOUT:')
+		print('system stdout:')
 		print(result.stdout)
 
 
@@ -38,10 +38,12 @@ def state_fncall_start(state, state_fncall):
 def state_fncall_finish(state, state_fncall, result):
 	print(' ✓ success' if result.success else ' ✗ failure')
 	if result.changes:
+		if isinstance(result.changes, str):
+			result.changes = [l for l in result.changes.split('\n') if l]
 		if len(result.changes) > 1:
-			print('Changes:\n  ' + '\n  '.join(result.changes))
+			print('changes:\n  ' + '\n  '.join(result.changes))
 		else:
-			print('Changes:', result.changes[0])
+			print('changes:', result.changes[0])
 	comment = result.format_comment()
 	if comment:
 		print(comment)

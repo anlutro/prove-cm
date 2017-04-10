@@ -213,10 +213,10 @@ class StateResult:
 			comment += '\n' + '\n'.join(self.comments)
 
 		if self.stdout:
-			comment += '\n\nSystem stdout:\n' + prove.util.indent_string(self.stdout, 2)
+			comment += '\n\nsystem stdout:\n' + prove.util.indent_string(self.stdout, 2)
 
 		if self.stderr:
-			comment += '\n\nSystem stderr:\n' + prove.util.indent_string(self.stderr, 2)
+			comment += '\n\nsystem stderr:\n' + prove.util.indent_string(self.stderr, 2)
 
 		return comment.strip()
 
