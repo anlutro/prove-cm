@@ -31,15 +31,15 @@ def cmd_result(result):
 
 
 def state_fncall_start(state, state_fncall):
-	sys.stdout.write('\n=> {} -- {}'.format(state.name, state_fncall.func))
+	sys.stdout.write('\n● {} ({})'.format(state.name, state_fncall.func))
 	sys.stdout.flush()
 
 
 def state_fncall_finish(state, state_fncall, result):
-	print(' --', 'success' if result.success else 'failure')
+	print(' ✓ success' if result.success else ' ✗ failure')
 	if result.changes:
 		if len(result.changes) > 1:
-			print('Changes:\n  ', '\n  '.join(result.changes))
+			print('Changes:\n  ' + '\n  '.join(result.changes))
 		else:
 			print('Changes:', result.changes[0])
 	comment = result.format_comment()
