@@ -59,7 +59,7 @@ class Session(prove.executor.Session):
 		self.ssh_client.connect(self.target.host, **kwargs)
 
 		if self.options.get('sudo'):
-			result = self.run_command(['sudo', '-n', '--', 'true'])
+			result = self.run_command('sudo -n -v', skip_sudo=True)
 			if result.exit_code > 0:
 				raise Exception(result.stderr.strip())
 
@@ -68,12 +68,11 @@ class Session(prove.executor.Session):
 		if self.sftp_client:
 			self.sftp_client.close()
 
-	def run_command(self, command, timeout=None, get_pty=False):
-		if self.options.get('sudo'):
-			command = ['sudo', '-n', '--'] + command
+	def run_command(self, command, skip_sudo=False, timeout=None, get_pty=False):
 		command = prove.util.cmd_as_string(command)
-		LOG.debug('Running command: `%s`', command)
-
+		if not skip_sudo and self.options.get('sudo'):
+			command = 'sudo -n -- ' + command
+		LOG.debug('Running command: `%r`', command)
 		chan = self.ssh_client.get_transport().open_session()
 		if get_pty:
 			chan.get_pty()
