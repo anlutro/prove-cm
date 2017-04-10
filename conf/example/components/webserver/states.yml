@@ -11,7 +11,7 @@ webserver_running:
     service: nginx
 
 nginx_configs:
-  - fn: file.manage
+  - fn: file.managed
     path: /etc/nginx/nginx.conf
     src: prove://webserver/nginx.conf
 

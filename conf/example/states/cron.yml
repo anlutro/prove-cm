@@ -7,7 +7,7 @@ cron_installed:
     service: cron
 
 /etc/default/cron:
-  - fn: file.manage
+  - fn: file.managed
     path: /etc/default/cron
     src: prove://files/cron_default
     notify:

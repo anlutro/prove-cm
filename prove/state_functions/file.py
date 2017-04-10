@@ -56,7 +56,7 @@ class FileState:
 		return current_mode, mode
 
 
-class FileManageState(FileState):
+class FileManagedState(FileState):
 	def run(self, path, source=None, content=None, user=None, group=None, mode=None):
 		result = StateResult()
 		result.changes = []
@@ -101,5 +101,5 @@ class FileManageState(FileState):
 		return result
 
 
-def manage(session, args):
-	return FileManageState(session).run(**args)
+def managed(session, args):
+	return FileManagedState(session).run(**args)
