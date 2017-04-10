@@ -95,6 +95,8 @@ class FileManageState(FileState):
 			if old_mode != new_mode:
 				result.changes.append('mode changed from {} to {}'.format(old_mode, new_mode))
 
+		if not result.changes:
+			result.comment = 'no changes to file %s' % path
 		result.success = True
 		return result
 
