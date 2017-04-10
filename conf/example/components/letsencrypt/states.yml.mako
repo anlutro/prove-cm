@@ -35,7 +35,7 @@ letsencrypt_setup:
     require:
       - git_installed
 
-  - fn: file.managed
+  - fn: file.manage
     path: ${conf_dir}/letsencrypt.sh
     src: prove://letsencrypt/letsencrypt.sh
     user: ${username}
@@ -61,7 +61,7 @@ letsencrypt_setup:
     require:
       - openssl_installed
 
-  - fn: file.managed
+  - fn: file.manage
     path: ${conf_dir}/account.key
     user: ${username}
     group: ${username}
@@ -76,7 +76,7 @@ letsencrypt_cert_${cert['name']}:
     require:
       - openssl_installed
 
-  - fn: file.managed
+  - fn: file.manage
     path: ${conf_dir}/domains/${cert['name']}.key
     user: ${username}
     group: ${username}
@@ -92,7 +92,7 @@ letsencrypt_cert_${cert['name']}:
       - webserver_vhosts
       - reload_webserver
 
-  - fn: file.managed
+  - fn: file.manage
     path: ${conf_dir}/domains/${cert['name']}.csr
     user: ${username}
     group: ${username}

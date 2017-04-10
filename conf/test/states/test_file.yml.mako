@@ -1,5 +1,5 @@
 create_file:
-  - fn: file.managed
+  - fn: file.manage
     path: ${test_file_path}
     source: prove://test-file
   - fn: command.run

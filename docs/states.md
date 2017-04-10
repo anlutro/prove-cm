@@ -26,7 +26,7 @@ In the following example, the "nginx" service will be reloaded when, and only wh
 
 ```yaml
 nginx_configs:
-  - fn: file.managed
+  - fn: file.manage
     path: /etc/nginx/nginx.conf
     src: prove://webserver/nginx.conf
 
@@ -42,7 +42,7 @@ We can also use the inverse syntax:
 
 ```yaml
 nginx_configs:
-  - fn: file.managed
+  - fn: file.manage
     path: /etc/nginx/nginx.conf
     src: prove://webserver/nginx.conf
     changes_notify:
