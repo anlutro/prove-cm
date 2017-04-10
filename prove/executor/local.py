@@ -48,8 +48,12 @@ class Session(prove.executor.Session):
 
 		return result
 
-	def _upload_file(self, source, path):
+	def upload_file(self, source, path):
 		return self.run_command('cp {} {}'.format(source, path)).was_successful
+
+	def write_to_file(self, content, path):
+		with open(path, 'w+') as filehandle:
+			filehandle.write(content)
 
 
 class Executor(prove.executor.Executor):

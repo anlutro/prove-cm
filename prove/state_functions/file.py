@@ -7,15 +7,17 @@ class FileState:
 	def __init__(self, session):
 		self.session = session
 
-	def upload_tmpfile(self, source):
+	def write_tmpfile(self, source=None, content=None):
 		result = self.session.run_command('mktemp --suffix=.prove', skip_sudo=True)
 		tmp_path = result.stdout.strip()
-		self.session.upload_file(source, tmp_path)
+		if content:
+			self.session.write_to_file(content, tmp_path)
+		elif source:
+			self.session.upload_file(source, tmp_path)
 		return tmp_path
 
 	def upload_tmpdir(self, source):
-		result = self.session.run_command('mktemp --suffix=.prove')
-		return result.stdout.strip()
+		raise NotImplementedError()
 
 	def get_diff(self, path1, path2):
 		def get_file_lines(path):
@@ -31,24 +33,24 @@ class FileState:
 	def move_tmpfile(self, tmpfile, path):
 		return self.session.run_command('mv %s %s' % (tmpfile, path))
 
-	def _stat(self, path, fmt):
+	def stat(self, path, fmt):
 		result = self.session.run_command("stat -c '%s' %s" % (fmt, path))
 		return result.stdout.strip()
 
 	def ensure_user(self, path, user):
-		current_user = self._stat(path, '%U')
+		current_user = self.stat(path, '%U')
 		if current_user != user:
 			self.session.run_command('chown %s %s' % (user, path))
 		return current_user, user
 
 	def ensure_group(self, path, group):
-		current_group = self._stat(path, '%G')
+		current_group = self.stat(path, '%G')
 		if current_group != group:
 			self.session.run_command('chgrp %s %s' % (group, path))
 		return current_group, group
 
 	def ensure_mode(self, path, mode):
-		current_mode = self._stat(path, '%a')
+		current_mode = self.stat(path, '%a')
 		if current_mode != mode:
 			self.session.run_command('chmod %s %s' % (mode, path))
 		return current_mode, mode
@@ -61,8 +63,11 @@ class FileManagedState(FileState):
 
 		file_exists = self.session.run_command('test -f %s' % path).exit_code == 0
 
-		if source is not None:
-			tmpfile = self.upload_tmpfile(source)
+		tmpfile = None
+		if source or content:
+			tmpfile = self.write_tmpfile(source=source, content=content)
+
+		if tmpfile:
 			should_move_file = False
 			if file_exists:
 				diff = self.get_diff(path, tmpfile)
@@ -73,7 +78,7 @@ class FileManagedState(FileState):
 				should_move_file = True
 				result.changes.append('file created: %s' % path)
 			if should_move_file:
-				mv_result = self.move_tmpfile(tmpfile, path)
+				self.move_tmpfile(tmpfile, path)
 
 		if user is not None:
 			old_user, new_user = self.ensure_user(path, user)

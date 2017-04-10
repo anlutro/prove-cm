@@ -23,8 +23,11 @@ class Session(prove.executor.Session):
 	def run_command(self, *args, **kwargs):
 		raise RuntimeError('Remote session does not run commands')
 
-	def _upload_file(self, *args, **kwargs):
+	def upload_file(self, *args, **kwargs):
 		raise RuntimeError('Remote session does not upload files')
+
+	def write_to_file(self, *args, **kwargs):
+		raise RuntimeError('Remote session does not write to files')
 
 
 class Executor(prove.executor.Executor):

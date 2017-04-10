@@ -1,6 +1,8 @@
 from contextlib import contextmanager
-from lazy import lazy
 import logging
+import tempfile
+
+from lazy import lazy
 
 import prove.config
 import prove.environment
@@ -28,28 +30,37 @@ class Session:
 	def run_action(self, command):
 		raise NotImplementedError()
 
-	def run_command(self, command):
+	def run_command(self, command, skip_sudo=False):
 		raise NotImplementedError()
 
-	def upload_file(self, source, path):
+	def manage_file(self, remote_path, source=None, content=None):
+		if not source and not content:
+			raise ValueError('must provide source or content!')
+
+		if content:
+			self.write_to_file(content, remote_path)
+
 		if source.startswith('http://') or source.startswith('https://'):
 			if self.run_command('which wget').was_successful:
-				return self.run_command('wget -nv {} -O {}'.format(source, path)).was_successful
+				return self.run_command('wget -nv {} -O {}'.format(source, remote_path)).was_successful
 			elif self.run_command('which curl').was_successful:
-				return self.run_command('curl {} -o {}'.format(source, path)).was_successful
+				return self.run_command('curl {} -o {}'.format(source, remote_path)).was_successful
 			raise Exception('curl or wget not found')
 
 		if source.startswith('prove://'):
 			source = source.replace('prove://', '')
 			source = self.env.files[source]
-			return self._upload_file(source, path)
+			return self.upload_file(source, remote_path)
 
 		if source.startswith('file://'):
-			return self.run_command('cp {} {}'.format(source, path)).was_successful
+			return self.run_command('cp {} {}'.format(source, remote_path)).was_successful
 
 		raise Exception('Unknown file protocol: %s', source)
 
-	def _upload_file(self, source, path):
+	def upload_file(self, source, remote_path):
+		raise NotImplementedError()
+
+	def write_to_file(self, content, remote_path):
 		raise NotImplementedError()
 
 

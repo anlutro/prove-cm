@@ -57,6 +57,9 @@ class Session(prove.executor.Session):
 			kwargs['look_for_keys'] = False
 
 		self.ssh_client.connect(self.target.host, **kwargs)
+		self.sftp_client = paramiko.SFTPClient.from_transport(
+			self.ssh_client.get_transport()
+		)
 
 		if self.options.get('sudo'):
 			result = self.run_command('sudo -n -v', skip_sudo=True)
@@ -68,24 +71,23 @@ class Session(prove.executor.Session):
 		if self.sftp_client:
 			self.sftp_client.close()
 
-	def run_command(self, command, skip_sudo=False, timeout=None, get_pty=False):
+	def run_command(self, command, skip_sudo=False):
 		command = prove.util.cmd_as_string(command)
 		if not skip_sudo and self.options.get('sudo'):
 			command = 'sudo -n -- ' + command
 		LOG.debug('Running command: `%r`', command)
 		chan = self.ssh_client.get_transport().open_session()
-		if get_pty:
-			chan.get_pty()
-		chan.settimeout(timeout)
+		chan.settimeout(None)
 		chan.exec_command(command)
 		return LazyParamikoCommandResult(chan)
 
-	def _upload_file(self, local_path, remote_path):
-		if not self.sftp_client:
-			self.sftp_client = paramiko.SFTPClient.from_transport(self.ssh_client.get_transport())
+	def write_to_file(self, content, remote_path):
+		with self.sftp_client.open(remote_path, 'w+') as remote_file:
+			remote_file.write(content)
+		return True
 
+	def upload_file(self, local_path, remote_path):
 		self.sftp_client.put(local_path, remote_path)
-
 		return True
 
 
