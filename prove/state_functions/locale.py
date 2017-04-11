@@ -62,9 +62,7 @@ class LocaleState(AbstractState):
 				result.changes.append('added locale %r to %s' % (locale, localegen_path))
 
 		localegen_result = self.run_command('locale-gen')
-		result.success = localegen_result.was_successful
-		result.stdout = localegen_result.stdout
-		result.stderr = localegen_result.stderr
+		result.merge_with_cmd_result(localegen_result)
 
 		return result
 
