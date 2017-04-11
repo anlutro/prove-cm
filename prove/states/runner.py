@@ -39,8 +39,11 @@ class StateRunner:
 
 	def run_state(self, state):
 		LOG.debug('running state %r', state)
+
 		if state in self.results:
 			raise Exception('state %r already in results!' % state)
+
+		self.session.output.state_start(state)
 		self.results[state] = {}
 		ret = True
 

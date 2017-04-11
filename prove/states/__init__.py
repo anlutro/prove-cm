@@ -188,6 +188,10 @@ class StateFuncCall:
 		self.defer = args.pop('defer', False)
 		self.args = args
 
+	@property
+	def main_arg(self):
+		return list(self.args.values())[0]
+
 	def __repr__(self):
 		return '<{} "{}">'.format(self.__class__.__name__, self.func)
 
