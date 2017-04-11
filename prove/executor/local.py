@@ -1,6 +1,5 @@
 import logging
 import subprocess
-import random
 
 import prove.executor
 import prove.util
@@ -15,24 +14,7 @@ class Session(prove.executor.Session):
 	def disconnect(self):
 		pass
 
-	def run_action(self, action):
-		action.run()
-
-	def run_command(self, command):
-		LOG.debug('Running command%s: `%s`',
-			' with sudo' if self.options.get('sudo') else '',
-			prove.util.cmd_as_string(command),
-		)
-
-		if self.options.get('sudo'):
-			command = prove.util.cmd_as_string(command)
-			heredoc_marker = 'PROVE_{}_EOF'.format(random.randint(10000, 99999))
-			command = 'sudo {0} -c <<{1}\n{2}\n{1}'.format(
-				self.options.get('shell', '/bin/sh'),
-				heredoc_marker,
-				prove.util.cmd_as_string(command),
-			)
-
+	def _run_command(self, command):
 		proc = subprocess.Popen(
 			prove.util.cmd_as_list(command),
 			stdout=subprocess.PIPE,

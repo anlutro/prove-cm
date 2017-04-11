@@ -11,6 +11,20 @@ import prove.util
 LOG = logging.getLogger(__name__)
 
 
+def command_with_sudo(command):
+	return prove.util.cmd_as_string(['sudo', '-n', '--', command])
+
+
+def parse_lsb_release(output):
+	ret = {}
+	for line in output.splitlines():
+		if not ':' in line:
+			continue
+		key, val = line.strip().split(':', 1)
+		ret[key.strip()] = val.strip()
+	return ret
+
+
 class Session:
 	def __init__(self, target, env, output):
 		assert isinstance(target, prove.config.Target)
@@ -22,23 +36,36 @@ class Session:
 		self.info = SessionInfo(self)
 
 	def connect(self):
+		'''Connect to the remote host.'''
 		raise NotImplementedError()
 
 	def disconnect(self):
+		'''Disconnect from the remote host.'''
 		raise NotImplementedError()
 
-	def run_action(self, command):
-		raise NotImplementedError()
+	def run_action(self, action):
+		'''Run an Action object through the session.'''
+		action.run()
 
 	def run_command(self, command, skip_sudo=False):
+		'''Run a shell-like command through the session.'''
+		command = prove.util.cmd_as_string(command)
+		if not skip_sudo and self.options.get('sudo'):
+			command = command_with_sudo(command)
+		LOG.debug('running command: `%r`', command)
+		return self._run_command(command)
+
+	def _run_command(self, command):
+		'''Run a shell-like command through the session. (Internal)'''
 		raise NotImplementedError()
 
 	def manage_file(self, remote_path, source=None, content=None):
+		'''Get a file onto the remote system.'''
 		if not source and not content:
 			raise ValueError('must provide source or content!')
 
 		if content:
-			self.write_to_file(content, remote_path)
+			return self.write_to_file(content, remote_path)
 
 		if source.startswith('http://') or source.startswith('https://'):
 			if self.run_command('which wget').was_successful:
@@ -58,9 +85,11 @@ class Session:
 		raise Exception('Unknown file protocol: %s', source)
 
 	def upload_file(self, source, remote_path):
+		'''Upload a file from the prove master to the remote host.'''
 		raise NotImplementedError()
 
 	def write_to_file(self, content, remote_path):
+		'''Write some contents to a file on the remote system.'''
 		raise NotImplementedError()
 
 
@@ -71,11 +100,7 @@ class SessionInfo:
 	@lazy
 	def _lsb_release(self):
 		result = self.session.run_command('lsb_release -a')
-		ret = {}
-		for line in result.stdout.splitlines():
-			key, val = line.strip().split(':', 1)
-			ret[key.strip()] = val.strip()
-		return ret
+		return parse_lsb_release(result.stdout)
 
 	@property
 	def distro(self):
@@ -88,6 +113,7 @@ class SessionInfo:
 	def program_exists(self, program):
 		result = self.session.run_command(['which', program])
 		return result.stdout.strip() if result.was_successful else False
+
 
 class CommandResult:
 	def __init__(self, exit_code, stdout, stderr):
@@ -113,7 +139,7 @@ class Executor:
 	@contextmanager
 	def connect(self, target):
 		session = self.get_session(target)
-		LOG.info('Connecting to target: %s', target.host)
+		LOG.info('connecting to target: %s', target.host)
 		self.app.output.connect_start(target)
 
 		try:
@@ -126,7 +152,7 @@ class Executor:
 		try:
 			yield session
 		finally:
-			LOG.info('Diconnecting target: %s', target.host)
+			LOG.info('diconnecting target: %s', target.host)
 			session.disconnect()
 			self.app.output.disconnected(target)
 
@@ -135,9 +161,9 @@ class Executor:
 		return self.session_cls(target, env, self.app.output)
 
 	def get_env(self, target):
-		LOG.debug('Creating environment for target: %s', target.host)
+		LOG.debug('creating environment for target: %s', target.host)
 		env = self.app.get_target_env(target)
-		LOG.debug('Host environment options: %s', env.options)
-		LOG.debug('Host environment states: %s', env.states)
-		LOG.debug('Host environment variables: %s', env.variables)
+		LOG.debug('host environment options: %s', env.options)
+		LOG.debug('host environment states: %s', env.states)
+		LOG.debug('host environment variables: %s', env.variables)
 		return env

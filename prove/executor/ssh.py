@@ -41,9 +41,6 @@ class Session(prove.executor.Session):
 		self.sftp_client = None
 		super().__init__(*args)
 
-	def run_action(self, action):
-		action.run()
-
 	def connect(self):
 		kwargs = {}
 		if self.options.get('port'):
@@ -71,11 +68,7 @@ class Session(prove.executor.Session):
 		if self.sftp_client:
 			self.sftp_client.close()
 
-	def run_command(self, command, skip_sudo=False):
-		command = prove.util.cmd_as_string(command)
-		if not skip_sudo and self.options.get('sudo'):
-			command = 'sudo -n -- ' + command
-		LOG.debug('Running command: `%r`', command)
+	def _run_command(self, command):
 		chan = self.ssh_client.get_transport().open_session()
 		chan.settimeout(None)
 		chan.exec_command(command)
