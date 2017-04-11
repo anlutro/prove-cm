@@ -5,6 +5,7 @@ def test_run_command_sudo():
 	assert "sudo -n -- ls" == command_with_sudo('ls')
 	assert "sudo -n -- 'echo foo; echo bar'" == command_with_sudo('echo foo; echo bar')
 	assert "sudo -n -- 'echo \"foo bar\"'" == command_with_sudo('echo "foo bar"')
+	assert "sudo -n -- 'echo foo | grep foo'" == command_with_sudo('echo foo | grep foo')
 
 
 def test_parse_lsb_release():

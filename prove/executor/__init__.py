@@ -52,7 +52,7 @@ class Session:
 		command = prove.util.cmd_as_string(command)
 		if not skip_sudo and self.options.get('sudo'):
 			command = command_with_sudo(command)
-		LOG.debug('running command: `%r`', command)
+		LOG.debug('running command: %r', command)
 		return self._run_command(command)
 
 	def _run_command(self, command):

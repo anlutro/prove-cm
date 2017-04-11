@@ -19,6 +19,7 @@ class Session(prove.executor.Session):
 			prove.util.cmd_as_list(command),
 			stdout=subprocess.PIPE,
 			stderr=subprocess.PIPE,
+			shell=True,
 		)
 		stdout, stderr = proc.communicate()
 
@@ -31,7 +32,7 @@ class Session(prove.executor.Session):
 		return result
 
 	def upload_file(self, source, path):
-		return self.run_command('cp {} {}'.format(source, path)).was_successful
+		return self.run_command(['cp', source, path]).was_successful
 
 	def write_to_file(self, content, path):
 		with open(path, 'w+') as filehandle:

@@ -22,9 +22,9 @@ def disconnected(target):
 def cmd_result(result):
 	logstr = 'Command finished - exit code: {}'.format(result.exit_code)
 	if result.stderr:
-		logstr += '\nSTDERR:\n{}'.format(result.stderr)
+		logstr += '\nsystem stderr:\n{}'.format(result.stderr)
 	if result.stdout:
-		logstr += '\nSTDOUT:\n{}'.format(result.stdout)
+		logstr += '\nsystem stdout:\n{}'.format(result.stdout)
 	LOG.info(logstr)
 
 
@@ -39,8 +39,9 @@ def state_fncall_finish(state, state_fncall, result):
 	if result.changes:
 		logstr += '\n'
 		logstr += '\n  '.join(result.changes)
-	if result.comment:
-		logstr += '\n' + result.comment
+	comment = result.format_comment()
+	if comment:
+		logstr += '\n' + comment
 	LOG.info(logstr)
 
 

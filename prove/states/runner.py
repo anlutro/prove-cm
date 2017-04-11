@@ -24,6 +24,19 @@ class StateRunner:
 
 		return self.results
 
+	def get_state_function(self, func):
+		state_mod, state_func = func.split('.')
+
+		# state_function modules have the ability to lazy-load other modules
+		# depending on things like linux distribution.
+		while isinstance(state_mod, str):
+			state_mod = state_mod.replace('prove.state_functions.', '')
+			state_mod = importlib.import_module('prove.state_functions.' + state_mod)
+			if hasattr(state_mod, '__virtual__'):
+				state_mod = state_mod.__virtual__(self.session)
+
+		return getattr(state_mod, state_func)
+
 	def run_state(self, state):
 		LOG.debug('running state %r', state)
 		if state in self.results:
@@ -39,22 +52,12 @@ class StateRunner:
 			if prereq_result:
 				result = prereq_result
 			else:
-				state_mod, state_func = fncall.func.split('.')
-
-				# state_function modules have the ability to lazy-load other modules
-				# depending on things like linux distribution.
-				while isinstance(state_mod, str):
-					state_mod = state_mod.replace('prove.state_functions.', '')
-					state_mod = importlib.import_module('prove.state_functions.' + state_mod)
-					if hasattr(state_mod, '__virtual__'):
-						state_mod = state_mod.__virtual__(self.session)
-
-				state_func = getattr(state_mod, state_func)
+				state_func = self.get_state_function(fncall.func)
 				result = state_func(self.session, fncall.args)
 
 				if not isinstance(result, StateResult):
 					raise ValueError('State function {}.{} did not return a StateResult object'.format(
-						state_mod.__name__, state_func.__name__))
+						state_func.__mod__.__name__, state_func.__name__))
 
 			LOG.debug('finished state.fncall %r', fncall)
 			self.session.output.state_fncall_finish(state, fncall, result)
