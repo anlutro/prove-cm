@@ -51,7 +51,8 @@ def indent_string(string, spaces):
 	return '\n'.join((((' ' * spaces) + line) for line in string.splitlines()))
 
 
-def format_result(comment='', comments=None, stdout=None, stderr=None, indent=2):
+def format_result(comment=None, comments=None, stdout=None, stderr=None, indent=2):
+	comment = comment or ''
 	if comments:
 		comment += '\n' + '\n'.join(comments)
 	if stdout:

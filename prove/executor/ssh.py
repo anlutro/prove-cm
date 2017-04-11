@@ -83,6 +83,11 @@ class Session(prove.executor.Session):
 		self.sftp_client.put(local_path, remote_path)
 		return True
 
+	def download_file(self, remote_path):
+		with self.sftp_client.open(remote_path, 'r') as remote_file:
+			ret = remote_file.read()
+		return ret
+
 
 class Executor(prove.executor.Executor):
 	def get_session(self, target):

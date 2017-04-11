@@ -92,6 +92,10 @@ class Session:
 		'''Write some contents to a file on the remote system.'''
 		raise NotImplementedError()
 
+	def download_file(self, remote_path):
+		'''Get the contents of a file from the remote system.'''
+		raise NotImplementedError()
+
 
 class SessionInfo:
 	def __init__(self, session):

@@ -14,12 +14,15 @@ class Session(prove.executor.Session):
 	def disconnect(self):
 		pass
 
-	def _run_command(self, command):
+	def _run_command(self, command, shell=True):
+		if not shell:
+			command = prove.util.cmd_as_list(command)
+
 		proc = subprocess.Popen(
-			prove.util.cmd_as_list(command),
+			command,
 			stdout=subprocess.PIPE,
 			stderr=subprocess.PIPE,
-			shell=True,
+			shell=shell,
 		)
 		stdout, stderr = proc.communicate()
 
@@ -32,11 +35,20 @@ class Session(prove.executor.Session):
 		return result
 
 	def upload_file(self, source, path):
+		LOG.debug('uploading file %r to %r', source, path)
 		return self.run_command(['cp', source, path]).was_successful
 
 	def write_to_file(self, content, path):
+		LOG.debug('downloading %d characters to file %r', len(content), path)
 		with open(path, 'w+') as filehandle:
 			filehandle.write(content)
+		return True
+
+	def download_file(self, path):
+		LOG.debug('downloading file %r', path)
+		with open(path, 'r') as filehandle:
+			ret = filehandle.read()
+		return ret
 
 
 class Executor(prove.executor.Executor):
