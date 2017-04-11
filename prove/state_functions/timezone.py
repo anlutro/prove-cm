@@ -25,7 +25,7 @@ class TimezoneState():
 		return True
 
 	def set_timezone(self, timezone):
-		result = StateResult()
+		result = StateResult(success=True)
 		old_tz = self._get_tz()
 		if old_tz == timezone:
 			result.comment = 'timezone already set to %s' % old_tz
