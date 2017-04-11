@@ -13,6 +13,6 @@ def load(path, variables=None):
 	with open(path, 'r') as file:
 		template = mako.template.Template(file.read(), strict_undefined=True)
 
-	yaml_str = template.render(**variables)
+	yaml_str = template.render(vars=variables)
 
 	return _ordered_load(yaml_str)
