@@ -1,4 +1,5 @@
 import sys
+import prove.util
 
 
 def connect_start(target):
@@ -22,12 +23,9 @@ def disconnected(target):
 
 def cmd_result(result):
 	print('exit code:', result.exit_code)
-	if result.stderr:
-		print('system stderr:')
-		print(result.stderr)
-	if result.stdout:
-		print('system stdout:')
-		print(result.stdout)
+	comment = prove.util.format_result(stdout=result.stdout, stderr=result.stderr)
+	if comment:
+		print(comment)
 
 
 def state_fncall_start(state, state_fncall):

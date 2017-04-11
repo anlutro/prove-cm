@@ -49,3 +49,13 @@ def snake_to_camel_case(string):
 
 def indent_string(string, spaces):
 	return '\n'.join((((' ' * spaces) + line) for line in string.splitlines()))
+
+
+def format_result(comment='', comments=None, stdout=None, stderr=None, indent=2):
+	if comments:
+		comment += '\n' + '\n'.join(comments)
+	if stdout:
+		comment += '\nsystem stdout:\n' + indent_string(stdout, indent)
+	if stderr:
+		comment += '\nsystem stderr:\n' + indent_string(stderr, indent)
+	return comment.strip()

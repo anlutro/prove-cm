@@ -21,10 +21,9 @@ def disconnected(target):
 
 def cmd_result(result):
 	logstr = 'Command finished - exit code: {}'.format(result.exit_code)
-	if result.stderr:
-		logstr += '\nsystem stderr:\n{}'.format(result.stderr)
-	if result.stdout:
-		logstr += '\nsystem stdout:\n{}'.format(result.stdout)
+	extra = prove.util.format_result(stdout=result.stdout, stderr=result.stderr)
+	if extra:
+		logstr += extra
 	LOG.info(logstr)
 
 

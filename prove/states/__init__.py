@@ -207,14 +207,12 @@ class StateResult:
 		return not self.success
 
 	def format_comment(self):
-		comment = self.comment or ''
-		if self.comments:
-			comment += '\n' + '\n'.join(self.comments)
-		if self.stdout:
-			comment += '\n\nsystem stdout:\n' + prove.util.indent_string(self.stdout, 2)
-		if self.stderr:
-			comment += '\n\nsystem stderr:\n' + prove.util.indent_string(self.stderr, 2)
-		return comment.strip()
+		return prove.util.format_result(
+			comment=self.comment,
+			comments=self.comments,
+			stdout=self.stdout,
+			stderr=self.stderr,
+		)
 
 	def merge_with_cmd_result(self, cmd_result):
 		self.success = cmd_result.was_successful
