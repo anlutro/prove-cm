@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 
 
 def command_with_sudo(command):
-	return prove.util.cmd_as_string(['sudo', '-n', '--', command])
+	return 'sudo -n -- ' + prove.util.cmd_as_string(command)
 
 
 def parse_lsb_release(output):
@@ -112,6 +112,8 @@ class SessionInfo:
 	@lazy
 	def _lsb_release(self):
 		result = self.session.run_command('lsb_release -a')
+		if not result.was_successful:
+			raise Exception(result.stderr)
 		return parse_lsb_release(result.stdout)
 
 	@property
