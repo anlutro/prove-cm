@@ -21,7 +21,7 @@ def _full_locale(locale):
 class LocaleState(AbstractState):
 	def install_locale(self, locale):
 		result = StateResult(success=True)
-		localegen_path = '/home/andreas/locale.gen'
+		localegen_path = '/etc/locale.gen'
 
 		for variation in _locale_variations(locale):
 			search_result = self.run_command('locale -a | grep -P "^%s"' % variation.replace('.', '\.'))
