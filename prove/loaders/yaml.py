@@ -1,6 +1,6 @@
-from prove.loaders import LoaderException
 from collections import OrderedDict
 import yaml
+from prove.loaders import LoaderException
 
 
 def _construct_mapping(loader, node):
@@ -21,7 +21,7 @@ def _ordered_load(stream):
 	try:
 		return yaml.load(stream, OrderedLoader)
 	except yaml.scanner.ScannerError as e:
-		raise LoaderException('error while parsing %r' % stream) from e
+		raise LoaderException('error while parsing yaml file %r' % stream) from e
 
 
 def supports(filename):
