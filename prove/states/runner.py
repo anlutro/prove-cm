@@ -50,11 +50,11 @@ class StateRunner:
 	def run_state(self, state):
 		LOG.debug('running state %r', state)
 
-		if state in self.results:
+		if state.name in self.results:
 			raise Exception('state %r already in results!' % state)
 
 		self.session.output.state_start(state)
-		self.results[state] = {}
+		self.results[state.name] = {}
 		ret = True
 
 		for fncall in state.fncalls:
@@ -74,7 +74,7 @@ class StateRunner:
 
 			LOG.debug('finished state.fncall %r', fncall)
 			self.session.output.state_fncall_finish(state, fncall, result)
-			self.results[state][fncall] = result
+			self.results[state.name][fncall] = result
 
 			if result.failure:
 				ret = False
