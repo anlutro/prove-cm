@@ -37,19 +37,19 @@ class FileState(AbstractState):
 
 	def ensure_user(self, path, user):
 		current_user = self.stat(path, '%U')
-		if current_user != user:
+		if current_user != user and not self.session.is_dry_run:
 			self.session.run_command('chown %s %s' % (user, path))
 		return current_user, user
 
 	def ensure_group(self, path, group):
 		current_group = self.stat(path, '%G')
-		if current_group != group:
+		if current_group != group and not self.session.is_dry_run:
 			self.session.run_command('chgrp %s %s' % (group, path))
 		return current_group, group
 
 	def ensure_mode(self, path, mode):
 		current_mode = self.stat(path, '%a')
-		if current_mode != mode:
+		if current_mode != mode and not self.session.is_dry_run:
 			self.session.run_command('chmod %s %s' % (mode, path))
 		return current_mode, mode
 
@@ -75,7 +75,7 @@ class ManagedState(FileState):
 			else:
 				should_move_file = True
 				result.changes.append('created file %r' % path)
-			if should_move_file:
+			if should_move_file and not self.session.is_dry_run:
 				self.move_tmpfile(tmpfile, path)
 
 		if user is not None:
@@ -106,7 +106,8 @@ class DirectoryState(FileState):
 
 		dir_exists = self.session.run_command('test -d "%s"' % path).was_successful
 		if not dir_exists:
-			self.session.run_command('mkdir -p "%s"' % path)
+			if not self.session.is_dry_run:
+				self.session.run_command('mkdir -p "%s"' % path)
 			result.changes.append('created directory %r' % path)
 
 		if user is not None:
@@ -138,8 +139,9 @@ class AbsentState(FileState):
 			result.comment = 'file already absent: %r'
 			return result
 
-		rm = self.session.run_command('rm -rfv "%s"' % path)
-		result.merge_with_cmd_result(rm)
+		if not self.session.is_dry_run:
+			rm = self.session.run_command('rm -rfv "%s"' % path)
+			result.merge_with_cmd_result(rm)
 		return result
 
 
