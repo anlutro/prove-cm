@@ -35,6 +35,10 @@ class Session:
 		self.options = env.options
 		self.info = SessionInfo(self)
 
+	@property
+	def is_dry_run(self):
+		return self.options.get('dry_run', False)
+
 	def connect(self):
 		'''Connect to the remote host.'''
 		raise NotImplementedError()
