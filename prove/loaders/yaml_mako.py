@@ -1,3 +1,4 @@
+import copy
 import mako.template
 from prove.loaders import LoaderException
 from prove.loaders.yaml import _ordered_load
@@ -5,7 +6,11 @@ from prove.loaders.yaml import _ordered_load
 
 class Variables(dict):
 	def __getattr__(self, key):
-		return self[key]
+		val = self[key]
+		if isisintance(val, dict):
+			self[key] = Variables(val)
+			val = self[key]
+		return val
 
 
 def supports(filename):
@@ -15,6 +20,8 @@ def supports(filename):
 def load(path, variables=None):
 	if variables is None:
 		variables = {}
+	else:
+		variables = copy.deepcopy(variables)
 
 	try:
 		with open(path, 'r') as file:
