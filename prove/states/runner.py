@@ -9,6 +9,10 @@ from prove.states.graph import generate_graph
 LOG = logging.getLogger(__name__)
 
 
+class StateRunException(Exception):
+	pass
+
+
 class StateRunner:
 	def __init__(self, session, states=None, output=None):
 		self.session = session
@@ -31,9 +35,15 @@ class StateRunner:
 		# depending on things like linux distribution.
 		while isinstance(state_mod, str):
 			state_mod = state_mod.replace('prove.state_functions.', '')
-			state_mod = importlib.import_module('prove.state_functions.' + state_mod)
+			try:
+				state_mod = importlib.import_module('prove.state_functions.' + state_mod)
+			except ImportError as e:
+				raise StateRunException('no state_functions module %r' % state_mod) from e
 			if hasattr(state_mod, '__virtual__'):
 				state_mod = state_mod.__virtual__(self.session)
+
+		if not hasattr(state_mod, state_func):
+			raise StateRunException('module %r has no function %r' % (state_mod, state_func))
 
 		return getattr(state_mod, state_func)
 

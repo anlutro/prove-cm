@@ -190,7 +190,10 @@ class StateFuncCall:
 
 	@property
 	def main_arg(self):
-		return list(self.args.values())[0]
+		args_list = list(self.args.values())
+		if args_list:
+			return args_list[0]
+		return None
 
 	def __repr__(self):
 		return '<{} "{}">'.format(self.__class__.__name__, self.func)

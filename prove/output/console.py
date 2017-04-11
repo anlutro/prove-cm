@@ -1,9 +1,11 @@
 import sys
+import textwrap
 import prove.util
 
 
 BEFORE_STATE_CHAR = ''
 BEFORE_FNCALL_CHAR = '→'
+STATE_RESULT_ITEM = '·'
 
 
 class tc:
@@ -18,13 +20,12 @@ class tc:
 
 
 def connect_start(target):
-	sys.stdout.write('connecting to %s ...' % target.host)
+	sys.stdout.write('connecting to %s …' % target.host)
 	sys.stdout.flush()
 
 
 def connect_success(target):
-	sys.stdout.write(' connected!\n\n')
-	sys.stdout.flush()
+	print(' connected!')
 
 
 def connect_failure(target):
@@ -45,31 +46,54 @@ def cmd_result(result):
 
 
 def state_start(state):
+	print()
 	line = ' %s %s' % (BEFORE_STATE_CHAR, state.name)
 	print('%s%s%s' % (tc.YELLOW, line.strip(), tc.RESET))
 
 
 def state_fncall_start(state, fncall):
-	indent = 3 if BEFORE_STATE_CHAR else 1
-	sys.stdout.write('%s%s %s(%s) …' % (' ' * indent, BEFORE_FNCALL_CHAR, fncall.func, fncall.main_arg))
+	sys.stdout.write(' ' * (3 if BEFORE_STATE_CHAR else 1))
+	sys.stdout.write('%s %s(%s) …' % (BEFORE_FNCALL_CHAR, fncall.func, fncall.main_arg))
 	sys.stdout.flush()
 
 
 def state_fncall_finish(state, fncall, result):
+	indent = 5 if BEFORE_STATE_CHAR else 3
 	if result.success:
 		print(' %s✓ success%s' % (tc.GREEN, tc.RESET))
 	else:
 		print(' %s✗ failure%s' % (tc.RED, tc.RESET))
+	sys.stdout.write(tc.GREY)
+
+	wrapper = textwrap.TextWrapper(
+		initial_indent=' ' * indent + ' ' + STATE_RESULT_ITEM + ' ',
+		subsequent_indent=' ' * (indent+3),
+		tabsize=4,
+	)
+
+	if result.comment:
+		print(wrapper.fill(result.comment))
+
+	if result.comments:
+		for comment in result.comments:
+			print(wrapper.fill(comment))
+
 	if result.changes:
 		if isinstance(result.changes, str):
 			result.changes = [l for l in result.changes.split('\n') if l]
-		if len(result.changes) > 1:
-			print('   changes:\n     ' + '\n     '.join(result.changes))
-		else:
-			print('   changes:', result.changes[0])
-	comment = result.format_comment()
-	if comment:
-		print('   ' + comment)
+		print(' ' * indent + 'changes:')
+		for change in result.changes:
+			print(wrapper.fill(change))
+
+	if result.stdout:
+		print(' ' * indent + 'system stdout:')
+		print(prove.util.indent_string(result.stdout, indent + 2))
+
+	if result.stderr:
+		print(' ' * indent + 'system stderr:')
+		print(prove.util.indent_string(result.stderr, indent + 2))
+
+	sys.stdout.write(tc.RESET)
 
 
 def state_summary():
