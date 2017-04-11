@@ -25,6 +25,10 @@ def parse_lsb_release(output):
 	return ret
 
 
+class SessionException(Exception):
+	pass
+
+
 class Session:
 	def __init__(self, target, env, output):
 		assert isinstance(target, prove.config.Target)
@@ -146,16 +150,20 @@ class Executor:
 
 	@contextmanager
 	def connect(self, target):
-		session = self.get_session(target)
+		try:
+			session = self.get_session(target)
+		except Exception as e:
+			raise SessionException('could not start session for target %r' % target) from e
+
 		LOG.info('connecting to target: %s', target.host)
 		self.app.output.connect_start(target)
 
 		try:
 			session.connect()
 			self.app.output.connect_success(target)
-		except:
+		except Exception as e:
 			self.app.output.connect_failure(target)
-			raise
+			raise SessionException('could not connect to target %r' % target) from e
 
 		try:
 			yield session

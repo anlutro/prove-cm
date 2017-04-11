@@ -136,7 +136,7 @@ class AbsentState(FileState):
 		result = StateResult(success=True)
 		exists = self.session.run_command('test -e "%s"' % path).was_successful
 		if not exists:
-			result.comment = 'file already absent: %r'
+			result.comment = 'file already absent: %r' % path
 			return result
 
 		if not self.session.is_dry_run:
