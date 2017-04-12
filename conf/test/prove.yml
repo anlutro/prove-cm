@@ -1,8 +1,8 @@
 options:
   executor: local
-  output: log
+  output: console
   log_path: stderr
-  log_level: debug
+  log_level: warning
   remote_transport: tcp
 
   states:
