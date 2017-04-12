@@ -7,7 +7,7 @@ from prove.loaders.yaml import _ordered_load
 class Variables(dict):
 	def __getattr__(self, key):
 		val = self[key]
-		if isisintance(val, dict):
+		if isinstance(val, dict):
 			self[key] = Variables(val)
 			val = self[key]
 		return val
