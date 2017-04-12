@@ -4,9 +4,7 @@ options:
   log_path: stderr
   log_level: warning
   remote_transport: tcp
-
-  states:
-    max_workers: 1
+  state_parallelism: null
 
   ssl:
     ca_path: ssl/ca.crt

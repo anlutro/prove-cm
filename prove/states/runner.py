@@ -1,5 +1,5 @@
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor
+import concurrent.futures
 import importlib
 import logging
 
@@ -109,33 +109,48 @@ class StateRunner:
 
 
 class ParallelizedStateRunner(StateRunner):
-	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
-
+	def __init__(self, session, parallelism):
+		super().__init__(session)
 		self.graph = generate_graph(self.states)
+		print(self.graph)
+		self.pool = concurrent.futures.ThreadPoolExecutor(max_workers=parallelism)
+		self.futures = []
 
 	def run(self, parallelism=1):
-		def run_node_wrapper(node):
-			try:
-				self.run_node(node)
-			except: # pylint: disable=bare-except
-				LOG.exception('exception occured while running node %r', node)
-
 		LOG.debug('running states with parallelism %d', parallelism)
-		with ThreadPoolExecutor(max_workers=parallelism) as pool:
-			for root_node in self.graph.roots:
-				pool.submit(run_node_wrapper, root_node)
+
+		for root_node in self.graph.roots:
+			self.submit_node_for_running(root_node)
+
+		while self.futures:
+			for future in self.futures[:]:
+				LOG.debug('waiting for %r', future)
+				future.result()
+				self.futures.remove(future)
+
+		self.pool.shutdown()
+
 		LOG.debug('finished running states')
 
-		return self.results
+	def submit_node_for_running(self, node):
+		future = self.pool.submit(self.run_node_safe, node)
+		future.add_done_callback(lambda r: self.run_child_nodes(node))
+		self.futures.append(future)
+		return future
+
+	def run_node_safe(self, node):
+		try:
+			return self.run_node(node)
+		except: # pylint: disable=bare-except
+			LOG.exception('exception occured while running node %r', node)
+			return False
 
 	def run_node(self, node):
 		for state in node.states:
 			if not self.run_state(state):
-				LOG.info('state %r failed, aborting', state)
-				return False
+				LOG.info('state %r failed', state)
+
+	def run_child_nodes(self, node):
 		if node.children:
 			for child_node in node.children:
-				if not self.run_node(child_node):
-					LOG.info('child node %r failed, aborting', child_node)
-					return False
+				self.submit_node_for_running(child_node)

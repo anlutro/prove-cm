@@ -10,17 +10,22 @@ class StatesAction(prove.actions.Action):
 	name = 'states'
 
 	def run(self):
-		parallelism = int(self.kwargs.get('parallelism', 1))
-		if parallelism > 1:
-			state_run = prove.states.runner.ParallelizedStateRunner(self.session)
-			state_run.run(parallelism=parallelism)
-		else:
+		parallelism = self.kwargs.get('parallelism', None)
+
+		if parallelism is None:
 			state_run = prove.states.runner.StateRunner(self.session)
-			state_run.run()
+		else:
+			state_run = prove.states.runner.ParallelizedStateRunner(
+				self.session, parallelism=int(parallelism),
+			)
+		state_run.run()
 
 
 class StatesCommand(prove.actions.Command):
 	action_cls = StatesAction
+
+	def _extra_kwargs(self):
+		return {'parallelism': self.app.options['state_parallelism']}
 
 	def run(self, targets=None):
 		if targets is None:

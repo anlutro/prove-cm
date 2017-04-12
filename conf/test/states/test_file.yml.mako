@@ -8,3 +8,4 @@ create_file:
 delete_file:
   - fn: command.run
     command: rm -v ${vars.test_file_path}
+    requires: [ create_file ]

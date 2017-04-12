@@ -17,7 +17,15 @@ class Command:
 	def __init__(self, app, args=None, kwargs=None):
 		self.app = app
 		self.args = args or []
+		self.args.extend(self._extra_args())
 		self.kwargs = kwargs or {}
+		self.kwargs.update(self._extra_kwargs())
+
+	def _extra_args(self):
+		return []
+
+	def _extra_kwargs(self):
+		return {}
 
 	def run(self, targets=None):
 		if targets is None:

@@ -5,11 +5,11 @@ cron_installed:
 cron_running:
   - fn: service.running
     service: cron
-    require:
+    requires:
       - cron_installed
 
 cron_enabled:
   - fn: service.enabled
     service: cron
-    require:
+    requires:
       - cron_installed
