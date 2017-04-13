@@ -11,8 +11,8 @@ import prove.util
 LOG = logging.getLogger(__name__)
 
 
-def command_with_sudo(command):
-	return 'sudo -n -- ' + prove.util.cmd_as_string(command)
+def command_with_sudo(command, shell='sh'):
+	return 'sudo -n -- ' + prove.util.cmd_as_string([shell, '-c', command])
 
 
 def parse_lsb_release(output):
