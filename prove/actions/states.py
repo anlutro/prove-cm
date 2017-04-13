@@ -25,7 +25,7 @@ class StatesCommand(prove.actions.Command):
 	action_cls = StatesAction
 
 	def _extra_kwargs(self):
-		return {'parallelism': self.app.options['state_parallelism']}
+		return {'parallelism': self.app.options.get('state_parallelism')}
 
 	def run(self, targets=None):
 		if targets is None:
