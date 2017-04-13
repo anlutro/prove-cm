@@ -13,12 +13,8 @@ class StateAction(prove.actions.Action):
 	def run(self):
 		runner = prove.states.runner.StateRunner(self.session, states={})
 		fncall = prove.states.StateFuncCall(self.args[0], self.kwargs)
-		state = prove.states.State('Ad-hoc state', [fncall])
-		self.session.output.state_start(state)
-		self.session.output.state_fncall_start(state, fncall)
-		state_func = runner.get_state_function(fncall.func)
-		result = state_func(self.session, self.kwargs)
-		self.session.output.state_fncall_finish(state, fncall, result)
+		state = prove.states.State('Ad-hoc single state', [fncall])
+		runner.run_single(state)
 
 
 class StateCommand(prove.actions.Command):

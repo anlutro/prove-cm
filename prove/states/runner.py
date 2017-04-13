@@ -28,6 +28,11 @@ class StateRunner:
 
 		return self.results
 
+	def run_single(self, state):
+		self.output.state_start(state)
+		for fncall in state.fncalls:
+			self.get_fncall_result(state, fncall)
+
 	def get_state_function(self, func):
 		state_mod, state_func = func.split('.')
 
@@ -58,22 +63,7 @@ class StateRunner:
 		ret = True
 
 		for fncall in state.fncalls:
-			LOG.debug('running state.fncall %r', fncall)
-			self.session.output.state_fncall_start(state, fncall)
-
-			prereq_result = self.state_prereqs(fncall)
-			if prereq_result:
-				result = prereq_result
-			else:
-				state_func = self.get_state_function(fncall.func)
-				result = state_func(self.session, fncall.args)
-
-				if not isinstance(result, StateResult):
-					raise ValueError('State function {}.{} did not return a StateResult object'.format(
-						state_func.__mod__.__name__, state_func.__name__))
-
-			LOG.debug('finished state.fncall %r', fncall)
-			self.session.output.state_fncall_finish(state, fncall, result)
+			result = self.get_fncall_result(state, fncall)
 			self.results[state.name][fncall] = result
 
 			if result.failure:
@@ -89,6 +79,26 @@ class StateRunner:
 					self.run_state(notify_state)
 
 		return ret
+
+	def get_fncall_result(self, state, fncall):
+		LOG.debug('running state.fncall %r', fncall)
+		self.session.output.state_fncall_start(state, fncall)
+
+		prereq_result = self.state_prereqs(fncall)
+		if prereq_result:
+			result = prereq_result
+		else:
+			state_func = self.get_state_function(fncall.func)
+			result = state_func(self.session, fncall.args)
+
+			if not isinstance(result, StateResult):
+				raise ValueError('State function {}.{} did not return a StateResult object'.format(
+					state_func.__mod__.__name__, state_func.__name__))
+
+		LOG.debug('finished state.fncall %r', fncall)
+		self.session.output.state_fncall_finish(state, fncall, result)
+
+		return result
 
 	def state_prereqs(self, fncall):
 		result = None
