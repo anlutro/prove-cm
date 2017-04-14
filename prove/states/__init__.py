@@ -255,6 +255,12 @@ class StateFuncCall:
 		return '<{} "{}">'.format(self.__class__.__name__, self.func)
 
 
+class StateResult:
+	def __init__(self, success, func_results):
+		self.success = success
+		self.func_results = func_results
+
+
 class StateFuncResult:
 	def __init__(self, success=None, changes=None, comment=None, comments=None,
 			stdout=None, stderr=None):

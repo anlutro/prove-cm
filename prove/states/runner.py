@@ -46,20 +46,23 @@ class AbstractStateRunner:
 		LOG.debug('running state %r', state)
 		self.session.output.state_start(state)
 
-		results = []
+		success = True
+		func_results = []
 		for fncall in state.fncalls:
 			result = self.run_fncall(state, fncall)
-			results.append((fncall, result))
-			results.extend(self.on_fncall_result(fncall, result))
+			func_results.append((fncall, result))
+			func_results.extend(self.on_fncall_result(fncall, result))
 			if not result.success:
+				success = False
 				LOG.info('state %r fncall %r failed, aborting', state, fncall)
 				break
 
+		result = prove.states.StateResult(success, func_results)
 		LOG.debug('finished state %r', state)
-		self.session.output.state_finish(state, results)
+		self.session.output.state_finish(state, result)
 
-		self.results.append((state, results))
-		self.on_state_results(state, results)
+		self.results.append((state, result))
+		self.on_state_result(state, result)
 
 	def run_fncall(self, state, fncall):
 		LOG.debug('running state.fncall %r', fncall)
@@ -101,7 +104,7 @@ class AbstractStateRunner:
 	def on_fncall_result(self, fncall, result):
 		return []
 
-	def on_state_results(self, state, results):
+	def on_state_result(self, state, result):
 		pass
 
 
@@ -161,7 +164,10 @@ class StatesRunner(AbstractStateRunner):
 			return None
 		return self.run_state(state)
 
-	def on_state_results(self, state, results):
+	def on_state_result(self, state, result):
+		if not result.success:
+			return
+
 		if state in self.states.rdepends:
 			for rdep_state in self.states.rdepends[state]:
 				LOG.debug('state %r depends on %r. running it', rdep_state, state)
