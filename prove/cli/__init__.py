@@ -51,19 +51,17 @@ class AbstractClient:
 		if 'root_dir' not in config['options']:
 			config['options']['root_dir'] = os.path.dirname(config_path)
 
+		def normalize_path(path):
+			path = os.path.expanduser(path)
+			if not os.path.isabs(path):
+				path = os.path.join(config['options']['root_dir'], path)
+			return path
+
 		for key in config['options'].get('ssl', {}).keys():
-			if not config['options']['ssl'][key].startswith('/'):
-				config['options']['ssl'][key] = os.path.join(
-					config['options']['root_dir'],
-					config['options']['ssl'][key],
-				)
+			config['options']['ssl'][key] = normalize_path(config['options']['ssl'][key])
 
 		for target in config.get('targets', []):
-			if 'ssh_key' in target and not target['ssh_key'].startswith('/'):
-				target['ssh_key'] = os.path.join(
-					config['options']['root_dir'],
-					target['ssh_key']
-				)
+			target['ssh_key'] = normalize_path(target['ssh_key'])
 
 		# override with command-line args
 		if self.args.log_level is not None:
