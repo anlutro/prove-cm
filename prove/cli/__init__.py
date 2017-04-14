@@ -58,6 +58,13 @@ class AbstractClient:
 					config['options']['ssl'][key],
 				)
 
+		for target in config.get('targets', []):
+			if 'ssh_key' in target and not target['ssh_key'].startswith('/'):
+				target['ssh_key'] = os.path.join(
+					config['options']['root_dir'],
+					target['ssh_key']
+				)
+
 		# override with command-line args
 		if self.args.log_level is not None:
 			config['options']['log_level'] = self.args.log_level
