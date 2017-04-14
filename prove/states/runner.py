@@ -1,5 +1,3 @@
-from collections import defaultdict
-import concurrent.futures
 import importlib
 import logging
 
@@ -49,20 +47,20 @@ class AbstractStateRunner:
 		success = True
 		func_results = []
 		for fncall in state.fncalls:
-			result = self.run_fncall(state, fncall)
-			func_results.append((fncall, result))
-			func_results.extend(self.on_fncall_result(fncall, result))
-			if not result.success:
+			func_result = self.run_fncall(state, fncall)
+			func_results.append((fncall, func_result))
+			func_results.extend(self.on_fncall_result(fncall, func_result))
+			if not func_result.success:
 				success = False
 				LOG.info('state %r fncall %r failed, aborting', state, fncall)
 				break
 
-		result = prove.states.StateResult(success, func_results)
+		state_result = prove.states.StateResult(success, func_results)
 		LOG.debug('finished state %r', state)
-		self.session.output.state_finish(state, result)
+		self.session.output.state_finish(state, state_result)
 
-		self.results.append((state, result))
-		self.on_state_result(state, result)
+		self.results.append((state, state_result))
+		self.on_state_result(state, state_result)
 
 	def run_fncall(self, state, fncall):
 		LOG.debug('running state.fncall %r', fncall)
@@ -143,9 +141,9 @@ class StatesRunner(AbstractStateRunner):
 	def on_fncall_result(self, fncall, result):
 		results = []
 
-		def run_notify_states(self, states):
+		def run_notify_states(states):
 			for state in states:
-				nofity_result = self.run_notify_state(notify_state)
+				nofity_result = self.run_notify_state(state)
 				if nofity_result:
 					results.append((state, nofity_result))
 

@@ -12,5 +12,5 @@ class RemoteOutput:
 			'kwargs': prove.remote.serialize(kwargs),
 		})
 
-	def __call__(self, func, *args, *kwargs):
+	def __call__(self, func, *args, **kwargs):
 		self._send(func, args, kwargs)

@@ -20,6 +20,7 @@ class Session(prove.executor.Session):
 	def run_action(self, action):
 		return self.remote_client.run_action(action)
 
+	# pylint: disable=unused-argument
 	def run_command(self, *args, **kwargs):
 		raise RuntimeError('Remote session does not run commands')
 
@@ -28,6 +29,7 @@ class Session(prove.executor.Session):
 
 	def write_to_file(self, *args, **kwargs):
 		raise RuntimeError('Remote session does not write to files')
+	# pylint: enable=unused-argument
 
 
 class Executor(prove.executor.Executor):

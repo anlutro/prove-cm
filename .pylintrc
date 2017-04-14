@@ -3,6 +3,7 @@ reports = no
 output-format = colorized
 
 [MESSAGES CONTROL]
+good-names = _, e
 disable = bad-continuation, missing-docstring, too-few-public-methods,
 	locally-disabled
 

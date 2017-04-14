@@ -163,7 +163,7 @@ class StateCollection:
 					raise StateDependencyMissingException(state, required_state) from e
 
 		return StateMap(dependencies)
-	
+
 	@lazy
 	def rdepends(self):
 		rev_dependencies = collections.defaultdict(lambda: [])
@@ -172,7 +172,7 @@ class StateCollection:
 			for required_state in state.requires:
 				try:
 					rev_dependencies[self[required_state]].append(state)
-				except KeyError:
+				except KeyError as e:
 					raise StateDependencyMissingException(state, required_state) from e
 
 		return StateMap(rev_dependencies)
@@ -187,11 +187,11 @@ class State:
 
 	def _combine_fncall_prop(self, prop_name, prop_type):
 		if prop_type is bool:
-			return any([getattr(i, prop_name) for i in self.fncalls])
+			return any([getattr(fncall, prop_name) for fncall in self.fncalls])
 		elif prop_type is list:
 			combined = []
-			for i in self.fncalls:
-				attr = getattr(i, prop_name)
+			for fncall in self.fncalls:
+				attr = getattr(fncall, prop_name)
 				if attr:
 					combined.extend(attr)
 			return combined

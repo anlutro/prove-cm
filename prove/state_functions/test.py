@@ -1,3 +1,5 @@
+# pylint: disable=unused-argument
+
 from prove.states import StateFuncResult
 
 

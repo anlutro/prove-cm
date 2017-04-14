@@ -1,3 +1,4 @@
+# pylint: disable=unused-argument
 import sys
 import textwrap
 import prove.util
@@ -8,7 +9,7 @@ BEFORE_FNCALL_CHAR = '→'
 STATE_RESULT_ITEM = '·'
 
 
-class tc:
+class Color:
 	BLUE = '\033[94m'
 	GREEN = '\033[92m'
 	YELLOW = '\033[93m'
@@ -29,7 +30,7 @@ def connect_success(target):
 
 
 def connect_failure(target):
-	sys.stdout.write(' %s✗ failed!%s\n' % (tc.RED, tc.RESET))
+	sys.stdout.write(' %s✗ failed!%s\n' % (Color.RED, Color.RESET))
 	sys.stdout.flush()
 
 
@@ -38,8 +39,8 @@ def disconnected(target):
 
 
 def cmd_result(result):
-	icon = ('%s✓ ' % tc.GREEN) if result.exit_code == 0 else ('%s✗ ' % tc.RED)
-	print('exit code: ' + icon + str(result.exit_code) + tc.RESET)
+	icon = ('%s✓ ' % Color.GREEN) if result.exit_code == 0 else ('%s✗ ' % Color.RED)
+	print('exit code: ' + icon + str(result.exit_code) + Color.RESET)
 	comment = prove.util.format_result(stdout=result.stdout, stderr=result.stderr)
 	if comment:
 		print(comment)
@@ -48,7 +49,7 @@ def cmd_result(result):
 def state_start(state):
 	print()
 	line = ' %s %s' % (BEFORE_STATE_CHAR, state.name)
-	print('%s%s%s' % (tc.YELLOW, line.strip(), tc.RESET))
+	print('%s%s%s' % (Color.YELLOW, line.strip(), Color.RESET))
 
 
 def state_fncall_start(state, fncall):
@@ -60,10 +61,10 @@ def state_fncall_start(state, fncall):
 def state_fncall_finish(state, fncall, result):
 	indent = 5 if BEFORE_STATE_CHAR else 3
 	if result.success:
-		print(' %s✓ success%s' % (tc.GREEN, tc.RESET))
+		print(' %s✓ success%s' % (Color.GREEN, Color.RESET))
 	else:
-		print(' %s✗ failure%s' % (tc.RED, tc.RESET))
-	sys.stdout.write(tc.GREY)
+		print(' %s✗ failure%s' % (Color.RED, Color.RESET))
+	sys.stdout.write(Color.GREY)
 
 	wrapper = textwrap.TextWrapper(
 		initial_indent=' ' * indent + ' ' + STATE_RESULT_ITEM + ' ',
@@ -93,7 +94,7 @@ def state_fncall_finish(state, fncall, result):
 		print(' ' * indent + 'system stderr:')
 		print(prove.util.indent_string(result.stderr, indent + 2))
 
-	sys.stdout.write(tc.RESET)
+	sys.stdout.write(Color.RESET)
 
 
 def state_finish(state, results):

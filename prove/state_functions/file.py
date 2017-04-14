@@ -140,8 +140,8 @@ class AbsentState(FileState):
 			return result
 
 		if not self.session.is_dry_run:
-			rm = self.session.run_command('rm -rfv "%s"' % path)
-			result.merge_with_cmd_result(rm)
+			rm_result = self.session.run_command('rm -rfv "%s"' % path)
+			result.merge_with_cmd_result(rm_result)
 		return result
 
 

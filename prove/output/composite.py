@@ -6,5 +6,5 @@ class CompositeOutput:
 		for outputter in self.outputters:
 			getattr(outputter, func)(*args, **kwargs)
 
-	def __call__(self, func, *args, *kwargs):
+	def __call__(self, func, *args, **kwargs):
 		self._forward(func, args, kwargs)
