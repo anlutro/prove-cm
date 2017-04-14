@@ -3,8 +3,7 @@ import concurrent.futures
 import importlib
 import logging
 
-from prove.states import StateResult
-from prove.states.graph import generate_graph
+import prove.states
 
 LOG = logging.getLogger(__name__)
 
@@ -13,25 +12,16 @@ class StateRunException(Exception):
 	pass
 
 
-class StateRunner:
-	def __init__(self, session, states=None, output=None):
+def run_states(session, parallelism=None):
+	runner = StatesRunner(session)
+	return runner.run()
+
+
+class AbstractStateRunner:
+	def __init__(self, session, output=None):
 		self.session = session
-		self.states = states or session.env.states
 		self.output = output or session.output
-		self.results = {}
-
-	def run(self):
-		for state in self.states:
-			self.run_state(state)
-
-		LOG.debug('finished running states')
-
-		return self.results
-
-	def run_single(self, state):
-		self.output.state_start(state)
-		for fncall in state.fncalls:
-			self.get_fncall_result(state, fncall)
+		self.results = []
 
 	def get_state_function(self, func):
 		state_mod, state_func = func.split('.')
@@ -54,33 +44,24 @@ class StateRunner:
 
 	def run_state(self, state):
 		LOG.debug('running state %r', state)
-
-		if state.name in self.results:
-			raise Exception('state %r already in results!' % state)
-
 		self.session.output.state_start(state)
-		self.results[state.name] = {}
-		ret = True
 
+		results = []
 		for fncall in state.fncalls:
-			result = self.get_fncall_result(state, fncall)
-			self.results[state.name][fncall] = result
-
-			if result.failure:
-				ret = False
-				if fncall.notify_failure:
-					for notify_state in fncall.notify_failure:
-						self.run_state(notify_state)
-				LOG.info('state.fncall %r failed, aborting', fncall)
+			result = self.run_fncall(state, fncall)
+			results.append((fncall, result))
+			results.extend(self.on_fncall_result(fncall, result))
+			if not result.success:
+				LOG.info('state %r fncall %r failed, aborting', state, fncall)
 				break
 
-			if result.success and result.changes and fncall.notify:
-				for notify_state in fncall.notify:
-					self.run_state(notify_state)
+		LOG.debug('finished state %r', state)
+		self.session.output.state_finish(state, results)
 
-		return ret
+		self.results.append((state, results))
+		self.on_state_results(state, results)
 
-	def get_fncall_result(self, state, fncall):
+	def run_fncall(self, state, fncall):
 		LOG.debug('running state.fncall %r', fncall)
 		self.session.output.state_fncall_start(state, fncall)
 
@@ -91,8 +72,8 @@ class StateRunner:
 			state_func = self.get_state_function(fncall.func)
 			result = state_func(self.session, fncall.args)
 
-			if not isinstance(result, StateResult):
-				raise ValueError('State function {}.{} did not return a StateResult object'.format(
+			if not isinstance(result, prove.states.StateFuncResult):
+				raise ValueError('State function {}.{} did not return a StateFuncResult object'.format(
 					state_func.__mod__.__name__, state_func.__name__))
 
 		LOG.debug('finished state.fncall %r', fncall)
@@ -111,56 +92,77 @@ class StateRunner:
 	def state_prereq(self, commands, expect_success):
 		for cmd in commands:
 			if self.session.run_command(cmd).was_successful == expect_success:
-				msg = 'prerequisite met: %s: %s' % (
+				msg = 'prerequisite met: %s: %r' % (
 					('success' if expect_success else 'failure'),
 					cmd
 				)
-				return StateResult(success=True, comment=msg)
+				return prove.states.StateFuncResult(success=True, comment=msg)
+
+	def on_fncall_result(self, fncall, result):
+		return []
+
+	def on_state_results(self, state, results):
+		pass
 
 
-class ParallelizedStateRunner(StateRunner):
-	def __init__(self, session, parallelism):
-		super().__init__(session)
-		self.graph = generate_graph(self.states)
-		print(self.graph)
-		self.pool = concurrent.futures.ThreadPoolExecutor(max_workers=parallelism)
-		self.futures = []
+class SingleStateRunner(AbstractStateRunner):
+	def run(self, state):
+		for fncall in state.fncalls:
+			self.run_fncall(state, fncall)
+		return self.results
 
-	def run(self, parallelism=1):
-		LOG.debug('running states with parallelism %d', parallelism)
 
-		for root_node in self.graph.roots:
-			self.submit_node_for_running(root_node)
+class StatesRunner(AbstractStateRunner):
+	def __init__(self, session, states=None, output=None):
+		super().__init__(session, output=output)
+		self.states = states or session.env.states
+		assert isinstance(self.states, prove.states.StateCollection), self.states
+		self.deferred = []
 
-		while self.futures:
-			for future in self.futures[:]:
-				LOG.debug('waiting for %r', future)
-				future.result()
-				self.futures.remove(future)
+	def get_state(self, state_name):
+		for state in self.states:
+			if state.name == state_name:
+				return state
+		return None
 
-		self.pool.shutdown()
+	def run(self):
+		self.deferred = []
 
-		LOG.debug('finished running states')
+		LOG.debug('running %d root states', len(self.states.root_states))
+		for state in self.states.root_states:
+			self.run_state(state)
 
-	def submit_node_for_running(self, node):
-		future = self.pool.submit(self.run_node_safe, node)
-		future.add_done_callback(lambda r: self.run_child_nodes(node))
-		self.futures.append(future)
-		return future
+		LOG.debug('running %d deferred states', len(self.deferred))
+		while len(self.deferred) > 0:
+			for state in self.deferred:
+				self.run_state(state)
 
-	def run_node_safe(self, node):
-		try:
-			return self.run_node(node)
-		except: # pylint: disable=bare-except
-			LOG.exception('exception occured while running node %r', node)
-			return False
+	def on_fncall_result(self, fncall, result):
+		results = []
 
-	def run_node(self, node):
-		for state in node.states:
-			if not self.run_state(state):
-				LOG.info('state %r failed', state)
+		def run_notify_states(self, states):
+			for state in states:
+				nofity_result = self.run_notify_state(notify_state)
+				if nofity_result:
+					results.append((state, nofity_result))
 
-	def run_child_nodes(self, node):
-		if node.children:
-			for child_node in node.children:
-				self.submit_node_for_running(child_node)
+		if result.failure and fncall.notify_failure:
+			run_notify_states(fncall.notify_failure)
+
+		if result.success and result.changes and fncall.notify:
+			run_notify_states(fncall.notify)
+
+		return results
+
+	def run_notify_state(self, state_name):
+		state = self.get_state(state_name)
+		if state.defer:
+			self.deferred.append(state)
+			return None
+		return self.run_state(state)
+
+	def on_state_results(self, state, results):
+		if state in self.states.rdepends:
+			for rdep_state in self.states.rdepends[state]:
+				LOG.debug('state %r depends on %r. running it', rdep_state, state)
+				self.run_state(rdep_state)

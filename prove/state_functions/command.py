@@ -1,10 +1,10 @@
-from prove.states import StateResult
+from prove.states import StateFuncResult
 
 
 def run(session, args):
 	result = session.run_command(args['command'])
 
-	return StateResult(
+	return StateFuncResult(
 		success=result.was_successful,
 		changes=None,
 		stdout=result.stdout,

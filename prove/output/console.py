@@ -96,7 +96,7 @@ def state_fncall_finish(state, fncall, result):
 	sys.stdout.write(tc.RESET)
 
 
-def state_summary():
+def state_finish(state, results):
 	pass
 
 

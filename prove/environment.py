@@ -36,17 +36,17 @@ class TargetEnvironment:
 			options = prove.config.Options(options)
 		assert isinstance(options, prove.config.Options)
 		self.options = options
-		assert isinstance(states, list)
+
+		if isinstance(states, list):
+			states = prove.states.StateCollection(states)
+		assert isinstance(states, prove.states.StateCollection)
 		self.states = states
+
 		assert isinstance(variables, dict)
 		self.variables = variables
+
 		assert isinstance(files, dict)
 		self.files = files
-
-	def find_state(self, state_name):
-		for state in self.states:
-			if state.name == state_name:
-				return state
 
 
 class Environment:
@@ -109,25 +109,25 @@ class Environment:
 			tgt_variables.update(self.variable_files[variable_file].variables)
 		tgt_variables.update(target.variables)
 
-		loaded_states = collections.OrderedDict()
-		def load_states(states):
-			for state_name in states:
-				if state_name in loaded_states:
+		loaded_state_files = collections.OrderedDict()
+		def load_state_files(state_files):
+			for state_file in state_files:
+				if state_file in loaded_state_files:
 					continue
-				if state_name not in self.state_files:
-					raise prove.states.StateMissingException(state_name)
-				state = self.state_files[state_name].load(tgt_variables)
-				load_states(state.includes)
-				loaded_states[state_name] = state
+				if state_file not in self.state_files:
+					raise prove.states.StateFileMissingException(state_file)
+				state = self.state_files[state_file].load(tgt_variables)
+				load_state_files(state.includes)
+				loaded_state_files[state_file] = state
 		for role in target.roles:
-			load_states(self.roles[role].states)
-		load_states(target.states)
+			load_state_files(self.roles[role].states)
+		load_state_files(target.states)
 
-		for state_name, state in loaded_states.items():
-			for required_state_name in state.requires:
-				if required_state_name not in loaded_states:
-					raise prove.states.StateNotLoadedException(required_state_name, state_name)
+		for file_name, state_file in loaded_state_files.items():
+			for required_file_name in state_file.requires:
+				if required_file_name not in loaded_state_files:
+					raise prove.states.StateNotLoadedException(required_file_name, file_name)
 
-		tgt_states = prove.states.sort_states(loaded_states)
+		tgt_states = prove.states.get_states(loaded_state_files)
 
 		return TargetEnvironment(tgt_options, tgt_states, tgt_variables, self.files)

@@ -11,14 +11,7 @@ class StatesAction(prove.actions.Action):
 
 	def run(self):
 		parallelism = self.kwargs.get('parallelism', None)
-
-		if parallelism is None:
-			state_run = prove.states.runner.StateRunner(self.session)
-		else:
-			state_run = prove.states.runner.ParallelizedStateRunner(
-				self.session, parallelism=int(parallelism),
-			)
-		state_run.run()
+		prove.states.runner.run_states(self.session, parallelism=parallelism)
 
 
 class StatesCommand(prove.actions.Command):

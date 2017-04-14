@@ -1,4 +1,4 @@
-from prove.states import StateResult
+from prove.states import StateFuncResult
 
 
 class GroupState():
@@ -6,7 +6,7 @@ class GroupState():
 		self.session = session
 
 	def present(self, name, gid=None, system=False):
-		result = StateResult()
+		result = StateFuncResult()
 		if self._group_exists(name):
 			result.success = True
 			result.comment = 'Group {} already exists'.format(name)
@@ -28,7 +28,7 @@ class GroupState():
 		return result
 
 	def absent(self, name):
-		result = StateResult()
+		result = StateFuncResult()
 		if not self._group_exists(name):
 			result.success = True
 			result.comment = 'Group {} already absent'.format(name)

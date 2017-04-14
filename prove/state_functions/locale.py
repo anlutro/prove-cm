@@ -1,4 +1,4 @@
-from prove.states import StateResult
+from prove.states import StateFuncResult
 from prove.state_functions import AbstractState
 
 
@@ -20,7 +20,7 @@ def _full_locale(locale):
 
 class LocaleState(AbstractState):
 	def install_locale(self, locale):
-		result = StateResult(success=True)
+		result = StateFuncResult(success=True)
 		localegen_path = '/etc/locale.gen'
 
 		for variation in _locale_variations(locale):

@@ -3,7 +3,7 @@ from unittest import mock
 from tests.unit.actions import make_app_conn
 
 import prove.actions.states
-from prove.states import State, StateFuncCall, StateResult
+from prove.states import State, StateFuncCall, StateFuncResult
 
 
 def test_StatesCommand():
@@ -12,7 +12,7 @@ def test_StatesCommand():
 	])
 	app, conn = make_app_conn([state])
 	command = prove.actions.states.StatesCommand(app, args=[])
-	result = StateResult()
+	result = StateFuncResult()
 	with mock.patch(
 			'prove.state_functions.test.noop',
 			new_callable=mock.MagicMock,

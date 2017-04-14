@@ -1,7 +1,7 @@
 import difflib
 
 from prove.state_functions import AbstractState
-from prove.states import StateResult
+from prove.states import StateFuncResult
 
 
 class FileState(AbstractState):
@@ -56,7 +56,7 @@ class FileState(AbstractState):
 
 class ManagedState(FileState):
 	def run(self, path, source=None, content=None, user=None, group=None, mode=None):
-		result = StateResult()
+		result = StateFuncResult()
 		result.changes = []
 
 		file_exists = self.session.run_command('test -f %s' % path).exit_code == 0
@@ -101,7 +101,7 @@ class ManagedState(FileState):
 
 class DirectoryState(FileState):
 	def run(self, path, user=None, group=None, mode=None):
-		result = StateResult()
+		result = StateFuncResult()
 		result.changes = []
 
 		dir_exists = self.session.run_command('test -d "%s"' % path).was_successful
@@ -133,7 +133,7 @@ class DirectoryState(FileState):
 
 class AbsentState(FileState):
 	def run(self, path):
-		result = StateResult(success=True)
+		result = StateFuncResult(success=True)
 		exists = self.session.run_command('test -e "%s"' % path).was_successful
 		if not exists:
 			result.comment = 'file already absent: %r' % path

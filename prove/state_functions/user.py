@@ -1,4 +1,4 @@
-from prove.states import StateResult
+from prove.states import StateFuncResult
 
 
 class UserState():
@@ -6,7 +6,7 @@ class UserState():
 		self.session = session
 
 	def present(self, name, uid=None, gid=None, system=False, home=None):
-		result = StateResult()
+		result = StateFuncResult()
 		if self._user_exists(name):
 			result.success = True
 			result.comment = 'User {} already exists'.format(name)
@@ -30,7 +30,7 @@ class UserState():
 		return result
 
 	def absent(self, name):
-		result = StateResult()
+		result = StateFuncResult()
 		if not self._user_exists(name):
 			result.success = True
 			result.comment = 'User {} already absent'.format(name)

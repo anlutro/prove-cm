@@ -1,5 +1,5 @@
 import os.path
-from prove.states import StateResult
+from prove.states import StateFuncResult
 from prove.state_functions import AbstractState
 
 
@@ -31,7 +31,7 @@ class AuthedKeyState(AbstractState):
 		return False
 
 	def ensure_present(self, key, user):
-		result = StateResult(success=True)
+		result = StateFuncResult(success=True)
 
 		getent = self.run_command(['getent', 'passwd', user])
 		if not getent.was_successful:
@@ -57,7 +57,7 @@ class AuthedKeyState(AbstractState):
 		return result
 
 	def ensure_absent(self, key, user):
-		result = StateResult(success=True)
+		result = StateFuncResult(success=True)
 
 		getent = self.run_command(['getent', 'passwd', user])
 		if not getent.was_successful:

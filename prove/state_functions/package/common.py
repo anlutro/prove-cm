@@ -1,4 +1,4 @@
-from prove.states import StateResult
+from prove.states import StateFuncResult
 
 
 class AbstractPkgState():
@@ -6,7 +6,7 @@ class AbstractPkgState():
 		self.session = session
 
 	def installed(self, args):
-		result = StateResult()
+		result = StateFuncResult()
 
 		if self._is_installed(args['package']):
 			result.success = True

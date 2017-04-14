@@ -1,85 +1,33 @@
-import pytest
-from prove import states
+from prove.states import State, StateFuncCall, StateCollection, StateMap
 
 
 def test_state_requires_accumulates_invocation_requires():
-	s = states.State('s1', [
-		states.StateFuncCall('f1', {'requires': ['s2']}),
-		states.StateFuncCall('f2', {'requires': ['s3']}),
+	s = State('s1', [
+		StateFuncCall('f1', {'requires': ['s2']}),
+		StateFuncCall('f2', {'requires': ['s3']}),
 	])
 	assert ['s2', 's3'] == s.requires
 
 
-def test_required_states_are_first():
-	s = [
-		states.State('s1', [
-			states.StateFuncCall('f1', {'requires': ['s2']})
+def test_state_collection_depends():
+	states = [
+		State('s1', []),
+		State('s2', [
+			StateFuncCall('f1', {'requires': ['s1']})
 		]),
-		states.State('s2', [
-			states.StateFuncCall('f2', {})
-		])
 	]
-	sf = states.LoadedStateFile('sf', s)
-	s = states.sort_states([sf])
-	assert 's2' == s[0].name
-	assert 's1' == s[1].name
+	coll = StateCollection(states)
 
+	assert isinstance(coll.depends, StateMap)
+	assert 1 == len(coll.depends)
+	assert isinstance(coll.depends['s2'], list)
+	assert 1 == len(coll.depends['s2'])
+	assert isinstance(coll.depends['s2'][0], State)
+	assert coll.depends['s2'][0].name == 's1'
 
-def test_recursive_require_throws_exception():
-	s = [
-		states.State('s1', [
-			states.StateFuncCall('f1', {'requires': ['s2']})
-		]),
-		states.State('s2', [
-			states.StateFuncCall('f2', {'requires': ['s1']})
-		])
-	]
-	sf = states.LoadedStateFile('sf', s)
-	with pytest.raises(states.StateRequireRecursionException):
-		states.sort_states([sf])
-
-
-def test_lazy_state():
-	sf = states.LoadedStateFile('sf', [
-		states.State('s1', [
-			states.StateFuncCall('f1', {'lazy': True})
-		]),
-	])
-	assert [] == states.sort_states([sf])
-
-
-def test_notify_lazy_state():
-	sf = states.LoadedStateFile('sf', [
-		states.State('s1', [
-			states.StateFuncCall('f1', {'lazy': True})
-		]),
-		states.State('s2', [
-			states.StateFuncCall('f2', {'notify': ['s1']})
-		]),
-		states.State('s3', [
-			states.StateFuncCall('f2', {'notify': ['s1']})
-		]),
-	])
-	s = states.sort_states([sf])
-	assert 's2' == s[0].name
-	assert 's1' == s[1].name
-	assert 's3' == s[2].name
-	assert 's1' == s[3].name
-
-
-def test_notify_defered_state():
-	sf = states.LoadedStateFile('sf', [
-		states.State('s1', [
-			states.StateFuncCall('f1', {'defer': True})
-		]),
-		states.State('s2', [
-			states.StateFuncCall('f2', {'notify': ['s1']})
-		]),
-		states.State('s3', [
-			states.StateFuncCall('f2', {'notify': ['s1']})
-		]),
-	])
-	s = states.sort_states([sf])
-	assert 's2' == s[0].name
-	assert 's3' == s[1].name
-	assert 's1' == s[2].name
+	assert isinstance(coll.rdepends, StateMap)
+	assert 1 == len(coll.rdepends)
+	assert isinstance(coll.rdepends['s1'], list)
+	assert 1 == len(coll.rdepends['s1'])
+	assert isinstance(coll.rdepends['s1'][0], State)
+	assert coll.rdepends['s1'][0].name == 's2'

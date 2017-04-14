@@ -1,4 +1,4 @@
-from prove.states import StateResult
+from prove.states import StateFuncResult
 
 
 def __virtual__(session):
@@ -14,7 +14,7 @@ def __virtual__(session):
 
 class ServiceState():
 	def enabled(self, session, args):
-		result = StateResult()
+		result = StateFuncResult()
 
 		if self.is_service_enabled(session, args['service']):
 			result.success = True
@@ -36,7 +36,7 @@ class ServiceState():
 		return result
 
 	def running(self, session, args):
-		result = StateResult()
+		result = StateFuncResult()
 
 		if self.is_service_running(session, args['service']):
 			result.success = True

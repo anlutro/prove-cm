@@ -1,23 +1,23 @@
-from prove.states import StateResult
+from prove.states import StateFuncResult
 
 
 def succeed_without_changes(session, args):
-	return StateResult(success=True)
+	return StateFuncResult(success=True)
 
 
 noop = succeed_without_changes
 
 
 def succeed_with_changes(session, args):
-	return StateResult(success=True, changes=['changes'])
+	return StateFuncResult(success=True, changes=['changes'])
 
 
 def fail_without_changes(session, args):
-	return StateResult(success=False)
+	return StateFuncResult(success=False)
 
 
 def fail_with_changes(session, args):
-	return StateResult(success=False, changes=['changes'])
+	return StateFuncResult(success=False, changes=['changes'])
 
 
 def throw_exception(session, args):
@@ -42,7 +42,7 @@ def long_output(session, args):
 		'W: Problem unlinking the file /var/cache/apt/pkgcache.bin - RemoveCaches (13: Permission denied)\n'
 		'W: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)\n'
 	)
-	return StateResult(
+	return StateFuncResult(
 		success=False,
 		changes=[lipsum, lipsum],
 		comments=[lipsum, lipsum],

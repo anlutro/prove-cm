@@ -1,4 +1,6 @@
+import collections
 import logging
+from lazy import lazy
 
 import prove.util
 
@@ -10,9 +12,21 @@ class StateException(Exception):
 
 
 class StateMissingException(StateException):
-	msg = 'State "{}" could not be found. Does the state file exist?'
+	msg = 'State %r could not be found.'
 	def __init__(self, state_name):
-		super().__init__(self.msg.format(state_name))
+		super().__init__(self.msg % (state_name))
+
+
+class StateDependencyMissingException(StateException):
+	msg = 'Dependency %r for state %r could not be found.'
+	def __init__(self, state, required_state):
+		super().__init__(self.msg % (required_state, state))
+
+
+class StateFileMissingException(StateException):
+	msg = 'State file "{}" could not be found. Does the state file exist?'
+	def __init__(self, state_file_name):
+		super().__init__(self.msg.format(state_file_name))
 
 
 class StateNotLoadedException(StateException):
@@ -33,51 +47,14 @@ class StateRequireRecursionException(StateException):
 		super().__init__('State requirement recursion detected: ' + stack_str)
 
 
-def sort_states(state_files):
-	if isinstance(state_files, dict):
-		state_files = state_files.values()
-
-	def iter_states():
-		for loaded_state_file in state_files:
-			for state in loaded_state_file.states:
-				yield state
-
-	avail_states = {}
-	for state in iter_states():
-		avail_states[state.name] = state
-
+def get_states(state_files):
 	states = []
-	states_added = []
 
-	def append_state(state, stack, only_once=True):
-		if state.name in stack:
-			raise StateRequireRecursionException(stack + [state.name])
+	for loaded_state_file in state_files.values():
+		for state in loaded_state_file.states:
+			states.append(state)
 
-		if only_once and state.name in states_added:
-			return
-
-		for require_state in state.requires:
-			append_state(avail_states[require_state], stack + [state.name])
-
-		states.append(state)
-		states_added.append(state.name)
-
-		for notify_state in state.notify:
-			notify_state = avail_states[notify_state]
-			if notify_state.defer:
-				notify_state._lazy_notified = True
-			else:
-				append_state(notify_state, stack + [state.name], only_once=False)
-
-	for state in iter_states():
-		if not state.lazy and not state.defer:
-			append_state(state, [], only_once=True)
-
-	for state in iter_states():
-		if state.defer and (not state.lazy or state._lazy_notified):
-			append_state(state, [], only_once=True)
-
-	return states
+	return StateCollection(states)
 
 
 class StateFile:
@@ -126,6 +103,81 @@ class LoadedStateFile:
 		self.requires = requires or set()
 
 
+class StateMap:
+	def __init__(self, data=None):
+		if isinstance(data, list):
+			data = {s.name: s for s in data}
+		elif isinstance(data, dict):
+			data = {state.name: value for state, value in data.items()}
+		self.states = data or {}
+
+	def __contains__(self, key):
+		if isinstance(key, State):
+			key = key.name
+		return key in self.states
+
+	def __getitem__(self, key):
+		if isinstance(key, State):
+			key = key.name
+		return self.states[key]
+
+	def __setitem__(self, key, value):
+		if isinstance(key, State):
+			key = key.name
+		self.states[key] = value
+
+	def __iter__(self):
+		return self.states
+
+	def __len__(self):
+		return len(self.states)
+
+	def __repr__(self):
+		return repr(self.states)
+
+
+class StateCollection:
+	def __init__(self, states):
+		self.states = states
+		self.states_map = StateMap(states)
+
+	def __iter__(self):
+		return self.states
+
+	def __getitem__(self, key):
+		return self.states_map[key]
+
+	@lazy
+	def root_states(self):
+		return [state for state in self.states if state.is_valid_root]
+
+	@lazy
+	def depends(self):
+		dependencies = collections.defaultdict(lambda: [])
+
+		for state in self.states:
+			for required_state in state.requires:
+				try:
+					dependencies[state].append(self[required_state])
+				except KeyError as e:
+					raise StateDependencyMissingException(state, required_state) from e
+
+		return StateMap(dependencies)
+	
+	@lazy
+	def rdepends(self):
+		rev_dependencies = collections.defaultdict(lambda: [])
+
+		for state in self.states:
+			for required_state in state.requires:
+				try:
+					rev_dependencies[self[required_state]].append(state)
+				except KeyError:
+					raise StateDependencyMissingException(state, required_state) from e
+
+		return StateMap(rev_dependencies)
+
+
 class State:
 	def __init__(self, name, fncalls):
 		self.name = name
@@ -157,6 +209,10 @@ class State:
 	@property
 	def requires(self):
 		return self._combine_fncall_prop('requires', list)
+
+	@property
+	def is_valid_root(self):
+		return not self.requires and not self.lazy and not self.defer
 
 	def __repr__(self):
 		return '<{} "{}">'.format(self.__class__.__name__, self.name)
@@ -199,7 +255,7 @@ class StateFuncCall:
 		return '<{} "{}">'.format(self.__class__.__name__, self.func)
 
 
-class StateResult:
+class StateFuncResult:
 	def __init__(self, success=None, changes=None, comment=None, comments=None,
 			stdout=None, stderr=None):
 		self.success = success

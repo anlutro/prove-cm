@@ -1,4 +1,4 @@
-from prove.states import StateResult
+from prove.states import StateFuncResult
 
 
 class AbstractState:
@@ -9,4 +9,4 @@ class AbstractState:
 		return self.session.run_command(command, skip_sudo=skip_sudo)
 
 	def result(self, *args, **kwargs):
-		return StateResult(*args, **kwargs)
+		return StateFuncResult(*args, **kwargs)
