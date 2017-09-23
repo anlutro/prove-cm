@@ -1,5 +1,7 @@
 import logging
 
+import prove.util
+
 LOG = logging.getLogger('prove.output')
 
 

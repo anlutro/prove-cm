@@ -75,7 +75,8 @@ class AbstractClient:
 class SingleCommandClient(AbstractClient):
 	def main(self):
 		app = self.make_app()
-		app.run_command(self.get_command(app))
+		cmd = self.get_command(app)
+		app.run_command(cmd)
 
-	def get_command(self):
+	def get_command(self, app):
 		raise NotImplementedError()
