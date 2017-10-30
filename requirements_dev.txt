@@ -1,4 +1,6 @@
 pytest
+pytest-catchlog
 pytest-cov
+pytest-mock
 pylint
 bpython
