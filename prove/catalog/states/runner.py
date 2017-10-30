@@ -1,7 +1,7 @@
 import importlib
 import logging
 
-import prove.states
+import prove.catalog.states
 
 LOG = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class AbstractStateRunner:
 				LOG.info('state %r fncall %r failed, aborting', state, fncall)
 				break
 
-		state_result = prove.states.StateResult(success, func_results)
+		state_result = prove.catalog.states.StateResult(success, func_results)
 		LOG.debug('finished state %r', state)
 		self.session.output.state_finish(state, state_result)
 
@@ -73,7 +73,7 @@ class AbstractStateRunner:
 			state_func = self.get_state_function(fncall.func)
 			result = state_func(self.session, fncall.args)
 
-			if not isinstance(result, prove.states.StateFuncResult):
+			if not isinstance(result, prove.catalog.states.StateFuncResult):
 				raise ValueError('State function {}.{} did not return a StateFuncResult object'.format(
 					state_func.__mod__.__name__, state_func.__name__))
 
@@ -97,7 +97,7 @@ class AbstractStateRunner:
 					('success' if expect_success else 'failure'),
 					cmd
 				)
-				return prove.states.StateFuncResult(success=True, comment=msg)
+				return prove.catalog.states.StateFuncResult(success=True, comment=msg)
 
 	def on_fncall_result(self, fncall, result):
 		return []
@@ -117,7 +117,7 @@ class StatesRunner(AbstractStateRunner):
 	def __init__(self, session, states=None, output=None):
 		super().__init__(session, output=output)
 		self.states = states or session.env.states
-		assert isinstance(self.states, prove.states.StateCollection), self.states
+		assert isinstance(self.states, prove.catalog.states.StateCollection), self.states
 		self.deferred = []
 
 	def get_state(self, state_name):
@@ -134,7 +134,7 @@ class StatesRunner(AbstractStateRunner):
 			self.run_state(state)
 
 		LOG.debug('running %d deferred states', len(self.deferred))
-		while len(self.deferred) > 0:
+		while self.deferred:
 			for state in self.deferred:
 				self.run_state(state)
 

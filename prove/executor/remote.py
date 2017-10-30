@@ -45,6 +45,6 @@ class Executor(prove.executor.Executor):
 				kwargs = prove.remote.unserialize(response['data']['kwargs'])
 				func(*args, **kwargs)
 
-		env = self.get_env(target)
-		client = prove.remote.get_client(target, env, callback)
-		return Session(client, target, env, self.app.output)
+		catalog = self.get_catalog(target)
+		client = prove.remote.get_client(target, catalog, callback)
+		return Session(client, target, catalog, self.app.output)

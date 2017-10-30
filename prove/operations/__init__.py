@@ -1,4 +1,7 @@
+import importlib
 import logging
+
+from prove.util import snake_to_camel_case
 
 LOG = logging.getLogger(__name__)
 
@@ -45,3 +48,19 @@ class Command:
 				'or one of the run methods must be overridden'))
 		action = action_cls(session, self.args, self.kwargs)
 		return session.run_action(action)
+
+
+def get_command_cls(name):
+	module_name = name.replace('-', '_')
+	command_module_name = 'prove.operations.commands.%s' % module_name
+	command_module = importlib.import_module(command_module_name)
+	command_cls = snake_to_camel_case(name)
+	return getattr(command_module, command_cls + 'Command')
+
+
+def get_action_cls(name):
+	module_name = name.replace('-', '_')
+	action_module_name = 'prove.operations.actions.%s' % module_name
+	action_module = importlib.import_module(action_module_name)
+	action_cls = snake_to_camel_case(name)
+	return getattr(action_module, action_cls + 'Action')

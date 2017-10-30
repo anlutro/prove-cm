@@ -1,8 +1,7 @@
 import argparse
-import importlib
 
 import prove.cli
-import prove.util
+import prove.operations
 
 
 class ActionRunner(prove.cli.SingleCommandClient):
@@ -54,12 +53,9 @@ class ActionRunner(prove.cli.SingleCommandClient):
 		return args, kwargs
 
 	def get_command(self, app):
-		cmd_module = 'prove.actions.' + self.args.command.replace('-', '_')
-		cmd_module = importlib.import_module(cmd_module)
-		cmd_class = prove.util.snake_to_camel_case(self.args.command)
-		cmd_class = getattr(cmd_module, cmd_class + 'Command')
+		command_cls = prove.operations.get_command_cls(self.args.command)
 		args, kwargs = self.parse_command_args(self.args.command_args)
-		return cmd_class(app, args, kwargs)
+		return command_cls(app, args, kwargs)
 
 
 def main():

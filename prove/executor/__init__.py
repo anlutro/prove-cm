@@ -1,11 +1,10 @@
 from contextlib import contextmanager
 import logging
-import tempfile
 
 from lazy import lazy
 
 import prove.config
-import prove.environment
+import prove.catalog
 import prove.util
 
 LOG = logging.getLogger(__name__)
@@ -30,13 +29,13 @@ class SessionException(Exception):
 
 
 class Session:
-	def __init__(self, target, env, output):
+	def __init__(self, target, catalog, output):
 		assert isinstance(target, prove.config.Target)
 		self.target = target
-		assert isinstance(env, prove.environment.TargetEnvironment)
-		self.env = env
+		assert isinstance(catalog, prove.catalog.TargetCatalog)
+		self.catalog = catalog
 		self.output = output
-		self.options = env.options
+		self.options = catalog.options
 		self.info = SessionInfo(self)
 
 	@property
@@ -84,7 +83,7 @@ class Session:
 
 		if source.startswith('prove://'):
 			source = source.replace('prove://', '')
-			source = self.env.files[source]
+			source = self.catalog.files[source]
 			return self.upload_file(source, remote_path)
 
 		if source.startswith('file://'):
@@ -175,13 +174,13 @@ class Executor:
 			self.app.output.disconnected(target)
 
 	def get_session(self, target):
-		env = self.get_env(target)
-		return self.session_cls(target, env, self.app.output)
+		catalog = self.get_catalog(target)
+		return self.session_cls(target, catalog, self.app.output)
 
-	def get_env(self, target):
-		LOG.debug('creating environment for target: %s', target.host)
-		env = self.app.get_target_env(target)
-		LOG.debug('host environment options: %s', env.options)
-		LOG.debug('host environment states: %s', env.states)
-		LOG.debug('host environment variables: %s', env.variables)
-		return env
+	def get_catalog(self, target):
+		LOG.debug('creating catalog for target: %s', target.host)
+		catalog = self.app.get_target_catalog(target)
+		LOG.debug('host catalog options: %s', catalog.options)
+		LOG.debug('host catalog states: %s', catalog.states)
+		LOG.debug('host catalog variables: %s', catalog.variables)
+		return catalog

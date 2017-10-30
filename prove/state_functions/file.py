@@ -1,7 +1,7 @@
 import difflib
 
 from prove.state_functions import AbstractState
-from prove.states import StateFuncResult
+from prove.catalog.states import StateFuncResult
 
 
 class FileState(AbstractState):

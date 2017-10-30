@@ -1,9 +1,10 @@
 from unittest import mock
 
-from tests.unit.actions import make_app_conn
+from tests.unit.operations import make_app_conn
 
-import prove.actions.states
-from prove.states import State, StateFuncCall, StateFuncResult
+from prove.operations.actions.states import StatesAction
+from prove.operations.commands.states import StatesCommand
+from prove.catalog.states import State, StateFuncCall, StateFuncResult
 
 
 def test_StatesCommand():
@@ -11,7 +12,7 @@ def test_StatesCommand():
 		StateFuncCall('test.noop', {})
 	])
 	app, conn = make_app_conn([state])
-	command = prove.actions.states.StatesCommand(app, args=[])
+	command = StatesCommand(app, args=[])
 	result = StateFuncResult()
 	with mock.patch(
 			'prove.state_functions.test.noop',
@@ -23,4 +24,4 @@ def test_StatesCommand():
 
 	app.executor_connect.assert_called_once_with('host1')
 	action = conn.run_action.call_args[0][0]
-	assert isinstance(action, prove.actions.states.StatesAction)
+	assert isinstance(action, StatesAction)

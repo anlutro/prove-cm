@@ -1,4 +1,4 @@
-from prove.states import State, StateFuncCall, StateCollection, StateMap
+from prove.catalog.states import State, StateFuncCall, StateCollection, StateMap
 
 
 def test_state_requires_accumulates_invocation_requires():

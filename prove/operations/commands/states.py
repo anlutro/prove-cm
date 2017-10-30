@@ -1,20 +1,12 @@
 import logging
 
-import prove.actions
-import prove.states.runner
+import prove.operations
+from ..actions.states import StatesAction
 
 LOG = logging.getLogger(__name__)
 
 
-class StatesAction(prove.actions.Action):
-	name = 'states'
-
-	def run(self):
-		parallelism = self.kwargs.get('parallelism', None)
-		prove.states.runner.run_states(self.session, parallelism=parallelism)
-
-
-class StatesCommand(prove.actions.Command):
+class StatesCommand(prove.operations.Command):
 	action_cls = StatesAction
 
 	def _extra_kwargs(self):

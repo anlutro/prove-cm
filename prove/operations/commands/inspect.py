@@ -1,8 +1,8 @@
 import yaml
-import prove.actions
+import prove.operations
 
 
-class InspectCommand(prove.actions.Command):
+class InspectCommand(prove.operations.Command):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.inspect_simple_things = True

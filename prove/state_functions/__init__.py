@@ -1,4 +1,4 @@
-from prove.states import StateFuncResult
+from prove.catalog.states import StateFuncResult
 
 
 class AbstractState:

@@ -1,7 +1,8 @@
 from unittest import mock
-import prove.environment
-import prove.states
-from prove.locator import _get_file_name, Locator, Component
+from prove.catalog.states import StateFile
+from prove.catalog.roles import Role
+from prove.catalog.variables import VariableFile
+from prove.catalog.locator import _get_file_name, Locator, Component
 
 
 def mock_loader():
@@ -25,7 +26,7 @@ def test_locate_roles():
 		roles = locator.locate_roles()
 		mock_list_files.assert_called_once_with('/root/roles')
 	assert 'test_role' in roles
-	assert isinstance(roles['test_role'], prove.environment.Role)
+	assert isinstance(roles['test_role'], Role)
 	assert 'test_role' == roles['test_role'].name
 
 
@@ -38,7 +39,7 @@ def test_locate_states():
 		states = locator.locate_states()
 		mock_list_files.assert_called_once_with('/root/states')
 	assert 'test_state' in states
-	assert isinstance(states['test_state'], prove.states.StateFile)
+	assert isinstance(states['test_state'], StateFile)
 	assert 'test_state' == states['test_state'].name
 
 
@@ -51,7 +52,7 @@ def test_locate_variables():
 		variables = locator.locate_variables()
 		mock_list_files.assert_called_once_with('/root/variables')
 	assert 'test_var' in variables
-	assert isinstance(variables['test_var'], prove.environment.VariableFile)
+	assert isinstance(variables['test_var'], VariableFile)
 	assert 'test_var' == variables['test_var'].name
 
 

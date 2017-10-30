@@ -1,14 +1,15 @@
 from unittest import mock
 
 import prove.config
-import prove.environment
+import prove.catalog
 import prove.executor.remote
+
 
 def _make_session(remote_client, host=None, env=None, output=None):
 	return prove.executor.remote.Session(
 		remote_client,
 		env or prove.config.Target('localhost'),
-		host or prove.environment.TargetEnvironment({}, [], {}, {}),
+		host or prove.catalog.TargetCatalog({}, [], {}, {}),
 		output or mock.Mock(),
 	)
 

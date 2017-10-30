@@ -2,20 +2,20 @@ import fnmatch
 import importlib
 import logging
 
-import prove.actions
+import prove.operations
 import prove.config
-import prove.locator
+import prove.catalog.locator
 import prove.util
 
 LOG = logging.getLogger(__name__)
 
 
 class Application:
-	def __init__(self, options, env, targets, output):
+	def __init__(self, options, catalog, targets, output):
 		assert isinstance(options, prove.config.Options)
 		self.options = options
-		assert isinstance(env, prove.environment.Environment)
-		self.global_env = env
+		assert isinstance(catalog, prove.catalog.Catalog)
+		self.catalog = catalog
 		self.targets = targets
 		self.output = output
 		self.executors = {}
@@ -25,7 +25,7 @@ class Application:
 		assert isinstance(config, dict)
 		options = prove.config.Options(config['options'])
 
-		env = prove.environment.Environment.from_options_and_config(options, config)
+		catalog = prove.catalog.Catalog.from_options_and_config(options, config)
 
 		groups = [
 			prove.config.Group(**group)
@@ -44,10 +44,10 @@ class Application:
 		LOG.debug('importing output module: %s', output_module)
 		output = importlib.import_module(output_module)
 
-		return cls(options, env, targets, output)
+		return cls(options, catalog, targets, output)
 
 	def run_command(self, command):
-		assert isinstance(command, prove.actions.Command)
+		assert isinstance(command, prove.operations.Command)
 		LOG.info('Running command: %s', command.__class__.__name__)
 		command.run(self.filter_targets())
 
@@ -76,8 +76,8 @@ class Application:
 
 		return targets
 
-	def get_target_env(self, target):
-		return self.global_env.make_target_env(target)
+	def get_target_catalog(self, target):
+		return self.catalog.make_target_catalog(target)
 
 	def get_target_executor(self, target):
 		assert isinstance(target, prove.config.Target)

@@ -1,6 +1,6 @@
 # pylint: disable=unused-argument
 
-from prove.states import StateFuncResult
+from prove.catalog.states import StateFuncResult
 
 
 def succeed_without_changes(session, args):

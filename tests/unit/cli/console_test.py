@@ -1,10 +1,9 @@
 from unittest import mock
-import prove.actions
 from prove.cli.action_runner import ActionRunner
 
 
 def test_instantiates_correct_action_class():
-	with mock.patch('prove.actions.states.StatesCommand', return_value='test_retval'):
+	with mock.patch('prove.operations.commands.states.StatesCommand', return_value='test_retval'):
 		command = ActionRunner(['states']).get_command(None)
 		assert 'test_retval' == command
 

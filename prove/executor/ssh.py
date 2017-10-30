@@ -91,7 +91,7 @@ class Session(prove.executor.Session):
 
 class Executor(prove.executor.Executor):
 	def get_session(self, target):
-		env = self.get_env(target)
+		catalog = self.get_catalog(target)
 		ssh_client = paramiko.SSHClient()
 		ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-		return Session(ssh_client, target, env, self.app.output)
+		return Session(ssh_client, target, catalog, self.app.output)

@@ -1,7 +1,7 @@
-import prove.actions
+import prove.operations
 
 
-class TestAction(prove.actions.Action):
+class TestAction(prove.operations.Action):
 	name = 'test'
 
 	def run(self):
@@ -12,5 +12,5 @@ class TestAction(prove.actions.Action):
 		self.session.output.comment('test reply')
 
 
-class TestCommand(prove.actions.Command):
+class TestCommand(prove.operations.Command):
 	action_cls = TestAction

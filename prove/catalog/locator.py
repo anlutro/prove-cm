@@ -4,9 +4,10 @@ import logging
 import os
 import os.path
 
-from prove.environment import Role, VariableFile
-from prove.states import StateFile
 import prove.util
+from .roles import Role
+from .states import StateFile
+from .variables import VariableFile
 
 LOG = logging.getLogger(__name__)
 
