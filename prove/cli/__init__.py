@@ -38,6 +38,7 @@ class AbstractClient:
 		allib.logging.setup_logging(
 			log_file=opts.get('log_path'),
 			log_level=opts.get('log_level'),
+			colors=True,
 		)
 		return config
 
