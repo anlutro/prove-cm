@@ -62,7 +62,8 @@ class AbstractClient:
 			config['options']['ssl'][key] = normalize_path(config['options']['ssl'][key])
 
 		for target in config.get('targets', []):
-			target['ssh_key'] = normalize_path(target['ssh_key'])
+			if 'ssh_key' in target:
+				target['ssh_key'] = normalize_path(target['ssh_key'])
 
 		# override with command-line args
 		if self.args.log_level is not None:
