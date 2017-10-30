@@ -13,6 +13,8 @@ def cmd_as_list(command):
 
 def cmd_as_string(command):
 	if isinstance(command, list):
+		if len(command) == 1:
+			return command[0]
 		command = ' '.join([shlex.quote(part) for part in command])
 	return command
 
