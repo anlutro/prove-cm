@@ -16,6 +16,8 @@ __pycache__
 # pytest data
 /.cache
 /.coverage
+/.pytest_cache
+/htmlcov
 
 # vagrant
 .vagrant
